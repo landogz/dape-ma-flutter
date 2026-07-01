@@ -21,6 +21,7 @@ class Endpoints {
   static String postComments(int postId) => '/posts/$postId/comments';
   static String postComment(int postId, int commentId) =>
       '/posts/$postId/comments/$commentId';
+  static String postReviews(int postId) => '/posts/$postId/reviews';
 
   static String postsByCategory(String slug) => '$posts?category=$slug';
   static String rehabByRegion(String region) => '$rehabCenters?region=$region';

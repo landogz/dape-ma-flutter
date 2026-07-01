@@ -12,6 +12,7 @@ import '../post_engagement/comment_tree_utils.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../post_engagement/widgets/comment_bubble.dart';
 import '../post_engagement/widgets/edit_comment_sheet.dart';
+import '../reviews/widgets/review_sheet.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -647,19 +648,71 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ],
                   ),
                   const Divider(height: 24),
-                  // ── Rate & Review (optional CTA) ──
+                  // ── Rate & Review ──
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: TextButton.icon(
-                        onPressed: _onRateAndReview,
-                        icon: const Icon(Icons.star_outline, size: 20),
-                        label: const Text('Rate & Review'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primaryBlue,
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            ...List.generate(5, (index) {
+                              final filled = index < post.averageRating.round();
+                              return Icon(
+                                filled ? Icons.star : Icons.star_border,
+                                size: 18,
+                                color: Colors.amber,
+                              );
+                            }),
+                            const SizedBox(width: 8),
+                            Text(
+                              post.reviewsCount > 0
+                                  ? '${post.averageRating.toStringAsFixed(1)} · ${post.reviewsCount} ${post.reviewsCount == 1 ? 'rating' : 'ratings'}'
+                                  : 'No ratings yet',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: AppColors.textSecondaryLight,
+                                  ),
+                            ),
+                          ],
                         ),
-                      ),
+                        if (post.userRating != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'You rated this ${post.userRating} star${post.userRating == 1 ? '' : 's'}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: AppColors.primaryBlue,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                        ],
+                        const SizedBox(height: 4),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            onPressed: _onRateAndReview,
+                            icon: Icon(
+                              post.userRating != null
+                                  ? Icons.star
+                                  : Icons.star_outline,
+                              size: 20,
+                            ),
+                            label: Text(
+                              post.userRating != null
+                                  ? 'Update your rating'
+                                  : 'Rate & Review',
+                            ),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primaryBlue,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   // ── Comments section ──
@@ -897,33 +950,45 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final loggedIn = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
-      if (loggedIn != true) return;
+      if (loggedIn != true || !mounted) return;
+      setState(() => _isLoggedIn = true);
+      _loadCurrentUser();
     }
     if (!mounted) return;
-    _showReviewSheet();
+    await _showReviewSheet();
   }
 
-  void _openReviewSheetWithComment(String comment) async {
-    final token = await AuthService.getToken();
-    if (!mounted) return;
-    if (token == null) {
-      final loggedIn = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-      if (loggedIn != true) return;
-    }
-    if (!mounted) return;
-    _showReviewSheet(initialComment: comment);
-  }
-
-  void _showReviewSheet({String? initialComment}) {
-    showModalBottomSheet<void>(
+  Future<void> _showReviewSheet({String? initialComment}) async {
+    final result = await showModalBottomSheet<({
+      int rating,
+      int reviewsCount,
+      double averageRating,
+    })>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => _ReviewSheet(
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => ReviewSheet(
         postId: _post.id,
+        initialRating: _post.userRating ?? 5,
         initialComment: initialComment,
       ),
+    );
+
+    if (!mounted || result == null) return;
+
+    setState(() {
+      _post = _post.copyWith(
+        userRating: result.rating,
+        reviewsCount: result.reviewsCount,
+        averageRating: result.averageRating,
+      );
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Rating submitted')),
     );
   }
 }
@@ -968,139 +1033,6 @@ class _DetailActionButton extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ReviewSheet extends StatefulWidget {
-  const _ReviewSheet({
-    required this.postId,
-    this.initialComment,
-  });
-
-  final int postId;
-  final String? initialComment;
-
-  @override
-  State<_ReviewSheet> createState() => _ReviewSheetState();
-}
-
-class _ReviewSheetState extends State<_ReviewSheet> {
-  int _rating = 5;
-  final _commentController = TextEditingController();
-  bool _submitting = false;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.initialComment != null) {
-      _commentController.text = widget.initialComment!;
-    }
-  }
-
-  @override
-  void dispose() {
-    _commentController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (_rating <= 0) return;
-    setState(() {
-      _submitting = true;
-      _error = null;
-    });
-    try {
-      await AuthService.authedPost<Map<String, dynamic>>(
-        Endpoints.reviews,
-        data: <String, dynamic>{
-          'target_type': 'post',
-          'target_id': widget.postId,
-          'rating': _rating,
-          'comment': _commentController.text.trim(),
-        },
-      );
-      if (!mounted) return;
-      Navigator.of(context).pop();
-    } catch (e) {
-      setState(() {
-        _error = 'Failed to submit. Please try again.';
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _submitting = false;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Rate this content',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: List.generate(5, (index) {
-              final starIndex = index + 1;
-              return IconButton(
-                icon: Icon(
-                  starIndex <= _rating ? Icons.star : Icons.star_border,
-                  color: Colors.amber,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _rating = starIndex;
-                  });
-                },
-              );
-            }),
-          ),
-          TextField(
-            controller: _commentController,
-            decoration: const InputDecoration(
-              labelText: 'Comment (optional)',
-            ),
-            maxLines: 3,
-          ),
-          const SizedBox(height: 12),
-          if (_error != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                _error!,
-                style: const TextStyle(color: Colors.red),
-              ),
-            ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: ElevatedButton(
-              onPressed: _submitting ? null : _submit,
-              child: _submitting
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Submit'),
-            ),
-          ),
-        ],
       ),
     );
   }

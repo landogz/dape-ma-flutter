@@ -14,6 +14,9 @@ class Post {
   final int likesCount;
   final int commentsCount;
   final bool isLiked;
+  final double averageRating;
+  final int reviewsCount;
+  final int? userRating;
 
   Post({
     required this.id,
@@ -29,12 +32,19 @@ class Post {
     this.likesCount = 0,
     this.commentsCount = 0,
     this.isLiked = false,
+    this.averageRating = 0,
+    this.reviewsCount = 0,
+    this.userRating,
   });
 
   Post copyWith({
     int? likesCount,
     int? commentsCount,
     bool? isLiked,
+    double? averageRating,
+    int? reviewsCount,
+    int? userRating,
+    bool clearUserRating = false,
   }) {
     return Post(
       id: id,
@@ -50,12 +60,17 @@ class Post {
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
       isLiked: isLiked ?? this.isLiked,
+      averageRating: averageRating ?? this.averageRating,
+      reviewsCount: reviewsCount ?? this.reviewsCount,
+      userRating: clearUserRating ? null : (userRating ?? this.userRating),
     );
   }
 
   factory Post.fromJson(Map<String, dynamic> json) {
     final bodyOrContent = (json['content'] ?? json['body']) as String? ?? '';
     final excerptStr = json['excerpt'] as String? ?? '';
+    final avg = json['average_rating'] ?? json['reviews_avg_rating'];
+    final reviewCount = json['reviews_count'];
     return Post(
       id: parseJsonInt(json['id']),
       title: json['title'] as String,
@@ -72,6 +87,11 @@ class Post {
       likesCount: parseJsonInt(json['likes_count']),
       commentsCount: parseJsonInt(json['comments_count']),
       isLiked: parseJsonBool(json['is_liked']),
+      averageRating: parseJsonDouble(avg),
+      reviewsCount: parseJsonInt(reviewCount),
+      userRating: json['user_rating'] == null
+          ? null
+          : parseJsonInt(json['user_rating']),
     );
   }
 }

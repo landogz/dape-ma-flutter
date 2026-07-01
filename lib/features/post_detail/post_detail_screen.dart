@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/models/post.dart';
 import '../../core/models/post_comment.dart';
@@ -204,6 +205,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           likesCount: result.likesCount,
         );
       });
+      if (result.liked) {
+        await AnalyticsClient.instance.trackLike(_post.id);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -374,6 +378,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
       if (!mounted) return;
       setState(() => _isBookmarked = !_isBookmarked);
+      if (_isBookmarked) {
+        await AnalyticsClient.instance.trackBookmark(_post.id);
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -987,6 +995,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
     });
 
+    await AnalyticsClient.instance.trackReview(_post.id);
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Rating submitted')),
     );

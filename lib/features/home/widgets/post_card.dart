@@ -272,6 +272,22 @@ class _PostCardState extends State<PostCard> {
                           color: AppColors.textSecondaryLight,
                         ),
                   ),
+                  if (post.reviewsCount > 0) ...[
+                    const Spacer(),
+                    Icon(
+                      Icons.star,
+                      size: 14,
+                      color: Colors.amber.shade700,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${post.averageRating.toStringAsFixed(1)} (${post.reviewsCount})',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondaryLight,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
 
       // Fire analytics for mobile searches
-      await AnalyticsClient.instance.trackSearch(query);
+      await AnalyticsClient.instance.trackSearch();
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -189,6 +189,9 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
       });
+      if (result.liked) {
+        await AnalyticsClient.instance.trackLike(post.id);
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -241,6 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
       await _loadBookmarkedIds();
       if (!mounted) return;
       final added = _bookmarkedIds.contains(post.id);
+      if (added) {
+        await AnalyticsClient.instance.trackBookmark(post.id);
+      }
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(

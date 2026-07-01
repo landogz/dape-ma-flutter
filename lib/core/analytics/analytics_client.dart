@@ -5,42 +5,65 @@ import 'package:dio/dio.dart';
 import '../network/api_client.dart';
 import '../network/endpoints.dart';
 
+/// Fire-and-forget analytics for the mobile app.
+/// Events use standard types (`post_view`, `search`, etc.) plus a `platform`
+/// field so the admin analytics dashboard can attribute traffic to iOS/Android.
 class AnalyticsClient {
   AnalyticsClient._();
 
   static final AnalyticsClient instance = AnalyticsClient._();
 
-  String get _platform {
+  String? get _platform {
     if (Platform.isAndroid) return 'android';
     if (Platform.isIOS) return 'ios';
-    return 'unknown';
+    return null;
   }
 
   Future<void> trackPostView(int postId) async {
-    await _sendEvent('post_view_${_platform}', postId: postId);
+    await _sendEvent('post_view', postId: postId);
   }
 
-  Future<void> trackSearch(String query) async {
-    // Store query length only to avoid sending full text if not desired
-    await _sendEvent('search_${_platform}');
+  Future<void> trackSearch() async {
+    await _sendEvent('search');
+  }
+
+  Future<void> trackBookmark(int postId) async {
+    await _sendEvent('bookmark', postId: postId);
+  }
+
+  Future<void> trackShare(int postId) async {
+    await _sendEvent('share', postId: postId);
+  }
+
+  Future<void> trackReview(int postId) async {
+    await _sendEvent('review', postId: postId);
+  }
+
+  Future<void> trackLike(int postId) async {
+    await _sendEvent('post_like', postId: postId);
   }
 
   Future<void> _sendEvent(
     String eventType, {
     int? postId,
   }) async {
+    final platform = _platform;
+    if (platform == null) {
+      return;
+    }
+
     try {
       final api = ApiClient();
       await api.post<Map<String, dynamic>>(
         Endpoints.analyticsEvents,
-        data: {
+        data: <String, dynamic>{
           'event_type': eventType,
-          if (postId != null) 'post_id': postId,
+          'platform': platform,
+          'post_id': ?postId,
         },
       );
     } on DioException {
-      // Swallow errors – analytics should never break UX
+      // Analytics must never break UX.
     }
   }
 }
-

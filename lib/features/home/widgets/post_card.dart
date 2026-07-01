@@ -8,6 +8,8 @@ class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback onTap;
   final VoidCallback onBookmarkTap;
+  final VoidCallback onLikeTap;
+  final VoidCallback onCommentTap;
   final bool isBookmarked;
 
   const PostCard({
@@ -15,6 +17,8 @@ class PostCard extends StatefulWidget {
     required this.post,
     required this.onTap,
     required this.onBookmarkTap,
+    required this.onLikeTap,
+    required this.onCommentTap,
     this.isBookmarked = false,
   });
 
@@ -250,20 +254,20 @@ class _PostCardState extends State<PostCard> {
                   ),
                 ),
             ],
-            // ── Reactions summary (placeholder) ──
+            // ── Reactions summary ──
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
               child: Row(
                 children: [
                   Text(
-                    '0 likes',
+                    '${post.likesCount} ${post.likesCount == 1 ? 'like' : 'likes'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondaryLight,
                         ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '0 comments',
+                    '${post.commentsCount} ${post.commentsCount == 1 ? 'comment' : 'comments'}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondaryLight,
                         ),
@@ -279,14 +283,17 @@ class _PostCardState extends State<PostCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _ActionButton(
-                    icon: Icons.thumb_up_outlined,
+                    icon: post.isLiked
+                        ? Icons.thumb_up
+                        : Icons.thumb_up_outlined,
                     label: 'Like',
-                    onTap: () {},
+                    isActive: post.isLiked,
+                    onTap: widget.onLikeTap,
                   ),
                   _ActionButton(
                     icon: Icons.chat_bubble_outline,
                     label: 'Comment',
-                    onTap: onTap,
+                    onTap: widget.onCommentTap,
                   ),
                 ],
               ),
@@ -303,14 +310,18 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isActive = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
+    final color =
+        isActive ? AppColors.primaryBlue : AppColors.textSecondaryLight;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -321,12 +332,14 @@ class _ActionButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20, color: AppColors.textSecondaryLight),
+              Icon(icon, size: 20, color: color),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondaryLight,
+                      color: color,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
               ),
             ],

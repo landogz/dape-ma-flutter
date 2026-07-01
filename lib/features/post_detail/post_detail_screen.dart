@@ -3,18 +3,22 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/models/post.dart';
+import '../../core/models/post_comment.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../auth/login_screen.dart';
+import '../post_engagement/post_engagement_service.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
   final bool initialIsBookmarked;
+  final bool focusCommentOnOpen;
 
   const PostDetailScreen({
     super.key,
     required this.post,
     this.initialIsBookmarked = false,
+    this.focusCommentOnOpen = false,
   });
 
   @override
@@ -24,8 +28,13 @@ class PostDetailScreen extends StatefulWidget {
 class _PostDetailScreenState extends State<PostDetailScreen> {
   YoutubePlayerController? _ytController;
   final _commentFocus = FocusNode();
+  final _commentController = TextEditingController();
+  late Post _post;
   bool _isBookmarked = false;
   bool _isLoggedIn = false;
+  List<PostComment> _comments = [];
+  bool _loadingComments = false;
+  bool _submittingComment = false;
 
   static String _formatTime(DateTime? d) {
     if (d == null) return '';
@@ -54,10 +63,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _post = widget.post;
     _isBookmarked = widget.initialIsBookmarked;
     AuthService.getToken().then((t) {
       if (mounted) setState(() => _isLoggedIn = t != null && t.isNotEmpty);
     });
+    _loadComments();
+    if (widget.focusCommentOnOpen) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          FocusScope.of(context).requestFocus(_commentFocus);
+        }
+      });
+    }
     final url = widget.post.youtubeUrl;
     if (url != null && url.isNotEmpty) {
       final id = YoutubePlayer.convertUrlToId(url);
@@ -73,6 +91,80 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  Future<void> _loadComments() async {
+    setState(() => _loadingComments = true);
+    try {
+      final comments =
+          await PostEngagementService.fetchComments(_post.id);
+      if (mounted) setState(() => _comments = comments);
+    } catch (_) {
+      if (mounted) setState(() => _comments = []);
+    } finally {
+      if (mounted) setState(() => _loadingComments = false);
+    }
+  }
+
+  Future<void> _onLikeTap() async {
+    if (!_isLoggedIn) {
+      final loggedIn = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (loggedIn != true || !mounted) return;
+      setState(() => _isLoggedIn = true);
+    }
+    try {
+      final result = await PostEngagementService.toggleLike(_post.id);
+      if (!mounted) return;
+      setState(() {
+        _post = _post.copyWith(
+          isLiked: result.liked,
+          likesCount: result.likesCount,
+        );
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not update like. Try again.')),
+      );
+    }
+  }
+
+  Future<void> _submitComment(String value) async {
+    final body = value.trim();
+    if (body.isEmpty || _submittingComment) return;
+
+    if (!_isLoggedIn) {
+      final loggedIn = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (loggedIn != true || !mounted) return;
+      setState(() => _isLoggedIn = true);
+    }
+
+    setState(() => _submittingComment = true);
+    try {
+      final comment =
+          await PostEngagementService.postComment(_post.id, body);
+      if (!mounted) return;
+      setState(() {
+        _comments = [comment, ..._comments];
+        _post = _post.copyWith(commentsCount: _post.commentsCount + 1);
+        _commentController.clear();
+      });
+      _commentFocus.unfocus();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment posted')),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not post comment. Try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _submittingComment = false);
+    }
+  }
+
   Future<void> _onBookmarkTap() async {
     if (!_isLoggedIn) {
       final loggedIn = await Navigator.of(context).push<bool>(
@@ -84,7 +176,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     try {
       await AuthService.authedPost<Map<String, dynamic>>(
         Endpoints.bookmarks,
-        data: <String, dynamic>{'post_id': widget.post.id},
+        data: <String, dynamic>{'post_id': _post.id},
       );
       if (!mounted) return;
       setState(() => _isBookmarked = !_isBookmarked);
@@ -109,13 +201,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   void dispose() {
     _commentFocus.dispose();
+    _commentController.dispose();
     _ytController?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final post = widget.post;
+    final post = _post;
     final hasImage = post.imageUrl != null && post.imageUrl!.isNotEmpty;
     final initial = post.authorName.isNotEmpty
         ? post.authorName.trim().substring(0, 1).toUpperCase()
@@ -129,7 +222,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(_post),
         ),
         title: Text(
           "${post.authorName}'s Post",
@@ -318,7 +411,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     child: Row(
                       children: [
                         Text(
-                          '0 likes',
+                          '${post.likesCount} ${post.likesCount == 1 ? 'like' : 'likes'}',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
@@ -328,7 +421,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '0 comments',
+                          '${post.commentsCount} ${post.commentsCount == 1 ? 'comment' : 'comments'}',
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
@@ -340,14 +433,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ),
                   ),
                   const Divider(height: 24),
-                  // ── Like, Comment ──
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _DetailActionButton(
-                        icon: Icons.thumb_up_outlined,
+                        icon: post.isLiked
+                            ? Icons.thumb_up
+                            : Icons.thumb_up_outlined,
                         label: 'Like',
-                        onTap: () {},
+                        isActive: post.isLiked,
+                        onTap: _onLikeTap,
                       ),
                       _DetailActionButton(
                         icon: Icons.chat_bubble_outline,
@@ -380,35 +475,34 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        TextButton(
-                          onPressed: () {},
-                          style: TextButton.styleFrom(
-                            padding: EdgeInsets.zero,
-                            minimumSize: Size.zero,
-                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          ),
-                          child: Text(
-                            'Load previous comments...',
+                        Text(
+                          'Comments',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleSmall
+                              ?.copyWith(fontWeight: FontWeight.w600),
+                        ),
+                        const SizedBox(height: 12),
+                        if (_loadingComments)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        else if (_comments.isEmpty)
+                          Text(
+                            'No comments yet. Be the first to comment.',
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
                                 ?.copyWith(
                                   color: AppColors.textSecondaryLight,
+                                  fontStyle: FontStyle.italic,
                                 ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        // Placeholder: no comments from API yet
-                        Text(
-                          'No comments yet. Be the first to comment.',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: AppColors.textSecondaryLight,
-                                fontStyle: FontStyle.italic,
-                              ),
-                        ),
+                          )
+                        else
+                          ..._comments.map(_buildCommentTile),
                       ],
                     ),
                   ),
@@ -446,7 +540,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 ),
                 Expanded(
                   child: TextField(
+                    controller: _commentController,
                     focusNode: _commentFocus,
+                    enabled: !_submittingComment,
                     decoration: InputDecoration(
                       hintText: 'Write a comment...',
                       hintStyle: TextStyle(
@@ -464,11 +560,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         vertical: 10,
                       ),
                     ),
-                    onSubmitted: (value) {
-                      if (value.trim().isEmpty) return;
-                      _commentFocus.unfocus();
-                      _openReviewSheetWithComment(value.trim());
-                    },
+                    onSubmitted: _submitComment,
                   ),
                 ),
                 IconButton(
@@ -477,6 +569,68 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     color: AppColors.textSecondaryLight,
                   ),
                   onPressed: () {},
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCommentTile(PostComment comment) {
+    final initial = comment.authorName.isNotEmpty
+        ? comment.authorName.trim().substring(0, 1).toUpperCase()
+        : '?';
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CircleAvatar(
+            radius: 18,
+            backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
+            child: Text(
+              initial,
+              style: const TextStyle(
+                color: AppColors.primaryBlue,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      comment.authorName,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    if (comment.createdAt != null) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        _formatTimeAgo(comment.createdAt),
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(
+                              color: AppColors.textSecondaryLight,
+                            ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  comment.body,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
             ),
@@ -517,7 +671,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       context: context,
       isScrollControlled: true,
       builder: (context) => _ReviewSheet(
-        postId: widget.post.id,
+        postId: _post.id,
         initialComment: initialComment,
       ),
     );
@@ -529,14 +683,18 @@ class _DetailActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.isActive = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final bool isActive;
 
   @override
   Widget build(BuildContext context) {
+    final color =
+        isActive ? AppColors.primaryBlue : AppColors.textSecondaryLight;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -547,12 +705,14 @@ class _DetailActionButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 22, color: AppColors.textSecondaryLight),
+              Icon(icon, size: 22, color: color),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondaryLight,
+                      color: color,
+                      fontWeight:
+                          isActive ? FontWeight.w600 : FontWeight.normal,
                     ),
               ),
             ],

@@ -10,6 +10,7 @@ import '../account/account_screen.dart';
 import '../auth/login_screen.dart';
 import '../bookmarks/bookmarks_screen.dart';
 import '../chat/botpress_chat_screen.dart';
+import '../post_engagement/post_engagement_service.dart';
 import '../post_detail/post_detail_screen.dart';
 import '../rehab_centers/rehab_centers_screen.dart';
 import 'widgets/category_tabs.dart';
@@ -108,7 +109,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final selectedCategory = category ?? 'all';
     setState(() => _loading = true);
     try {
-      final api = ApiClient();
+      final token = await AuthService.getToken();
+      final api = ApiClient(token: token);
       final queryParams = (selectedCategory != 'all')
           ? <String, dynamic>{'category': selectedCategory}
           : null;
@@ -165,6 +167,60 @@ class _HomeScreenState extends State<HomeScreen> {
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  Future<void> _onLikeTap(Post post) async {
+    if (!_isLoggedIn) {
+      final loggedIn = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (loggedIn != true || !mounted) return;
+      await _refreshAuthState();
+    }
+    try {
+      final result = await PostEngagementService.toggleLike(post.id);
+      if (!mounted) return;
+      setState(() {
+        final index = _posts.indexWhere((p) => p.id == post.id);
+        if (index != -1) {
+          _posts[index] = _posts[index].copyWith(
+            isLiked: result.liked,
+            likesCount: result.likesCount,
+          );
+        }
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not update like. Try again.')),
+      );
+    }
+  }
+
+  Future<void> _openPostDetail(
+    Post post, {
+    bool focusComment = false,
+  }) async {
+    await AnalyticsClient.instance.trackPostView(post.id);
+    if (!mounted) return;
+    final updated = await Navigator.of(context).push<Post?>(
+      MaterialPageRoute(
+        builder: (_) => PostDetailScreen(
+          post: post,
+          initialIsBookmarked: _bookmarkedIds.contains(post.id),
+          focusCommentOnOpen: focusComment,
+        ),
+      ),
+    );
+    if (updated != null && mounted) {
+      setState(() {
+        final index = _posts.indexWhere((p) => p.id == updated.id);
+        if (index != -1) {
+          _posts[index] = updated;
+        }
+      });
+    }
+    await _loadBookmarkedIds();
   }
 
   Future<void> _onBookmarkTap(Post post) async {
@@ -364,20 +420,10 @@ class _HomeScreenState extends State<HomeScreen> {
                           return PostCard(
                             post: post,
                             isBookmarked: _bookmarkedIds.contains(post.id),
-                            onTap: () async {
-                              await AnalyticsClient.instance
-                                  .trackPostView(post.id);
-                              if (!context.mounted) return;
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => PostDetailScreen(
-                                    post: post,
-                                    initialIsBookmarked:
-                                        _bookmarkedIds.contains(post.id),
-                                  ),
-                                ),
-                              ).then((_) => _loadBookmarkedIds());
-                            },
+                            onTap: () => _openPostDetail(post),
+                            onLikeTap: () => _onLikeTap(post),
+                            onCommentTap: () =>
+                                _openPostDetail(post, focusComment: true),
                             onBookmarkTap: () => _onBookmarkTap(post),
                           );
                         },

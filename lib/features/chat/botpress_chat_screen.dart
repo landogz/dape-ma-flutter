@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'botpress_config.dart';
 
@@ -14,6 +15,17 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
   InAppWebViewController? _webViewController;
   bool _loadFailed = false;
   bool _isDisposed = false;
+
+  Future<void> _openInBrowser() async {
+    final uri = Uri.parse(BotpressConfig.externalChatUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open browser')),
+      );
+    }
+  }
 
   void _safeSetState(VoidCallback fn) {
     if (!_isDisposed && mounted) {
@@ -66,7 +78,16 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Live Chat')),
+      appBar: AppBar(
+        title: const Text('Live Chat'),
+        actions: [
+          IconButton(
+            onPressed: _openInBrowser,
+            tooltip: 'Open in browser',
+            icon: const Icon(Icons.open_in_browser),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -74,7 +95,7 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
               key: const ValueKey('botpress_chat_webview'),
               initialData: InAppWebViewInitialData(
                 data: BotpressConfig.buildEmbedHtml(),
-                baseUrl: WebUri('https://cdn.botpress.cloud'),
+                baseUrl: WebUri(BotpressConfig.webViewBaseUrl),
                 mimeType: 'text/html',
                 encoding: 'utf-8',
               ),
@@ -121,7 +142,7 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Check your Botpress config script URL and try again.',
+                        'Open live chat in your browser instead.',
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: Colors.grey,
@@ -129,23 +150,29 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
                       ),
                       const SizedBox(height: 24),
                       FilledButton.icon(
-                        onPressed: () {
-                          _safeSetState(() => _loadFailed = false);
-                          _webViewController?.loadData(
-                            data: BotpressConfig.buildEmbedHtml(),
-                            baseUrl: WebUri('https://cdn.botpress.cloud'),
-                            mimeType: 'text/html',
-                            encoding: 'utf-8',
-                          );
-                        },
-                        icon: const Icon(Icons.refresh_rounded),
-                        label: const Text('Try again'),
+                        onPressed: _openInBrowser,
+                        icon: const Icon(Icons.open_in_browser),
+                        label: const Text('Open in browser'),
                         style: FilledButton.styleFrom(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24,
                             vertical: 12,
                           ),
                         ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextButton.icon(
+                        onPressed: () {
+                          _safeSetState(() => _loadFailed = false);
+                          _webViewController?.loadData(
+                            data: BotpressConfig.buildEmbedHtml(),
+                            baseUrl: WebUri(BotpressConfig.webViewBaseUrl),
+                            mimeType: 'text/html',
+                            encoding: 'utf-8',
+                          );
+                        },
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Try again'),
                       ),
                     ],
                   ),

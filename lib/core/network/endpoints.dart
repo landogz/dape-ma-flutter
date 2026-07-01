@@ -16,6 +16,9 @@ class Endpoints {
   static const bookmarks = '/bookmarks';
   static const reviews = '/reviews';
 
+  static String postLike(int postId) => '/posts/$postId/like';
+  static String postComments(int postId) => '/posts/$postId/comments';
+
   static String postsByCategory(String slug) => '$posts?category=$slug';
   static String rehabByRegion(String region) => '$rehabCenters?region=$region';
   static String searchQuery(String q, {String? category}) {

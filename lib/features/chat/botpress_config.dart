@@ -15,6 +15,14 @@ class BotpressConfig {
   static const String configScriptUrl =
       'https://files.bpcontent.cloud/2026/07/01/16/20260701161618-5PW46XBP.js';
 
+  /// Public chat page on Laravel (for external browser after server deploy).
+  static const String hostedChatUrl =
+      'https://dape-ma.alwaysdata.net/chat';
+
+  static const String externalChatUrl = hostedChatUrl;
+
+  static const String webViewBaseUrl = 'https://cdn.botpress.cloud';
+
   static bool get isConfigured =>
       botId.isNotEmpty && configScriptUrl.isNotEmpty;
 

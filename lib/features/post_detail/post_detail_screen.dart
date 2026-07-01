@@ -6,8 +6,11 @@ import '../../core/models/post.dart';
 import '../../core/models/post_comment.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/json_parsers.dart';
 import '../auth/login_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
+import '../post_engagement/widgets/comment_bubble.dart';
+import '../post_engagement/widgets/edit_comment_sheet.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -32,8 +35,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   late Post _post;
   bool _isBookmarked = false;
   bool _isLoggedIn = false;
+  int? _currentUserId;
   List<PostComment> _comments = [];
   bool _loadingComments = false;
+  bool _loadingMoreComments = false;
+  bool _hasMoreComments = false;
+  int _commentsPage = 1;
+  String? _commentsError;
   bool _submittingComment = false;
 
   static String _formatTime(DateTime? d) {
@@ -66,9 +74,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     _post = widget.post;
     _isBookmarked = widget.initialIsBookmarked;
     AuthService.getToken().then((t) {
-      if (mounted) setState(() => _isLoggedIn = t != null && t.isNotEmpty);
+      if (mounted) {
+        setState(() => _isLoggedIn = t != null && t.isNotEmpty);
+        if (_isLoggedIn) _loadCurrentUser();
+      }
     });
     _loadComments();
+    _refreshPostEngagement();
     if (widget.focusCommentOnOpen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -91,16 +103,83 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
-  Future<void> _loadComments() async {
-    setState(() => _loadingComments = true);
+  Future<void> _loadCurrentUser() async {
     try {
-      final comments =
-          await PostEngagementService.fetchComments(_post.id);
-      if (mounted) setState(() => _comments = comments);
+      final res = await AuthService.authedGet<Map<String, dynamic>>(
+        Endpoints.me,
+      );
+      final root = res.data ?? <String, dynamic>{};
+      final user = root['data'] is Map<String, dynamic>
+          ? root['data'] as Map<String, dynamic>
+          : root;
+      final id = user['id'];
+      final parsedId = parseJsonInt(id, 0);
+      if (mounted && parsedId > 0) {
+        setState(() => _currentUserId = parsedId);
+      }
     } catch (_) {
-      if (mounted) setState(() => _comments = []);
+      if (mounted) setState(() => _currentUserId = null);
+    }
+  }
+
+  Future<void> _refreshPostEngagement() async {
+    try {
+      final fresh = await PostEngagementService.fetchPost(_post.id);
+      if (!mounted) return;
+      setState(() => _post = fresh);
+    } catch (_) {
+      // Keep the post passed from the feed when refresh fails.
+    }
+  }
+
+  Future<void> _loadComments({bool loadMore = false}) async {
+    if (loadMore) {
+      if (_loadingMoreComments || !_hasMoreComments) return;
+      setState(() => _loadingMoreComments = true);
+    } else {
+      setState(() {
+        _loadingComments = true;
+        _commentsError = null;
+        _commentsPage = 1;
+      });
+    }
+
+    final page = loadMore ? _commentsPage + 1 : 1;
+
+    try {
+      final result = await PostEngagementService.fetchComments(
+        _post.id,
+        page: page,
+      );
+      if (!mounted) return;
+      setState(() {
+        if (loadMore) {
+          _comments = [..._comments, ...result.comments];
+        } else {
+          _comments = result.comments;
+        }
+        _commentsPage = page;
+        _hasMoreComments = result.hasMore;
+        _commentsError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        if (!loadMore) {
+          _comments = [];
+          _commentsError = PostEngagementService.friendlyError(
+            e,
+            'load comments',
+          );
+        }
+      });
     } finally {
-      if (mounted) setState(() => _loadingComments = false);
+      if (mounted) {
+        setState(() {
+          _loadingComments = false;
+          _loadingMoreComments = false;
+        });
+      }
     }
   }
 
@@ -111,6 +190,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
       if (loggedIn != true || !mounted) return;
       setState(() => _isLoggedIn = true);
+      _loadCurrentUser();
     }
     try {
       final result = await PostEngagementService.toggleLike(_post.id);
@@ -141,6 +221,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
       if (loggedIn != true || !mounted) return;
       setState(() => _isLoggedIn = true);
+      _loadCurrentUser();
     }
 
     setState(() => _submittingComment = true);
@@ -166,6 +247,85 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
     } finally {
       if (mounted) setState(() => _submittingComment = false);
+    }
+  }
+
+  Future<void> _editComment(PostComment comment) async {
+    final updated = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => EditCommentSheet(
+        initialBody: comment.body,
+        onSave: (body) async {
+          final result = await PostEngagementService.updateComment(
+            _post.id,
+            comment.id,
+            body,
+          );
+          if (!mounted) return;
+          setState(() {
+            final index = _comments.indexWhere((c) => c.id == comment.id);
+            if (index != -1) {
+              _comments[index] = result;
+            }
+          });
+        },
+      ),
+    );
+    if (updated == true && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment updated')),
+      );
+    }
+  }
+
+  Future<void> _deleteComment(PostComment comment) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete comment?'),
+        content: const Text('This comment will be removed permanently.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(foregroundColor: AppColors.accentRed),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      final commentsCount = await PostEngagementService.deleteComment(
+        _post.id,
+        comment.id,
+      );
+      if (!mounted) return;
+      setState(() {
+        _comments.removeWhere((c) => c.id == comment.id);
+        _post = _post.copyWith(commentsCount: commentsCount);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Comment deleted')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            PostEngagementService.friendlyError(e, 'delete this comment'),
+          ),
+        ),
+      );
     }
   }
 
@@ -486,13 +646,69 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               .titleSmall
                               ?.copyWith(fontWeight: FontWeight.w600),
                         ),
+                        if (post.commentsCount > 0) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            '${post.commentsCount} ${post.commentsCount == 1 ? 'comment' : 'comments'}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondaryLight,
+                                ),
+                          ),
+                        ],
                         const SizedBox(height: 12),
+                        if (_hasMoreComments && _comments.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8),
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
+                                onPressed: _loadingMoreComments
+                                    ? null
+                                    : () => _loadComments(loadMore: true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppColors.primaryBlue,
+                                  padding: EdgeInsets.zero,
+                                ),
+                                child: _loadingMoreComments
+                                    ? const SizedBox(
+                                        width: 18,
+                                        height: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                    : const Text('Load previous comments...'),
+                              ),
+                            ),
+                          ),
                         if (_loadingComments)
                           const Center(
                             child: Padding(
                               padding: EdgeInsets.all(16),
                               child: CircularProgressIndicator(),
                             ),
+                          )
+                        else if (_commentsError != null)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _commentsError!,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                      color: AppColors.accentRed,
+                                    ),
+                              ),
+                              TextButton(
+                                onPressed: _loadComments,
+                                child: const Text('Retry'),
+                              ),
+                            ],
                           )
                         else if (_comments.isEmpty)
                           Text(
@@ -547,6 +763,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     controller: _commentController,
                     focusNode: _commentFocus,
                     enabled: !_submittingComment,
+                    textInputAction: TextInputAction.send,
                     decoration: InputDecoration(
                       hintText: 'Write a comment...',
                       hintStyle: TextStyle(
@@ -565,15 +782,26 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ),
                     ),
                     onSubmitted: _submitComment,
+                    onChanged: (_) => setState(() {}),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    Icons.emoji_emotions_outlined,
-                    color: AppColors.textSecondaryLight,
+                if (_commentController.text.trim().isNotEmpty)
+                  IconButton(
+                    onPressed:
+                        _submittingComment ? null : () => _submitComment(_commentController.text),
+                    icon: Icon(
+                      Icons.send_rounded,
+                      color: AppColors.primaryBlue,
+                    ),
+                  )
+                else
+                  IconButton(
+                    icon: Icon(
+                      Icons.emoji_emotions_outlined,
+                      color: AppColors.textSecondaryLight,
+                    ),
+                    onPressed: () {},
                   ),
-                  onPressed: () {},
-                ),
               ],
             ),
           ),
@@ -583,64 +811,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Widget _buildCommentTile(PostComment comment) {
-    final initial = comment.authorName.isNotEmpty
-        ? comment.authorName.trim().substring(0, 1).toUpperCase()
-        : '?';
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
-            child: Text(
-              initial,
-              style: const TextStyle(
-                color: AppColors.primaryBlue,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      comment.authorName,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    if (comment.createdAt != null) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatTimeAgo(comment.createdAt),
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(
-                              color: AppColors.textSecondaryLight,
-                            ),
-                      ),
-                    ],
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  comment.body,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+    final canManage = _currentUserId != null &&
+        comment.userId > 0 &&
+        comment.userId == _currentUserId;
+    return CommentBubble(
+      comment: comment,
+      timeAgo: _formatTimeAgo(comment.createdAt),
+      canManage: canManage,
+      onEdit: () => _editComment(comment),
+      onDelete: () => _deleteComment(comment),
+      onReply: () => FocusScope.of(context).requestFocus(_commentFocus),
     );
   }
 

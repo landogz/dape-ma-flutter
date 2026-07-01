@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/auth/auth_service.dart';
 import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
@@ -49,7 +50,8 @@ class _SplashScreenState extends State<SplashScreen>
     List<Post> posts = [];
 
     try {
-      final api = ApiClient();
+      final token = await AuthService.getToken();
+      final api = ApiClient(token: token);
       final res = await api.get<Map<String, dynamic>>(Endpoints.posts);
       final root = res.data ?? <String, dynamic>{};
       final data = (root['data'] is Map<String, dynamic>)

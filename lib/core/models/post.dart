@@ -1,3 +1,5 @@
+import '../utils/json_parsers.dart';
+
 class Post {
   final int id;
   final String title;
@@ -55,7 +57,7 @@ class Post {
     final bodyOrContent = (json['content'] ?? json['body']) as String? ?? '';
     final excerptStr = json['excerpt'] as String? ?? '';
     return Post(
-      id: json['id'] as int,
+      id: parseJsonInt(json['id']),
       title: json['title'] as String,
       excerpt: excerptStr,
       content: bodyOrContent,
@@ -67,9 +69,9 @@ class Post {
       publishedAt: json['publish_date'] != null
           ? DateTime.tryParse(json['publish_date'] as String)
           : null,
-      likesCount: json['likes_count'] as int? ?? 0,
-      commentsCount: json['comments_count'] as int? ?? 0,
-      isLiked: json['is_liked'] as bool? ?? false,
+      likesCount: parseJsonInt(json['likes_count']),
+      commentsCount: parseJsonInt(json['comments_count']),
+      isLiked: parseJsonBool(json['is_liked']),
     );
   }
 }

@@ -105,5 +105,11 @@ class AuthService {
     final client = ApiClient(token: token);
     return client.put<T>(path, data: data);
   }
+
+  static Future<Response<T>> authedDelete<T>(String path) async {
+    final token = await getToken();
+    final client = ApiClient(token: token);
+    return client.delete<T>(path);
+  }
 }
 

@@ -33,5 +33,9 @@ class ApiClient {
   Future<Response<T>> put<T>(String path, {Object? data}) {
     return _dio.put<T>(path, data: data);
   }
+
+  Future<Response<T>> delete<T>(String path) {
+    return _dio.delete<T>(path);
+  }
 }
 

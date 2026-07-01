@@ -91,10 +91,17 @@ class PostEngagementService {
     return (comments: comments, hasMore: hasMore);
   }
 
-  static Future<PostComment> postComment(int postId, String body) async {
+  static Future<PostComment> postComment(
+    int postId,
+    String body, {
+    int? parentId,
+  }) async {
     final res = await AuthService.authedPost<Map<String, dynamic>>(
       Endpoints.postComments(postId),
-      data: <String, dynamic>{'body': body},
+      data: <String, dynamic>{
+        'body': body,
+        if (parentId != null) 'parent_id': parentId,
+      },
     );
     final root = res.data ?? <String, dynamic>{};
     final data = root['data'] is Map<String, dynamic>

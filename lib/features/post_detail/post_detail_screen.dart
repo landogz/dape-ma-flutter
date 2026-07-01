@@ -8,6 +8,7 @@ import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/json_parsers.dart';
 import '../auth/login_screen.dart';
+import '../post_engagement/comment_tree_utils.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../post_engagement/widgets/comment_bubble.dart';
 import '../post_engagement/widgets/edit_comment_sheet.dart';
@@ -43,6 +44,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   int _commentsPage = 1;
   String? _commentsError;
   bool _submittingComment = false;
+  PostComment? _replyingTo;
 
   static String _formatTime(DateTime? d) {
     if (d == null) return '';
@@ -224,19 +226,26 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       _loadCurrentUser();
     }
 
+    final parentId = _replyingTo?.id;
     setState(() => _submittingComment = true);
     try {
-      final comment =
-          await PostEngagementService.postComment(_post.id, body);
+      final comment = await PostEngagementService.postComment(
+        _post.id,
+        body,
+        parentId: parentId,
+      );
       if (!mounted) return;
       setState(() {
-        _comments = [comment, ..._comments];
+        _comments = addCommentToTree(_comments, comment);
         _post = _post.copyWith(commentsCount: _post.commentsCount + 1);
         _commentController.clear();
+        _replyingTo = null;
       });
       _commentFocus.unfocus();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment posted')),
+        SnackBar(
+          content: Text(parentId == null ? 'Comment posted' : 'Reply posted'),
+        ),
       );
     } catch (e) {
       if (!mounted) return;
@@ -248,6 +257,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     } finally {
       if (mounted) setState(() => _submittingComment = false);
     }
+  }
+
+  void _startReply(PostComment comment) {
+    if (!_isLoggedIn) {
+      Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      ).then((loggedIn) {
+        if (loggedIn == true && mounted) {
+          setState(() => _isLoggedIn = true);
+          _loadCurrentUser();
+          setState(() => _replyingTo = comment);
+          FocusScope.of(context).requestFocus(_commentFocus);
+        }
+      });
+      return;
+    }
+
+    setState(() => _replyingTo = comment);
+    FocusScope.of(context).requestFocus(_commentFocus);
+  }
+
+  void _cancelReply() {
+    setState(() => _replyingTo = null);
   }
 
   Future<void> _editComment(PostComment comment) async {
@@ -268,10 +300,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           );
           if (!mounted) return;
           setState(() {
-            final index = _comments.indexWhere((c) => c.id == comment.id);
-            if (index != -1) {
-              _comments[index] = result;
-            }
+            _comments = updateCommentInTree(_comments, result);
           });
         },
       ),
@@ -311,7 +340,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
       if (!mounted) return;
       setState(() {
-        _comments.removeWhere((c) => c.id == comment.id);
+        _comments = removeCommentFromTree(_comments, comment.id);
         _post = _post.copyWith(commentsCount: commentsCount);
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -722,7 +751,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 ),
                           )
                         else
-                          ..._comments.map(_buildCommentTile),
+                          ..._comments.map(
+                            (comment) => CommentThread(
+                              comment: comment,
+                              timeAgoBuilder: _formatTimeAgo,
+                              canManageBuilder: _canManageComment,
+                              onEdit: _editComment,
+                              onDelete: _deleteComment,
+                              onReply: _startReply,
+                            ),
+                          ),
                       ],
                     ),
                   ),
@@ -731,7 +769,39 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             ),
           ),
           // ── Write comment bar (Facebook-style bottom input) ──
-          Container(
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (_replyingTo != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: AppColors.lightBackground,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Replying to ${_replyingTo!.authorName}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: AppColors.primaryBlue,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        color: AppColors.textSecondaryLight,
+                        onPressed: _cancelReply,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              Container(
             padding: EdgeInsets.only(
               left: 16,
               right: 16,
@@ -765,7 +835,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     enabled: !_submittingComment,
                     textInputAction: TextInputAction.send,
                     decoration: InputDecoration(
-                      hintText: 'Write a comment...',
+                      hintText: _replyingTo == null
+                          ? 'Write a comment...'
+                          : 'Write a reply...',
                       hintStyle: TextStyle(
                         color: AppColors.textSecondaryLight,
                         fontSize: 15,
@@ -805,23 +877,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               ],
             ),
           ),
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildCommentTile(PostComment comment) {
-    final canManage = _currentUserId != null &&
+  bool _canManageComment(PostComment comment) {
+    return _currentUserId != null &&
         comment.userId > 0 &&
         comment.userId == _currentUserId;
-    return CommentBubble(
-      comment: comment,
-      timeAgo: _formatTimeAgo(comment.createdAt),
-      canManage: canManage,
-      onEdit: () => _editComment(comment),
-      onDelete: () => _deleteComment(comment),
-      onReply: () => FocusScope.of(context).requestFocus(_commentFocus),
-    );
   }
 
   Future<void> _onRateAndReview() async {

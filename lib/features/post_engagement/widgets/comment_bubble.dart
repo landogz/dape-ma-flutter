@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/models/post_comment.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/user_avatar.dart';
 
 class CommentBubble extends StatelessWidget {
   const CommentBubble({
@@ -12,6 +13,7 @@ class CommentBubble extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onReply,
+    this.depth = 0,
   });
 
   final PostComment comment;
@@ -20,29 +22,22 @@ class CommentBubble extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onReply;
+  final int depth;
 
   @override
   Widget build(BuildContext context) {
-    final initial = comment.authorName.isNotEmpty
-        ? comment.authorName.trim().substring(0, 1).toUpperCase()
-        : '?';
-
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(
+        left: depth * 28.0,
+        bottom: 12,
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
+          UserAvatar(
+            name: comment.authorName,
+            imageUrl: comment.authorAvatarUrl,
             radius: 16,
-            backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
-            child: Text(
-              initial,
-              style: const TextStyle(
-                color: AppColors.primaryBlue,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
-            ),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -164,6 +159,56 @@ class CommentBubble extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class CommentThread extends StatelessWidget {
+  const CommentThread({
+    super.key,
+    required this.comment,
+    required this.timeAgoBuilder,
+    required this.canManageBuilder,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onReply,
+    this.depth = 0,
+  });
+
+  final PostComment comment;
+  final String Function(DateTime?) timeAgoBuilder;
+  final bool Function(PostComment comment) canManageBuilder;
+  final void Function(PostComment comment) onEdit;
+  final void Function(PostComment comment) onDelete;
+  final void Function(PostComment comment) onReply;
+  final int depth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CommentBubble(
+          comment: comment,
+          timeAgo: timeAgoBuilder(comment.createdAt),
+          canManage: canManageBuilder(comment),
+          onEdit: () => onEdit(comment),
+          onDelete: () => onDelete(comment),
+          onReply: () => onReply(comment),
+          depth: depth,
+        ),
+        ...comment.replies.map(
+          (reply) => CommentThread(
+            comment: reply,
+            timeAgoBuilder: timeAgoBuilder,
+            canManageBuilder: canManageBuilder,
+            onEdit: onEdit,
+            onDelete: onDelete,
+            onReply: onReply,
+            depth: depth + 1,
+          ),
+        ),
+      ],
     );
   }
 }

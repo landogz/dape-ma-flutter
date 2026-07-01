@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 
+import '../auth/auth_service.dart';
 import '../network/api_client.dart';
 import '../network/endpoints.dart';
 
@@ -53,7 +54,8 @@ class AnalyticsClient {
     }
 
     try {
-      final api = ApiClient();
+      final token = await AuthService.getToken();
+      final api = ApiClient(token: token);
       await api.post<Map<String, dynamic>>(
         Endpoints.analyticsEvents,
         data: <String, dynamic>{
@@ -62,8 +64,12 @@ class AnalyticsClient {
           'post_id': ?postId,
         },
       );
-    } on DioException {
-      // Analytics must never break UX.
+    } on DioException catch (error) {
+      assert(() {
+        // ignore: avoid_print
+        print('Analytics event failed: ${error.response?.statusCode} ${error.message}');
+        return true;
+      }());
     }
   }
 }

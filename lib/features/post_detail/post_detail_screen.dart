@@ -121,10 +121,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           likesCount: result.likesCount,
         );
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not update like. Try again.')),
+        SnackBar(
+          content: Text(PostEngagementService.friendlyError(e, 'like this post')),
+        ),
       );
     }
   }
@@ -155,10 +157,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Comment posted')),
       );
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not post comment. Try again.')),
+        SnackBar(
+          content: Text(PostEngagementService.friendlyError(e, 'post a comment')),
+        ),
       );
     } finally {
       if (mounted) setState(() => _submittingComment = false);

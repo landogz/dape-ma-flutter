@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+
 import '../../core/auth/auth_service.dart';
 import '../../core/models/post_comment.dart';
 import '../../core/network/api_client.dart';
@@ -5,6 +7,19 @@ import '../../core/network/endpoints.dart';
 
 class PostEngagementService {
   PostEngagementService._();
+
+  static String friendlyError(Object error, String action) {
+    if (error is DioException) {
+      final code = error.response?.statusCode;
+      if (code == 404) {
+        return 'Likes and comments need the latest server update. Deploy Laravel and run php artisan migrate.';
+      }
+      if (code == 401) {
+        return 'Please log in to $action.';
+      }
+    }
+    return 'Could not $action. Try again.';
+  }
 
   static Future<({bool liked, int likesCount})> toggleLike(int postId) async {
     final res = await AuthService.authedPost<Map<String, dynamic>>(

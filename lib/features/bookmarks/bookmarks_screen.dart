@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
+import '../post_engagement/post_engagement_service.dart';
 import '../post_detail/post_detail_screen.dart';
 import '../home/widgets/post_card.dart';
 
@@ -41,6 +42,51 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       if (mounted) setState(() => _bookmarks = []);
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _onLikeTap(Post post) async {
+    try {
+      final result = await PostEngagementService.toggleLike(post.id);
+      if (!mounted) return;
+      setState(() {
+        final index = _bookmarks.indexWhere((p) => p.id == post.id);
+        if (index != -1) {
+          _bookmarks[index] = _bookmarks[index].copyWith(
+            isLiked: result.liked,
+            likesCount: result.likesCount,
+          );
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(PostEngagementService.friendlyError(e, 'like this post')),
+        ),
+      );
+    }
+  }
+
+  Future<void> _openPostDetail(Post post, {bool focusComment = false}) async {
+    final updated = await Navigator.of(context).push<Post?>(
+      MaterialPageRoute(
+        builder: (_) => PostDetailScreen(
+          post: post,
+          initialIsBookmarked: true,
+          focusCommentOnOpen: focusComment,
+        ),
+      ),
+    );
+    if (updated != null && mounted) {
+      setState(() {
+        final index = _bookmarks.indexWhere((p) => p.id == updated.id);
+        if (index != -1) {
+          _bookmarks[index] = updated;
+        }
+      });
+    } else {
+      await _loadBookmarks();
     }
   }
 
@@ -86,16 +132,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                     return PostCard(
                       post: post,
                       isBookmarked: true,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => PostDetailScreen(
-                              post: post,
-                              initialIsBookmarked: true,
-                            ),
-                          ),
-                        ).then((_) => _loadBookmarks());
-                      },
+                      onTap: () => _openPostDetail(post),
+                      onLikeTap: () => _onLikeTap(post),
+                      onCommentTap: () =>
+                          _openPostDetail(post, focusComment: true),
                       onBookmarkTap: () => _onBookmarkTap(post),
                     );
                   },

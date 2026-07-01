@@ -189,10 +189,12 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
       });
-    } catch (_) {
+    } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not update like. Try again.')),
+        SnackBar(
+          content: Text(PostEngagementService.friendlyError(e, 'like this post')),
+        ),
       );
     }
   }

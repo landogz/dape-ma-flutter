@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/l10n/app_locale.dart';
 import 'core/l10n/locale_controller.dart';
@@ -30,6 +31,11 @@ class DapeMaApp extends StatelessWidget {
             theme: buildLightTheme(),
             locale: controller.locale.flutterLocale,
             supportedLocales: AppLocale.flutterLocales,
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
             home: const SplashScreen(),
           ),
         );

@@ -112,8 +112,15 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _writeToday,
         backgroundColor: AppColors.primaryBlue,
-        icon: const Icon(Icons.edit_note),
-        label: Text(l10n.writeToday),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.edit_note, color: Colors.white),
+        label: Text(
+          l10n.writeToday,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: !_isLoggedIn
           ? Center(
@@ -138,6 +145,7 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
                       onPressed: _requireLogin,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
                       ),
                       child: Text(l10n.login),
                     ),

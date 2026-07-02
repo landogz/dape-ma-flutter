@@ -13,6 +13,7 @@ import '../bible/bible_home_screen.dart';
 import '../bookmarks/bookmarks_screen.dart';
 import '../chat/botpress_chat_screen.dart';
 import '../diary/diary_list_screen.dart';
+import '../rehab_centers/rehab_centers_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../post_detail/post_detail_screen.dart';
 import 'widgets/category_tabs.dart';
@@ -278,11 +279,19 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _currentTabIndex = index);
     if (index == 1) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const DiaryListScreen()),
+        MaterialPageRoute(builder: (_) => const RehabCentersScreen()),
       );
     } else if (index == 2) {
+      if (!_isLoggedIn) {
+        await Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+        await _refreshAuthState();
+        if (!_isLoggedIn || !mounted) return;
+      }
+      if (!mounted) return;
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
+        MaterialPageRoute(builder: (_) => const BookmarksScreen()),
       );
     } else if (index == 3) {
       Navigator.of(context)
@@ -293,15 +302,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _openBookmarks() {
-    if (!_isLoggedIn) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      ).then((_) => _refreshAuthState());
-      return;
-    }
+  void _openDiary() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const BookmarksScreen()),
+      MaterialPageRoute(builder: (_) => const DiaryListScreen()),
+    );
+  }
+
+  void _openBible() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
     );
   }
   void _onNotificationTap() {
@@ -379,9 +388,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       IconButton(
-                        onPressed: _openBookmarks,
+                        onPressed: _openDiary,
+                        tooltip: l10n.navDiary,
                         icon: Icon(
-                          Icons.bookmark_outline,
+                          Icons.edit_note_outlined,
+                          color: AppColors.textPrimaryLight,
+                          size: 26,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _openBible,
+                        tooltip: l10n.navBible,
+                        icon: Icon(
+                          Icons.menu_book_outlined,
                           color: AppColors.textPrimaryLight,
                           size: 26,
                         ),
@@ -503,15 +522,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () => _onBottomTabTap(0),
               ),
               _NavItem(
-                icon: Icons.edit_note_outlined,
-                label: l10n.navDiary,
+                icon: Icons.local_hospital_outlined,
+                label: l10n.navRehab,
                 selected: _currentTabIndex == 1,
                 onTap: () => _onBottomTabTap(1),
               ),
               const SizedBox(width: 40), // space for FAB notch
               _NavItem(
-                icon: Icons.menu_book_outlined,
-                label: l10n.navBible,
+                icon: Icons.bookmark_outline,
+                label: l10n.navSaved,
                 selected: _currentTabIndex == 2,
                 onTap: () => _onBottomTabTap(2),
               ),

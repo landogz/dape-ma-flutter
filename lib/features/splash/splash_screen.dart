@@ -5,7 +5,7 @@ import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
-import '../home/home_screen.dart';
+import '../bible/daily_verse_welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => HomeScreen(initialPosts: posts),
+          builder: (_) => DailyVerseWelcomeScreen(initialPosts: posts),
         ),
       );
     }

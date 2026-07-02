@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
 import '../post_engagement/post_engagement_service.dart';
@@ -62,7 +63,13 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(PostEngagementService.friendlyError(e, 'like this post')),
+          content: Text(
+            PostEngagementService.friendlyError(
+              e,
+              'like this post',
+              context.l10n,
+            ),
+          ),
         ),
       );
     }
@@ -99,16 +106,16 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       await _loadBookmarks();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Removed from bookmarks'),
+        SnackBar(
+          content: Text(context.l10n.removedFromBookmarks),
           duration: Duration(seconds: 2),
         ),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not remove bookmark. Try again.'),
+        SnackBar(
+          content: Text(context.l10n.bookmarkRemoveFailed),
         ),
       );
     }
@@ -116,8 +123,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Bookmarks')),
+      appBar: AppBar(title: Text(l10n.bookmarksTitle)),
       body: SafeArea(
         child: _loading
             ? const Center(child: CircularProgressIndicator())

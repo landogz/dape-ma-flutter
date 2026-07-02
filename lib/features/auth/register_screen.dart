@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import 'widgets/auth_header.dart';
 
@@ -58,13 +59,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         setState(() {
           _error = errMsg?.isNotEmpty == true
               ? errMsg!
-              : 'Registration failed. Please check your details.';
+              : context.l10n.registrationFailed;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _error = 'Registration failed. Please check your details.';
+          _error = context.l10n.registrationFailed;
         });
       }
     } finally {
@@ -78,6 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final inputDecoration = InputDecoration(
       filled: true,
       fillColor: Colors.white,
@@ -99,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
-        title: const Text('Register'),
+        title: Text(l10n.register),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimaryLight,
@@ -118,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _nameController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Name',
+                    labelText: l10n.name,
                     prefixIcon: const Icon(
                       Icons.person_outline,
                       color: AppColors.textSecondaryLight,
@@ -128,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Name is required';
+                      return l10n.nameRequired;
                     }
                     return null;
                   },
@@ -137,7 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     prefixIcon: const Icon(
                       Icons.email_outlined,
                       color: AppColors.textSecondaryLight,
@@ -148,7 +150,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email is required';
+                      return l10n.emailRequired;
                     }
                     return null;
                   },
@@ -157,7 +159,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(
                       Icons.lock_outline,
                       color: AppColors.textSecondaryLight,
@@ -182,7 +184,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.length < 6) {
-                      return 'Password must be at least 6 characters';
+                      return l10n.passwordMinSix;
                     }
                     return null;
                   },
@@ -191,7 +193,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _passwordConfirmController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Confirm Password',
+                    labelText: l10n.confirmPassword,
                     prefixIcon: const Icon(
                       Icons.lock_outline,
                       color: AppColors.textSecondaryLight,
@@ -217,7 +219,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onFieldSubmitted: (_) => _submit(),
                   validator: (value) {
                     if (value != _passwordController.text) {
-                      return 'Passwords do not match';
+                      return l10n.passwordsDoNotMatch;
                     }
                     return null;
                   },
@@ -256,7 +258,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Create account'),
+                        : Text(l10n.createAccount),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -264,7 +266,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Already have an account? ',
+                      l10n.alreadyHaveAccount,
                       style: TextStyle(
                         color: AppColors.textSecondaryLight,
                         fontSize: 14,
@@ -281,8 +283,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
-                        'Login',
+                      child: Text(
+                        l10n.login,
                         style: TextStyle(
                           color: AppColors.primaryBlue,
                           fontWeight: FontWeight.w600,

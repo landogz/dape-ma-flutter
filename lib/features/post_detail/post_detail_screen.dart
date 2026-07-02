@@ -3,6 +3,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/models/post_comment.dart';
 import '../../core/network/endpoints.dart';
@@ -174,6 +175,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           _commentsError = PostEngagementService.friendlyError(
             e,
             'load comments',
+            context.l10n,
           );
         }
       });
@@ -212,7 +214,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(PostEngagementService.friendlyError(e, 'like this post')),
+          content: Text(
+            PostEngagementService.friendlyError(
+              e,
+              'like this post',
+              context.l10n,
+            ),
+          ),
         ),
       );
     }
@@ -249,14 +257,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       _commentFocus.unfocus();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(parentId == null ? 'Comment posted' : 'Reply posted'),
+          content: Text(
+            parentId == null
+                ? context.l10n.commentPosted
+                : context.l10n.replyPosted,
+          ),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(PostEngagementService.friendlyError(e, 'post a comment')),
+          content: Text(
+            PostEngagementService.friendlyError(
+              e,
+              'post a comment',
+              context.l10n,
+            ),
+          ),
         ),
       );
     } finally {
@@ -312,7 +330,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
     if (updated == true && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment updated')),
+        SnackBar(content: Text(context.l10n.commentUpdated)),
       );
     }
   }
@@ -320,21 +338,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _deleteComment(PostComment comment) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete comment?'),
-        content: const Text('This comment will be removed permanently.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.accentRed),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        final l10n = ctx.l10n;
+        return AlertDialog(
+          title: Text(l10n.deleteCommentTitle),
+          content: Text(l10n.deleteCommentBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: TextButton.styleFrom(foregroundColor: AppColors.accentRed),
+              child: Text(l10n.deleteAction),
+            ),
+          ],
+        );
+      },
     );
     if (confirmed != true || !mounted) return;
 
@@ -349,14 +370,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _post = _post.copyWith(commentsCount: commentsCount);
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Comment deleted')),
+        SnackBar(content: Text(context.l10n.commentDeleted)),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            PostEngagementService.friendlyError(e, 'delete this comment'),
+            PostEngagementService.friendlyError(
+              e,
+              'delete this comment',
+              context.l10n,
+            ),
           ),
         ),
       );
@@ -385,7 +410,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isBookmarked ? 'Saved to bookmarks' : 'Removed from bookmarks',
+            _isBookmarked
+                ? context.l10n.savedToBookmarks
+                : context.l10n.removedFromBookmarks,
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -393,8 +420,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not update bookmark. Try again.'),
+        SnackBar(
+          content: Text(context.l10n.bookmarkUpdateFailed),
         ),
       );
     }
@@ -411,6 +438,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final post = _post;
+    final l10n = context.l10n;
     final hasImage = post.imageUrl != null && post.imageUrl!.isNotEmpty;
     final initial = post.authorName.isNotEmpty
         ? post.authorName.trim().substring(0, 1).toUpperCase()
@@ -427,7 +455,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           onPressed: () => Navigator.of(context).pop(_post),
         ),
         title: Text(
-          "${post.authorName}'s Post",
+          l10n.authorPost(post.authorName),
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -623,7 +651,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${post.commentsCount} ${post.commentsCount == 1 ? 'comment' : 'comments'}',
+                          l10n.commentsCount(post.commentsCount),
                           style: Theme.of(context)
                               .textTheme
                               .bodySmall
@@ -642,13 +670,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         icon: post.isLiked
                             ? Icons.thumb_up
                             : Icons.thumb_up_outlined,
-                        label: 'Like',
+                        label: l10n.like,
                         isActive: post.isLiked,
                         onTap: _onLikeTap,
                       ),
                       _DetailActionButton(
                         icon: Icons.chat_bubble_outline,
-                        label: 'Comment',
+                        label: l10n.comment,
                         onTap: () {
                           FocusScope.of(context).requestFocus(_commentFocus);
                         },
@@ -675,8 +703,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             const SizedBox(width: 8),
                             Text(
                               post.reviewsCount > 0
-                                  ? '${post.averageRating.toStringAsFixed(1)} · ${post.reviewsCount} ${post.reviewsCount == 1 ? 'rating' : 'ratings'}'
-                                  : 'No ratings yet',
+                                  ? l10n.ratingAverageSummary(
+                                      post.averageRating,
+                                      post.reviewsCount,
+                                    )
+                                  : l10n.noRatingsYet,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -689,7 +720,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         if (post.userRating != null) ...[
                           const SizedBox(height: 6),
                           Text(
-                            'You rated this ${post.userRating} star${post.userRating == 1 ? '' : 's'}',
+                            l10n.youRatedStars(post.userRating!),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
@@ -712,8 +743,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             ),
                             label: Text(
                               post.userRating != null
-                                  ? 'Update your rating'
-                                  : 'Rate & Review',
+                                  ? l10n.updateYourRating
+                                  : l10n.rateAndReview,
                             ),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.primaryBlue,
@@ -730,7 +761,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Comments',
+                          l10n.commentsTitle,
                           style: Theme.of(context)
                               .textTheme
                               .titleSmall
@@ -739,7 +770,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         if (post.commentsCount > 0) ...[
                           const SizedBox(height: 4),
                           Text(
-                            '${post.commentsCount} ${post.commentsCount == 1 ? 'comment' : 'comments'}',
+                            l10n.commentsCount(post.commentsCount),
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
@@ -770,7 +801,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text('Load previous comments...'),
+                                    : Text(l10n.loadPreviousComments),
                               ),
                             ),
                           ),
@@ -796,13 +827,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               ),
                               TextButton(
                                 onPressed: _loadComments,
-                                child: const Text('Retry'),
+                                child: Text(l10n.retry),
                               ),
                             ],
                           )
                         else if (_comments.isEmpty)
                           Text(
-                            'No comments yet. Be the first to comment.',
+                            l10n.noCommentsYet,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodySmall
@@ -842,7 +873,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          'Replying to ${_replyingTo!.authorName}',
+                          '${l10n.replyingTo} ${_replyingTo!.authorName}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: AppColors.primaryBlue,
                                 fontWeight: FontWeight.w600,
@@ -897,8 +928,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     textInputAction: TextInputAction.send,
                     decoration: InputDecoration(
                       hintText: _replyingTo == null
-                          ? 'Write a comment...'
-                          : 'Write a reply...',
+                          ? l10n.writeComment
+                          : l10n.writeReply,
                       hintStyle: TextStyle(
                         color: AppColors.textSecondaryLight,
                         fontSize: 15,
@@ -999,7 +1030,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Rating submitted')),
+      SnackBar(content: Text(context.l10n.ratingSubmitted)),
     );
   }
 }

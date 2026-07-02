@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 
 class CategoryTabs extends StatelessWidget {
@@ -12,36 +13,38 @@ class CategoryTabs extends StatelessWidget {
     required this.onChanged,
   });
 
+  static const List<String> _slugs = [
+    'all',
+    'drug-effects',
+    'rehabilitation',
+    'prevention',
+    'iec',
+    'news',
+    'legal',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    const categories = [
-      {'slug': 'all', 'label': 'All'},
-      {'slug': 'drug-effects', 'label': 'Drug Effects'},
-      {'slug': 'rehabilitation', 'label': 'Rehabilitation'},
-      {'slug': 'prevention', 'label': 'Prevention'},
-      {'slug': 'news', 'label': 'News'},
-      {'slug': 'legal', 'label': 'Laws & Policies'},
-    ];
+    final l10n = context.l10n;
 
     return SizedBox(
       height: 48,
       child: ListView.separated(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
+        itemCount: _slugs.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final c = categories[index];
-          final isActive = c['slug'] == current;
+          final slug = _slugs[index];
+          final isActive = slug == current;
           return ChoiceChip(
-            label: Text(c['label']!),
+            label: Text(l10n.categoryLabel(slug)),
             selected: isActive,
-            onSelected: (_) => onChanged(c['slug']!),
+            onSelected: (_) => onChanged(slug),
             selectedColor: AppColors.primaryBlue,
             backgroundColor: Colors.white,
             labelStyle: TextStyle(
-              color:
-                  isActive ? Colors.white : AppColors.textSecondaryLight,
+              color: isActive ? Colors.white : AppColors.textSecondaryLight,
             ),
           );
         },
@@ -49,4 +52,3 @@ class CategoryTabs extends StatelessWidget {
     );
   }
 }
-

@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/network/api_client.dart';
 import '../../core/theme/app_colors.dart';
@@ -12,6 +13,7 @@ import '../auth/forgot_password_screen.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
 import '../auth/widgets/auth_header.dart';
+import '../settings/widgets/language_picker_card.dart';
 
 class AccountScreen extends StatefulWidget {
   const AccountScreen({super.key});
@@ -119,8 +121,8 @@ class _AccountScreenState extends State<AccountScreen> {
       if (success == true && mounted) {
         _loadProfile();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile updated'),
+          SnackBar(
+            content: Text(context.l10n.profileUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -141,10 +143,12 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
-        title: const Text('Account'),
+        title: Text(l10n.accountTitle),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimaryLight,
@@ -163,7 +167,9 @@ class _AccountScreenState extends State<AccountScreen> {
                   children: [
                     const SizedBox(height: 8),
                     const AuthHeader(),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 20),
+                    const LanguagePickerCard(),
+                    const SizedBox(height: 20),
                     if (_loggedIn) ...[
                       Container(
                         padding: const EdgeInsets.all(20),
@@ -211,7 +217,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        _userName ?? 'You are signed in',
+                                        _userName ?? l10n.youAreSignedIn,
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleMedium
@@ -224,7 +230,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                       ),
                                       const SizedBox(height: 2),
                                       Text(
-                                        'Save bookmarks and submit reviews',
+                                        l10n.signedInHint,
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodySmall
@@ -244,7 +250,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               child: ElevatedButton.icon(
                                 onPressed: () => _showEditProfileSheet(context),
                                 icon: const Icon(Icons.person_rounded, size: 20),
-                                label: const Text('Edit profile'),
+                                label: Text(l10n.editProfile),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: AppColors.primaryBlue,
                                   foregroundColor: Colors.white,
@@ -262,7 +268,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               child: OutlinedButton.icon(
                                 onPressed: () => _showChangePasswordSheet(context),
                                 icon: const Icon(Icons.lock_rounded, size: 20),
-                                label: const Text('Change password'),
+                                label: Text(l10n.changePassword),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.primaryBlue,
                                   side: const BorderSide(color: AppColors.primaryBlue),
@@ -279,7 +285,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               child: OutlinedButton.icon(
                                 onPressed: _logout,
                                 icon: const Icon(Icons.logout_rounded, size: 20),
-                                label: const Text('Log out'),
+                                label: Text(l10n.logOut),
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: AppColors.accentRed,
                                   side: const BorderSide(
@@ -315,7 +321,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              'Welcome to DAPE-MA',
+                              l10n.welcomeTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge
@@ -326,7 +332,7 @@ class _AccountScreenState extends State<AccountScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Sign in or create an account to save bookmarks and submit reviews.',
+                              l10n.welcomeBody,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodyMedium
@@ -358,7 +364,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text('Login'),
+                                child: Text(l10n.login),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -384,7 +390,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                child: const Text('Register'),
+                                child: Text(l10n.register),
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -398,8 +404,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                     ),
                                   );
                                 },
-                                child: const Text(
-                                  'Forgot password?',
+                                child: Text(
+                                  l10n.forgotPassword,
                                   style: TextStyle(
                                     color: AppColors.primaryBlue,
                                     fontWeight: FontWeight.w600,
@@ -473,7 +479,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
   Future<void> _submit() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      setState(() => _error = 'Name is required');
+      setState(() => _error = context.l10n.nameRequired);
       return;
     }
     setState(() {
@@ -487,8 +493,8 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
         setState(() {
           _loading = false;
           _error = e.toString().contains('422') || e.toString().contains('message')
-              ? 'Update failed. Please try again.'
-              : 'Update failed. Please try again.';
+              ? context.l10n.updateFailed
+              : context.l10n.updateFailed;
         });
       }
     }
@@ -496,6 +502,8 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Container(
       padding: EdgeInsets.only(
         left: 24,
@@ -513,7 +521,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Edit profile',
+              l10n.editProfile,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimaryLight,
@@ -546,7 +554,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
               child: TextButton.icon(
                 onPressed: _loading ? null : _pickImage,
                 icon: const Icon(Icons.photo_camera_rounded, size: 20),
-                label: const Text('Change photo'),
+                label: Text(l10n.changePhoto),
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.primaryBlue,
                 ),
@@ -556,7 +564,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: l10n.name,
                 filled: true,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -590,7 +598,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
                         height: 24,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Save'),
+                    : Text(l10n.save),
               ),
             ),
           ],
@@ -622,15 +630,15 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
     final newPass = _newController.text;
     final confirm = _confirmController.text;
     if (current.isEmpty) {
-      setState(() => _error = 'Current password is required');
+      setState(() => _error = context.l10n.currentPasswordRequired);
       return;
     }
     if (newPass.length < 6) {
-      setState(() => _error = 'New password must be at least 6 characters');
+      setState(() => _error = context.l10n.passwordMinLength);
       return;
     }
     if (newPass != confirm) {
-      setState(() => _error = 'New passwords do not match');
+      setState(() => _error = context.l10n.passwordsDoNotMatch);
       return;
     }
     setState(() {
@@ -649,8 +657,8 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password updated successfully'),
+          SnackBar(
+            content: Text(context.l10n.passwordUpdated),
             backgroundColor: Colors.green,
           ),
         );
@@ -659,7 +667,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
       if (mounted) {
         setState(() {
           _loading = false;
-          _error = 'Failed to update password. Check current password.';
+          _error = context.l10n.passwordUpdateFailed;
         });
       }
     }
@@ -675,6 +683,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final inputDecoration = InputDecoration(
       filled: true,
       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -697,7 +706,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Change password',
+              l10n.changePassword,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.textPrimaryLight,
@@ -707,7 +716,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
             TextField(
               controller: _currentController,
               decoration: inputDecoration.copyWith(
-                labelText: 'Current password',
+                labelText: l10n.currentPassword,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -724,7 +733,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
             TextField(
               controller: _newController,
               decoration: inputDecoration.copyWith(
-                labelText: 'New password',
+                labelText: l10n.newPassword,
                 prefixIcon: const Icon(Icons.lock_rounded),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -740,7 +749,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
             TextField(
               controller: _confirmController,
               decoration: inputDecoration.copyWith(
-                labelText: 'Confirm new password',
+                labelText: l10n.confirmNewPassword,
                 prefixIcon: const Icon(Icons.lock_rounded),
                 suffixIcon: IconButton(
                   icon: Icon(
@@ -779,7 +788,7 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Update password'),
+                    : Text(l10n.updatePassword),
               ),
             ),
           ],

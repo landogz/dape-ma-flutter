@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/locale_scope.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
@@ -36,12 +37,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         },
       );
       setState(() {
-        _success =
-            'Password reset instructions have been sent to your email.';
+        _success = context.l10n.resetSuccess;
       });
     } catch (_) {
       setState(() {
-        _error = 'Unable to send reset link. Please try again.';
+        _error = context.l10n.resetFailed;
       });
     } finally {
       if (mounted) {
@@ -54,6 +54,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final inputDecoration = InputDecoration(
       filled: true,
       fillColor: Colors.white,
@@ -75,7 +76,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
-        title: const Text('Forgot Password'),
+        title: Text(l10n.forgotPassword),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimaryLight,
@@ -92,7 +93,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 const AuthHeader(),
                 const SizedBox(height: 24),
                 Text(
-                  'Enter your email and we will send you instructions to reset your password.',
+                  l10n.resetInstructions,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondaryLight,
                       ),
@@ -101,7 +102,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     prefixIcon: const Icon(
                       Icons.email_outlined,
                       color: AppColors.textSecondaryLight,
@@ -113,7 +114,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   onFieldSubmitted: (_) => _submit(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email is required';
+                      return l10n.emailRequired;
                     }
                     return null;
                   },
@@ -164,7 +165,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Send reset link'),
+                        : Text(l10n.sendResetLink),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -175,9 +176,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         : () {
                             Navigator.of(context).pop();
                           },
-                    child: const Text(
-                      'Back to Login',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.backToLogin,
+                      style: const TextStyle(
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.w600,
                         fontSize: 14,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../review_service.dart';
 
@@ -56,7 +57,11 @@ class _ReviewSheetState extends State<ReviewSheet> {
       Navigator.of(context).pop(result);
     } catch (e) {
       setState(() {
-        _error = ReviewService.friendlyError(e, 'submit your rating');
+        _error = ReviewService.friendlyError(
+          e,
+          'submit your rating',
+          context.l10n,
+        );
       });
     } finally {
       if (mounted) {
@@ -67,6 +72,8 @@ class _ReviewSheetState extends State<ReviewSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 16,
@@ -79,7 +86,7 @@ class _ReviewSheetState extends State<ReviewSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Rate this content',
+            l10n.rateThisContent,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -101,7 +108,7 @@ class _ReviewSheetState extends State<ReviewSheet> {
           TextField(
             controller: _commentController,
             decoration: InputDecoration(
-              labelText: 'Comment (optional)',
+              labelText: l10n.commentOptional,
               filled: true,
               fillColor: AppColors.lightBackground,
               border: OutlineInputBorder(
@@ -136,7 +143,7 @@ class _ReviewSheetState extends State<ReviewSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Submit rating'),
+                  : Text(l10n.submitRating),
             ),
           ),
         ],

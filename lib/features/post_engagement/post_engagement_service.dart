@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/models/post.dart';
 import '../../core/models/post_comment.dart';
 import '../../core/network/api_client.dart';
@@ -10,24 +11,24 @@ import '../../core/utils/json_parsers.dart';
 class PostEngagementService {
   PostEngagementService._();
 
-  static String friendlyError(Object error, String action) {
+  static String friendlyError(Object error, String action, AppStrings l10n) {
     if (error is DioException) {
       final code = error.response?.statusCode;
       if (code == 404) {
-        return 'Likes and comments need the latest server update. Deploy Laravel and run php artisan migrate.';
+        return l10n.serverUpdateRequired;
       }
       if (code == 401) {
-        return 'Please log in to $action.';
+        return l10n.loginRequired(action);
       }
       if (code == 403) {
-        return 'You can only manage your own comments.';
+        return l10n.ownCommentsOnly;
       }
       if (error.type == DioExceptionType.connectionError ||
           error.type == DioExceptionType.connectionTimeout) {
-        return 'No internet connection. Check your network and try again.';
+        return l10n.noInternet;
       }
     }
-    return 'Could not $action. Try again.';
+    return l10n.actionFailed(action);
   }
 
   static Future<Post> fetchPost(int postId) async {

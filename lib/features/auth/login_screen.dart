@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import 'widgets/auth_header.dart';
 import 'forgot_password_screen.dart';
@@ -37,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pop(true);
     } catch (e) {
       setState(() {
-        _error = 'Login failed. Please check your credentials.';
+        _error = context.l10n.loginFailed;
       });
     } finally {
       if (mounted) {
@@ -50,6 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final inputDecoration = InputDecoration(
       filled: true,
       fillColor: Colors.white,
@@ -71,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: AppColors.lightBackground,
       appBar: AppBar(
-        title: const Text('Login'),
+        title: Text(l10n.login),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: AppColors.textPrimaryLight,
@@ -90,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Email',
+                    labelText: l10n.email,
                     prefixIcon: const Icon(
                       Icons.email_outlined,
                       color: AppColors.textSecondaryLight,
@@ -101,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   textInputAction: TextInputAction.next,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email is required';
+                      return l10n.emailRequired;
                     }
                     return null;
                   },
@@ -110,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextFormField(
                   controller: _passwordController,
                   decoration: inputDecoration.copyWith(
-                    labelText: 'Password',
+                    labelText: l10n.password,
                     prefixIcon: const Icon(
                       Icons.lock_outline,
                       color: AppColors.textSecondaryLight,
@@ -136,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onFieldSubmitted: (_) => _submit(),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Password is required';
+                      return l10n.passwordRequired;
                     }
                     return null;
                   },
@@ -154,8 +156,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             );
                           },
-                    child: const Text(
-                      'Forgot Password?',
+                    child: Text(
+                      l10n.forgotPassword,
                       style: TextStyle(
                         color: AppColors.primaryBlue,
                         fontWeight: FontWeight.w600,
@@ -196,7 +198,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Sign in'),
+                        : Text(l10n.signIn),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -204,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      l10n.noAccount,
                       style: TextStyle(
                         color: AppColors.textSecondaryLight,
                         fontSize: 14,
@@ -228,8 +230,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
-                        'Register',
+                      child: Text(
+                        l10n.register,
                         style: TextStyle(
                           color: AppColors.primaryBlue,
                           fontWeight: FontWeight.w600,

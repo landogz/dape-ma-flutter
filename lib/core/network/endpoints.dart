@@ -15,6 +15,13 @@ class Endpoints {
   static const forgotPassword = '/auth/forgot-password';
   static const bookmarks = '/bookmarks';
   static const reviews = '/reviews';
+  static const dailyVerseToday = '/daily-verse/today';
+  static const bibleBooks = '/bible/books';
+  static const biblePassage = '/bible/passage';
+  static const diaryEntries = '/diary-entries';
+  static const diaryToday = '/diary-entries/today';
+
+  static String diaryEntry(int id) => '/diary-entries/$id';
 
   static String postDetail(int postId) => '/posts/$postId';
   static String postLike(int postId) => '/posts/$postId/like';

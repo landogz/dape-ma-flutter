@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
 import '../../../core/theme/app_colors.dart';
 
@@ -81,6 +82,7 @@ class _PostCardState extends State<PostCard> {
   @override
   Widget build(BuildContext context) {
     final post = widget.post;
+    final l10n = context.l10n;
     final onTap = widget.onTap;
     final onBookmarkTap = widget.onBookmarkTap;
     final isBookmarked = widget.isBookmarked;
@@ -260,14 +262,14 @@ class _PostCardState extends State<PostCard> {
               child: Row(
                 children: [
                   Text(
-                    '${post.likesCount} ${post.likesCount == 1 ? 'like' : 'likes'}',
+                    l10n.likesCount(post.likesCount),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondaryLight,
                         ),
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${post.commentsCount} ${post.commentsCount == 1 ? 'comment' : 'comments'}',
+                    l10n.commentsCount(post.commentsCount),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.textSecondaryLight,
                         ),
@@ -302,13 +304,13 @@ class _PostCardState extends State<PostCard> {
                     icon: post.isLiked
                         ? Icons.thumb_up
                         : Icons.thumb_up_outlined,
-                    label: 'Like',
+                    label: l10n.like,
                     isActive: post.isLiked,
                     onTap: widget.onLikeTap,
                   ),
                   _ActionButton(
                     icon: Icons.chat_bubble_outline,
-                    label: 'Comment',
+                    label: l10n.comment,
                     onTap: widget.onCommentTap,
                   ),
                 ],

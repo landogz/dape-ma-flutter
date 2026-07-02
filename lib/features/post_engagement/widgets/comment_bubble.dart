@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post_comment.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/user_avatar.dart';
@@ -26,6 +27,8 @@ class CommentBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: EdgeInsets.only(
         left: depth * 28.0,
@@ -92,8 +95,8 @@ class CommentBubble extends StatelessWidget {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           foregroundColor: AppColors.textSecondaryLight,
                         ),
-                        child: const Text(
-                          'Reply',
+                        child: Text(
+                          l10n.reply,
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -120,14 +123,14 @@ class CommentBubble extends StatelessWidget {
                               onDelete?.call();
                             }
                           },
-                          itemBuilder: (context) => const [
+                          itemBuilder: (context) => [
                             PopupMenuItem(
                               value: 'edit',
                               child: Row(
                                 children: [
-                                  Icon(Icons.edit_outlined, size: 18),
-                                  SizedBox(width: 8),
-                                  Text('Edit'),
+                                  const Icon(Icons.edit_outlined, size: 18),
+                                  const SizedBox(width: 8),
+                                  Text(l10n.edit),
                                 ],
                               ),
                             ),
@@ -135,15 +138,15 @@ class CommentBubble extends StatelessWidget {
                               value: 'delete',
                               child: Row(
                                 children: [
-                                  Icon(
+                                  const Icon(
                                     Icons.delete_outline,
                                     size: 18,
                                     color: AppColors.accentRed,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 8),
                                   Text(
-                                    'Delete',
-                                    style: TextStyle(color: AppColors.accentRed),
+                                    l10n.deleteAction,
+                                    style: const TextStyle(color: AppColors.accentRed),
                                   ),
                                 ],
                               ),

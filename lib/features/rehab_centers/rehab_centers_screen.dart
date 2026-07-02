@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n/locale_scope.dart';
 import '../../core/models/rehab_center.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
@@ -75,9 +76,11 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rehab Centers'),
+        title: Text(l10n.rehabCentersTitle),
         backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
@@ -91,7 +94,7 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                   TextField(
                     controller: _searchController,
                     decoration: InputDecoration(
-                      hintText: 'Search by name, address, or province',
+                      hintText: l10n.searchRehabByHint,
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
                       fillColor: Colors.white,
@@ -108,7 +111,7 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                     child: Row(
                       children: _regions.map((r) {
                         final value = r['value']!;
-                        final label = r['label']!;
+                        final label = value.isEmpty ? l10n.allRegions : r['label']!;
                         final isSelected = _region == value;
                         return Padding(
                           padding: const EdgeInsets.only(right: 8),
@@ -143,7 +146,7 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                               ),
                               const SizedBox(height: 16),
                               Text(
-                                'No rehab centers found',
+                                l10n.noRehabFound,
                                 style: Theme.of(context)
                                     .textTheme
                                     .titleMedium
@@ -155,8 +158,8 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                               Text(
                                 _region.isNotEmpty ||
                                         _searchController.text.isNotEmpty
-                                    ? 'Try a different region or search'
-                                    : 'Check back later for listings',
+                                    ? l10n.tryDifferentSearch
+                                    : l10n.checkBackLater,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall

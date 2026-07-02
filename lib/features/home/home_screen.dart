@@ -6,13 +6,15 @@ import '../../core/network/endpoints.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/analytics/analytics_client.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../account/account_screen.dart';
 import '../auth/login_screen.dart';
+import '../bible/bible_home_screen.dart';
 import '../bookmarks/bookmarks_screen.dart';
 import '../chat/botpress_chat_screen.dart';
+import '../diary/diary_list_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../post_detail/post_detail_screen.dart';
-import '../rehab_centers/rehab_centers_screen.dart';
 import 'widgets/category_tabs.dart';
 import 'widgets/post_card.dart';
 
@@ -196,7 +198,13 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(PostEngagementService.friendlyError(e, 'like this post')),
+          content: Text(
+            PostEngagementService.friendlyError(
+              e,
+              'like this post',
+              context.l10n,
+            ),
+          ),
         ),
       );
     }
@@ -251,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            added ? 'Saved to bookmarks' : 'Removed from bookmarks',
+            added ? context.l10n.savedToBookmarks : context.l10n.removedFromBookmarks,
           ),
           duration: const Duration(seconds: 2),
         ),
@@ -259,8 +267,8 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not update bookmark. Try again.'),
+        SnackBar(
+          content: Text(context.l10n.bookmarkUpdateFailed),
         ),
       );
     }
@@ -270,11 +278,11 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _currentTabIndex = index);
     if (index == 1) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const RehabCentersScreen()),
+        MaterialPageRoute(builder: (_) => const DiaryListScreen()),
       );
     } else if (index == 2) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const BookmarksScreen()),
+        MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
       );
     } else if (index == 3) {
       Navigator.of(context)
@@ -285,6 +293,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _openBookmarks() {
+    if (!_isLoggedIn) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      ).then((_) => _refreshAuthState());
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const BookmarksScreen()),
+    );
+  }
   void _onNotificationTap() {
     if (!_isLoggedIn) {
       Navigator.of(context).push(
@@ -297,6 +316,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -333,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Welcome back,',
+                              l10n.welcomeBack,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -343,7 +364,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${_userName ?? 'Guest'} 👋',
+                              '${_userName ?? l10n.guest} 👋',
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
@@ -355,6 +376,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: _openBookmarks,
+                        icon: Icon(
+                          Icons.bookmark_outline,
+                          color: AppColors.textPrimaryLight,
+                          size: 26,
                         ),
                       ),
                       IconButton(
@@ -381,7 +410,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       controller: _searchController,
                       decoration: InputDecoration(
                       prefixIcon: const Icon(Icons.search),
-                      hintText: 'Search information, rehab, news...',
+                      hintText: l10n.searchHint,
                       filled: true,
                       fillColor: Colors.white,
                       contentPadding: const EdgeInsets.symmetric(
@@ -469,26 +498,26 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               _NavItem(
                 icon: Icons.home_outlined,
-                label: 'Home',
+                label: l10n.navHome,
                 selected: _currentTabIndex == 0,
                 onTap: () => _onBottomTabTap(0),
               ),
               _NavItem(
-                icon: Icons.local_hospital_outlined,
-                label: 'Rehab',
+                icon: Icons.edit_note_outlined,
+                label: l10n.navDiary,
                 selected: _currentTabIndex == 1,
                 onTap: () => _onBottomTabTap(1),
               ),
               const SizedBox(width: 40), // space for FAB notch
               _NavItem(
-                icon: Icons.bookmark_outline,
-                label: 'Saved',
+                icon: Icons.menu_book_outlined,
+                label: l10n.navBible,
                 selected: _currentTabIndex == 2,
                 onTap: () => _onBottomTabTap(2),
               ),
               _NavItem(
                 icon: Icons.person_outline,
-                label: 'Account',
+                label: l10n.navAccount,
                 selected: _currentTabIndex == 3,
                 onTap: () => _onBottomTabTap(3),
               ),

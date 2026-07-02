@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 
 class EditCommentSheet extends StatefulWidget {
@@ -36,7 +37,7 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
   Future<void> _submit() async {
     final body = _controller.text.trim();
     if (body.isEmpty) {
-      setState(() => _error = 'Comment cannot be empty');
+      setState(() => _error = context.l10n.commentCannotBeEmpty);
       return;
     }
     setState(() {
@@ -50,7 +51,7 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
       if (mounted) {
         setState(() {
           _saving = false;
-          _error = 'Could not update comment. Try again.';
+          _error = context.l10n.commentUpdateFailed;
         });
       }
     }
@@ -58,6 +59,8 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Padding(
       padding: EdgeInsets.only(
         left: 20,
@@ -70,7 +73,7 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Edit comment',
+            l10n.editComment,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -81,7 +84,7 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
             maxLines: 4,
             minLines: 2,
             decoration: InputDecoration(
-              hintText: 'Update your comment...',
+              hintText: l10n.updateCommentHint,
               filled: true,
               fillColor: AppColors.lightBackground,
               border: OutlineInputBorder(
@@ -114,7 +117,7 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Save changes'),
+                  : Text(l10n.saveChanges),
             ),
           ),
         ],

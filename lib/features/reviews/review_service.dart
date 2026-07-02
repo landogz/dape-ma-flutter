@@ -1,20 +1,21 @@
 import 'package:dio/dio.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/utils/json_parsers.dart';
 
 class ReviewService {
   ReviewService._();
 
-  static String friendlyError(Object error, String action) {
+  static String friendlyError(Object error, String action, AppStrings l10n) {
     if (error is DioException) {
       final code = error.response?.statusCode;
       if (code == 401) {
-        return 'Please log in to $action.';
+        return l10n.loginRequired(action);
       }
     }
-    return 'Could not $action. Try again.';
+    return l10n.actionFailed(action);
   }
 
   static Future<({

@@ -44,6 +44,8 @@ dependencies:
   flutter_svg: ^2.0.10+1
   image_picker: ^1.0.7
   url_launcher: ^6.2.5
+  intl: ^0.20.2
+  flutter_widget_from_html: ^0.16.0
 
 dev_dependencies:
   flutter_test:

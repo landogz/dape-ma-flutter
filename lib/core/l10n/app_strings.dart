@@ -58,6 +58,12 @@ class AppStrings {
   String get yourEntryStatus => _t('Your entry', 'Ang iyong entry');
   String get submitContestEntry =>
       _t('Submit your entry', 'I-submit ang iyong entry');
+  String get loginToSubmitEntry => _t(
+        'Sign in to submit your entry',
+        'Mag-sign in para mag-submit ng entry',
+      );
+  String get submissionsClosed =>
+      _t('Submissions are closed', 'Sarado na ang pag-submit');
   String get publishedEntries =>
       _t('Published entries', 'Mga na-publish na entry');
   String get noPublishedEntriesYet => _t(

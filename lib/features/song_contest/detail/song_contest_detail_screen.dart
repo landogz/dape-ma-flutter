@@ -27,6 +27,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
   List<SongContestEntry> _entries = [];
   SongContestEntry? _myEntry;
   bool _loading = true;
+  bool _isLoggedIn = false;
 
   @override
   void initState() {
@@ -38,8 +39,9 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
     setState(() => _loading = true);
     try {
       final token = await AuthService.getToken();
+      final loggedIn = token != null && token.isNotEmpty;
       final Map<String, dynamic> root;
-      if (token != null && token.isNotEmpty) {
+      if (loggedIn) {
         final res = await AuthService.authedGet<Map<String, dynamic>>(
           Endpoints.songContestDetail(widget.contestId),
         );
@@ -79,6 +81,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
           _contest = contest;
           _entries = entries;
           _myEntry = myEntry;
+          _isLoggedIn = loggedIn;
         });
       }
     } catch (_) {
@@ -98,11 +101,13 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
     final token = await AuthService.getToken();
     if (token == null || token.isEmpty) {
       if (!mounted) return;
-      await Navigator.of(context).push(
+      final loggedIn = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
       await _load();
-      return;
+      if (loggedIn != true || !mounted || _contest == null || _myEntry != null) {
+        return;
+      }
     }
 
     if (!mounted || _contest == null) return;
@@ -124,6 +129,9 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
     }
   }
 
+  bool get _showSubmitCta =>
+      _contest != null && _contest!.canSubmitEntry && _myEntry == null;
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -134,6 +142,35 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
         backgroundColor: AppColors.primaryBlue,
         foregroundColor: Colors.white,
       ),
+      bottomNavigationBar: _loading || _contest == null || !_showSubmitCta
+          ? null
+          : SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _onSubmitTap,
+                    icon: Icon(
+                      _isLoggedIn ? Icons.upload_outlined : Icons.login,
+                    ),
+                    label: Text(
+                      _isLoggedIn
+                          ? l10n.submitContestEntry
+                          : l10n.loginToSubmitEntry,
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _contest == null
@@ -141,7 +178,12 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
               : RefreshIndicator(
                   onRefresh: _load,
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      20,
+                      20,
+                      _showSubmitCta ? 24 : 32,
+                    ),
                     children: [
                       Text(
                         _contest!.title,
@@ -159,7 +201,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                           _Pill(label: _contest!.status.toUpperCase()),
                           if (_contest!.contestYear != null)
                             _Pill(label: '${_contest!.contestYear}'),
-                          if (_contest!.isOpenForSubmission)
+                          if (_contest!.canSubmitEntry)
                             _Pill(label: l10n.acceptingEntries),
                         ],
                       ),
@@ -215,20 +257,39 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                                 ),
                           ),
                         ),
-                      ],
-                      if (_contest!.isOpenForSubmission &&
-                          _myEntry == null) ...[
+                      ] else if (!_contest!.canSubmitEntry) ...[
+                        const SizedBox(height: 20),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            l10n.submissionsClosed,
+                            style:
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: Colors.orange.shade900,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                          ),
+                        ),
+                      ] else ...[
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
-                          child: ElevatedButton.icon(
+                          child: OutlinedButton.icon(
                             onPressed: _onSubmitTap,
                             icon: const Icon(Icons.upload_outlined),
                             label: Text(l10n.submitContestEntry),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryBlue,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primaryBlue,
+                              side: const BorderSide(
+                                color: AppColors.primaryBlue,
+                              ),
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

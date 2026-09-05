@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/song_contest.dart';
 import '../../../core/theme/app_colors.dart';
 import '../detail/song_contest_detail_screen.dart';
@@ -19,6 +20,8 @@ class SongContestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Card(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -86,8 +89,8 @@ class SongContestCard extends StatelessWidget {
                   _Chip(label: contest.status.toUpperCase()),
                   if (contest.contestYear != null)
                     _Chip(label: '${contest.contestYear}'),
-                  if (contest.isOpenForSubmission)
-                    const _Chip(label: 'Accepting entries'),
+                  if (contest.canSubmitEntry)
+                    _Chip(label: l10n.acceptingEntries),
                 ],
               ),
               if (contest.description != null &&
@@ -100,6 +103,25 @@ class SongContestCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: AppColors.textSecondaryLight,
                       ),
+                ),
+              ],
+              if (contest.canSubmitEntry) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _openDetail(context),
+                    icon: const Icon(Icons.upload_outlined, size: 18),
+                    label: Text(l10n.submitContestEntry),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryBlue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ],

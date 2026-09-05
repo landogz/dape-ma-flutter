@@ -46,7 +46,7 @@ class SongContest {
       submissionEndsAt: json['submission_ends_at']?.toString(),
       status: json['status'] as String? ?? 'draft',
       coverImageUrl: json['cover_image_url'] as String?,
-      isOpenForSubmission: json['is_open_for_submission'] == true,
+      isOpenForSubmission: _parseBool(json['is_open_for_submission']),
       entriesCount: json['entries_count'] is int
           ? json['entries_count'] as int
           : int.tryParse('${json['entries_count'] ?? 0}') ?? 0,
@@ -55,4 +55,18 @@ class SongContest {
           : int.tryParse('${json['pending_count'] ?? 0}') ?? 0,
     );
   }
+
+  /// Show submit CTA for open contests; API still enforces the real window.
+  bool get canSubmitEntry =>
+      isOpenForSubmission || status.toLowerCase() == 'open';
+}
+
+bool _parseBool(dynamic value, {bool defaultValue = false}) {
+  if (value == true || value == 1 || value == '1' || value == 'true') {
+    return true;
+  }
+  if (value == false || value == 0 || value == '0' || value == 'false') {
+    return false;
+  }
+  return defaultValue;
 }

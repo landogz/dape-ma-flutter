@@ -6,6 +6,8 @@ class RehabCenter {
   final String province;
   final String contact;
   final String? website;
+  final double? latitude;
+  final double? longitude;
 
   RehabCenter({
     required this.id,
@@ -15,7 +17,15 @@ class RehabCenter {
     required this.province,
     required this.contact,
     this.website,
+    this.latitude,
+    this.longitude,
   });
+
+  bool get hasCoordinates =>
+      latitude != null &&
+      longitude != null &&
+      latitude != 0 &&
+      longitude != 0;
 
   factory RehabCenter.fromJson(Map<String, dynamic> json) {
     return RehabCenter(
@@ -26,7 +36,14 @@ class RehabCenter {
       province: json['province'] as String? ?? '',
       contact: (json['contact'] ?? json['contact_number']) as String? ?? '',
       website: json['website'] as String?,
+      latitude: _toDouble(json['latitude']),
+      longitude: _toDouble(json['longitude']),
     );
   }
-}
 
+  static double? _toDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString());
+  }
+}

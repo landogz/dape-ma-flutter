@@ -11,11 +11,90 @@ class AppStrings {
 
   // Navigation
   String get navHome => _t('Home', 'Tahanan');
-  String get navRehab => _t('Rehab', 'Rehab');
+  String get navRehab => _t('Services', 'Serbisyo');
   String get navSaved => _t('Saved', 'Naka-save');
   String get navDiary => _t('Diary', 'Talaarawan');
   String get navBible => _t('Bible', 'Bibliya');
   String get navAccount => _t('Account', 'Account');
+
+  // DDB Services
+  String get ddbServicesTitle => _t('DDB Services', 'Mga Serbisyo ng DDB');
+  String get ddbServicesSubtitle => _t(
+        'Browse DDB trainings, rehab centers, and song contest entries.',
+        'Tingnan ang mga training, rehab center, at song contest ng DDB.',
+      );
+  String get trainingsTitle => _t('Trainings', 'Mga Training');
+  String get trainingsSubtitle => _t(
+        'Upcoming capacity-building and preventive education programs.',
+        'Mga paparating na capacity-building at preventive education programs.',
+      );
+  String get rehabCentersSubtitle => _t(
+        'Find treatment and rehabilitation facilities near you.',
+        'Maghanap ng treatment at rehabilitation facilities.',
+      );
+  String get songContestTitle =>
+      _t('Playlist / Song Contest', 'Playlist / Song Contest');
+  String get songContestSubtitle => _t(
+        'Join open contests, submit your entry, and see winners.',
+        'Sumali sa open contests, mag-submit ng entry, at tingnan ang mga panalo.',
+      );
+  String get songContestDetailTitle =>
+      _t('Contest details', 'Detalye ng contest');
+  String get aboutEntry => _t('About this entry', 'Tungkol sa entry');
+  String get themeLabel => _t('Theme', 'Tema');
+  String get lyricsLabel => _t('Lyrics', 'Lyrics');
+  String get playlistType => _t('Playlist', 'Playlist');
+  String get songWritingType => _t('Song writing', 'Pagsulat ng kanta');
+  String get allEntryTypes => _t('All types', 'Lahat ng uri');
+  String get searchSongContestHint =>
+      _t('Search contests...', 'Maghanap ng contest...');
+  String get noSongContestFound =>
+      _t('No contests found', 'Walang nahanap na contest');
+  String get openOnYoutube => _t('Open on YouTube', 'Buksan sa YouTube');
+  String get openMediaLink => _t('Open media link', 'Buksan ang media link');
+  String get acceptingEntries =>
+      _t('Accepting entries', 'Tumanggap ng entries');
+  String get contestRules => _t('Rules', 'Mga patakaran');
+  String get yourEntryStatus => _t('Your entry', 'Ang iyong entry');
+  String get submitContestEntry =>
+      _t('Submit your entry', 'I-submit ang iyong entry');
+  String get publishedEntries =>
+      _t('Published entries', 'Mga na-publish na entry');
+  String get noPublishedEntriesYet => _t(
+        'No published entries yet. Submit yours for admin review.',
+        'Wala pang na-publish na entry. Mag-submit para ma-review ng admin.',
+      );
+  String get entrySubmittedForReview => _t(
+        'Entry submitted for admin review.',
+        'Naipasa ang entry para sa review ng admin.',
+      );
+  String get entrySubmitFailed => _t(
+        'Unable to submit entry. Please try again.',
+        'Hindi maipasa ang entry. Subukan muli.',
+      );
+  String get entryTypeLabel => _t('Entry type', 'Uri ng entry');
+  String get entryTitleLabel => _t('Title', 'Pamagat');
+  String get artistNameLabel => _t('Artist / Creator name', 'Pangalan ng artist / creator');
+  String get mediaUrlLabel => _t('Media URL', 'Media URL');
+  String get regionOptionalLabel => _t('Region (optional)', 'Rehiyon (opsyonal)');
+  String get descriptionOptionalLabel =>
+      _t('Description (optional)', 'Deskripsyon (opsyonal)');
+  String get requiredField => _t('This field is required', 'Kinakailangan ang field na ito');
+  String get trainingDetailTitle => _t('Training details', 'Detalye ng training');
+  String get aboutTraining => _t('About this training', 'Tungkol sa training');
+  String get scheduleLabel => _t('Schedule', 'Iskedyul');
+  String get timeLabel => _t('Time', 'Oras');
+  String get venueLabel => _t('Venue', 'Lugar');
+  String get organizerLabel => _t('Organizer', 'Tagapag-organisa');
+  String get slotsLabel => _t('Slots', 'Mga slot');
+  String get contactLabel => _t('Contact', 'Contact');
+  String get registerOrLearnMore =>
+      _t('Register / Learn more', 'Magparehistro / Alamin pa');
+  String get searchTrainingsHint =>
+      _t('Search trainings...', 'Maghanap ng training...');
+  String get allCategories => _t('All categories', 'Lahat ng kategorya');
+  String get noTrainingsFound =>
+      _t('No trainings found', 'Walang nahanap na training');
 
   // Home
   String get welcomeBack => _t('Welcome back,', 'Maligayang pagbabalik,');

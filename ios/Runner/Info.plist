@@ -68,5 +68,13 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to set your profile picture.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>https</string>
+		<string>http</string>
+		<string>tel</string>
+		<string>comgooglemaps</string>
+		<string>googlechromes</string>
+	</array>
 </dict>
 </plist>

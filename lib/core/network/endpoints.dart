@@ -4,6 +4,8 @@ class Endpoints {
 
   static const posts = '/posts';
   static const rehabCenters = '/rehab-centers';
+  static const trainings = '/trainings';
+  static const songContest = '/song-contest';
   static const search = '/search';
   static const analyticsEvents = '/analytics/events';
   static const login = '/auth/login';
@@ -15,12 +17,16 @@ class Endpoints {
   static const forgotPassword = '/auth/forgot-password';
   static const bookmarks = '/bookmarks';
   static const reviews = '/reviews';
+  static const notifications = '/notifications';
+  static const notificationsSummary = '/notifications/summary';
+  static const notificationsReadAll = '/notifications/read-all';
   static const dailyVerseToday = '/daily-verse/today';
   static const bibleBooks = '/bible/books';
   static const biblePassage = '/bible/passage';
   static const diaryEntries = '/diary-entries';
   static const diaryToday = '/diary-entries/today';
 
+  static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';
 
   static String postDetail(int postId) => '/posts/$postId';
@@ -29,9 +35,14 @@ class Endpoints {
   static String postComment(int postId, int commentId) =>
       '/posts/$postId/comments/$commentId';
   static String postReviews(int postId) => '/posts/$postId/reviews';
+  static String trainingDetail(int id) => '/trainings/$id';
+  static String songContestDetail(int id) => '/song-contest/$id';
+  static String songContestSubmit(int id) => '/song-contest/$id/entries';
+  static String songContestMyEntry(int id) => '/song-contest/$id/my-entry';
 
   static String postsByCategory(String slug) => '$posts?category=$slug';
   static String rehabByRegion(String region) => '$rehabCenters?region=$region';
+  static String trainingsByRegion(String region) => '$trainings?region=$region';
   static String searchQuery(String q, {String? category}) {
     final encodedQuery = Uri.encodeQueryComponent(q);
     final encodedCategory =

@@ -13,7 +13,9 @@ import '../bible/bible_home_screen.dart';
 import '../bookmarks/bookmarks_screen.dart';
 import '../chat/botpress_chat_screen.dart';
 import '../diary/diary_list_screen.dart';
-import '../rehab_centers/rehab_centers_screen.dart';
+import '../notifications/notifications_screen.dart';
+import '../notifications/notifications_service.dart';
+import '../ddb_services/ddb_services_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../post_detail/post_detail_screen.dart';
 import 'widgets/category_tabs.dart';
@@ -37,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Set<int> _bookmarkedIds = {};
   String? _userName;
   String? _userProfileImageUrl;
+  int _unreadNotifications = 0;
 
   final _searchController = TextEditingController();
 
@@ -47,10 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_isLoggedIn) {
         _loadBookmarkedIds();
         _loadUserProfile();
+        _loadUnreadNotifications();
       } else {
         setState(() {
           _userName = null;
           _userProfileImageUrl = null;
+          _unreadNotifications = 0;
         });
       }
     }
@@ -79,6 +84,16 @@ class _HomeScreenState extends State<HomeScreen> {
         _userName = null;
         _userProfileImageUrl = null;
       });
+    }
+  }
+
+  Future<void> _loadUnreadNotifications() async {
+    if (!_isLoggedIn) return;
+    try {
+      final count = await NotificationsService.fetchUnreadCount();
+      if (mounted) setState(() => _unreadNotifications = count);
+    } catch (_) {
+      if (mounted) setState(() => _unreadNotifications = 0);
     }
   }
 
@@ -279,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() => _currentTabIndex = index);
     if (index == 1) {
       Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const RehabCentersScreen()),
+        MaterialPageRoute(builder: (_) => const DdbServicesScreen()),
       );
     } else if (index == 2) {
       if (!_isLoggedIn) {
@@ -319,7 +334,11 @@ class _HomeScreenState extends State<HomeScreen> {
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       ).then((_) => _refreshAuthState());
     } else {
-      // TODO: Navigate to notifications screen when implemented
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+          )
+          .then((_) => _loadUnreadNotifications());
     }
   }
 
@@ -407,10 +426,22 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       IconButton(
                         onPressed: _onNotificationTap,
-                        icon: Icon(
-                          Icons.notifications_none,
-                          color: AppColors.textPrimaryLight,
-                          size: 26,
+                        icon: Badge(
+                          isLabelVisible: _unreadNotifications > 0,
+                          label: Text(
+                            _unreadNotifications > 99
+                                ? '99+'
+                                : '$_unreadNotifications',
+                            style: const TextStyle(fontSize: 10),
+                          ),
+                          backgroundColor: AppColors.accentRed,
+                          child: Icon(
+                            _unreadNotifications > 0
+                                ? Icons.notifications
+                                : Icons.notifications_none,
+                            color: AppColors.textPrimaryLight,
+                            size: 26,
+                          ),
                         ),
                       ),
                     ],
@@ -522,7 +553,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: () => _onBottomTabTap(0),
               ),
               _NavItem(
-                icon: Icons.local_hospital_outlined,
+                icon: Icons.apps_outlined,
                 label: l10n.navRehab,
                 selected: _currentTabIndex == 1,
                 onTap: () => _onBottomTabTap(1),

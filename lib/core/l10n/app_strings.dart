@@ -38,6 +38,46 @@ class AppStrings {
         'Join open contests, submit your entry, and see winners.',
         'Sumali sa open contests, mag-submit ng entry, at tingnan ang mga panalo.',
       );
+  String get posterContestTitle =>
+      _t('Poster-Making Contest', 'Poster-Making Contest');
+  String get posterContestSubtitle => _t(
+        'Submit original advocacy posters for DDB review.',
+        'Mag-submit ng orihinal na advocacy poster para sa review ng DDB.',
+      );
+  String get posterContestDetailTitle =>
+      _t('Poster contest details', 'Detalye ng poster contest');
+  String get submitPosterEntry =>
+      _t('Submit your poster', 'I-submit ang iyong poster');
+  String get loginToSubmitPoster => _t(
+        'Sign in to submit your poster',
+        'Mag-sign in para mag-submit ng poster',
+      );
+  String get creatorNameLabel =>
+      _t('Creator name', 'Pangalan ng creator');
+  String get posterImageLabel =>
+      _t('Poster image', 'Larawan ng poster');
+  String get pickPosterImage =>
+      _t('Choose poster from gallery', 'Pumili ng poster mula sa gallery');
+  String get orPosterImageUrl =>
+      _t('Or paste image URL', 'O i-paste ang image URL');
+  String get publishedPosters =>
+      _t('Published posters', 'Mga na-publish na poster');
+  String get noPublishedPostersYet => _t(
+        'No published posters yet. Submit yours for admin review.',
+        'Wala pang na-publish na poster. Mag-submit para ma-review ng admin.',
+      );
+  String get posterSubmittedForReview => _t(
+        'Poster submitted for admin review.',
+        'Naipasa ang poster para sa review ng admin.',
+      );
+  String get posterSubmitFailed => _t(
+        'Unable to submit poster. Please try again.',
+        'Hindi maipasa ang poster. Subukan muli.',
+      );
+  String get searchPosterContestHint =>
+      _t('Search poster contests...', 'Maghanap ng poster contest...');
+  String get noPosterContestFound =>
+      _t('No poster contests found', 'Walang nahanap na poster contest');
   String get songContestDetailTitle =>
       _t('Contest details', 'Detalye ng contest');
   String get aboutEntry => _t('About this entry', 'Tungkol sa entry');

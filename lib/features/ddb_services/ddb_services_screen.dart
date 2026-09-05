@@ -4,6 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../rehab_centers/rehab_centers_screen.dart';
 import '../song_contest/song_contest_screen.dart';
+import '../poster_contest/poster_contest_screen.dart';
 import '../trainings/trainings_screen.dart';
 
 class DdbServicesScreen extends StatelessWidget {
@@ -59,6 +60,19 @@ class DdbServicesScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SongContestScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _ServiceTile(
+              icon: Icons.image_outlined,
+              title: l10n.posterContestTitle,
+              subtitle: l10n.posterContestSubtitle,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const PosterContestScreen(),
+                  ),
                 );
               },
             ),

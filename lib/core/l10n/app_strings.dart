@@ -95,6 +95,23 @@ class AppStrings {
       _t('No video contests found', 'Walang nahanap na video contest');
   String get pasteVideoUrl =>
       _t('Paste video URL', 'I-paste ang video URL');
+  String get iecMaterialsTitle =>
+      _t('IEC Materials (Animated)', 'IEC Materials (Animated)');
+  String get iecMaterialsSubtitle => _t(
+        'Browse animated IEC GIFs, images, and advocacy clips.',
+        'Tingnan ang animated IEC GIF, larawan, at advocacy clips.',
+      );
+  String get iecMaterialDetailTitle =>
+      _t('IEC material', 'IEC material');
+  String get searchIecMaterialsHint =>
+      _t('Search IEC materials...', 'Maghanap ng IEC materials...');
+  String get noIecMaterialsFound =>
+      _t('No IEC materials found', 'Walang nahanap na IEC materials');
+  String get allTopics => _t('All topics', 'Lahat ng topic');
+  String get allMediaTypes => _t('All media', 'Lahat ng media');
+  String get aboutIecMaterial =>
+      _t('About this material', 'Tungkol sa material na ito');
+  String get tapToViewIec => _t('Tap to view', 'I-tap para tingnan');
   String get creatorNameLabel =>
       _t('Creator name', 'Pangalan ng creator');
   String get posterImageLabel =>

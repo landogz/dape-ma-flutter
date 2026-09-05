@@ -7,6 +7,7 @@ import '../song_contest/song_contest_screen.dart';
 import '../poster_contest/poster_contest_screen.dart';
 import '../trainings/trainings_screen.dart';
 import '../video_contest/video_contest_screen.dart';
+import '../iec_materials/iec_materials_screen.dart';
 
 class DdbServicesScreen extends StatelessWidget {
   const DdbServicesScreen({super.key});
@@ -39,6 +40,19 @@ class DdbServicesScreen extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const TrainingsScreen()),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+            _ServiceTile(
+              icon: Icons.animation_outlined,
+              title: l10n.iecMaterialsTitle,
+              subtitle: l10n.iecMaterialsSubtitle,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const IecMaterialsScreen(),
+                  ),
                 );
               },
             ),

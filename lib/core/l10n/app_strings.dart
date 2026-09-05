@@ -52,6 +52,49 @@ class AppStrings {
         'Sign in to submit your poster',
         'Mag-sign in para mag-submit ng poster',
       );
+  String get videoContestTitle =>
+      _t('Video-Making Contest', 'Video-Making Contest');
+  String get videoContestSubtitle => _t(
+        'Submit original advocacy videos via YouTube or video URL.',
+        'Mag-submit ng orihinal na advocacy video via YouTube o video URL.',
+      );
+  String get videoContestDetailTitle =>
+      _t('Video contest details', 'Detalye ng video contest');
+  String get submitVideoEntry =>
+      _t('Submit your video', 'I-submit ang iyong video');
+  String get loginToSubmitVideo => _t(
+        'Sign in to submit your video',
+        'Mag-sign in para mag-submit ng video',
+      );
+  String get videoUrlLabel => _t('YouTube / video URL', 'YouTube / video URL');
+  String get videoUrlHint => _t(
+        'Paste a YouTube or public video link',
+        'I-paste ang YouTube o public video link',
+      );
+  String get videoUrlInvalid => _t(
+        'Enter a valid http(s) URL',
+        'Maglagay ng wastong http(s) URL',
+      );
+  String get publishedVideos =>
+      _t('Published videos', 'Mga na-publish na video');
+  String get noPublishedVideosYet => _t(
+        'No published videos yet. Submit yours for admin review.',
+        'Wala pang na-publish na video. Mag-submit para ma-review ng admin.',
+      );
+  String get videoSubmittedForReview => _t(
+        'Video submitted for admin review.',
+        'Naipasa ang video para sa review ng admin.',
+      );
+  String get videoSubmitFailed => _t(
+        'Unable to submit video. Please try again.',
+        'Hindi maipasa ang video. Subukan muli.',
+      );
+  String get searchVideoContestHint =>
+      _t('Search video contests...', 'Maghanap ng video contest...');
+  String get noVideoContestFound =>
+      _t('No video contests found', 'Walang nahanap na video contest');
+  String get pasteVideoUrl =>
+      _t('Paste video URL', 'I-paste ang video URL');
   String get creatorNameLabel =>
       _t('Creator name', 'Pangalan ng creator');
   String get posterImageLabel =>

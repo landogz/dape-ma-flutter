@@ -7,6 +7,7 @@ class Endpoints {
   static const trainings = '/trainings';
   static const songContest = '/song-contest';
   static const posterContest = '/poster-contest';
+  static const videoContest = '/video-contest';
   static const search = '/search';
   static const analyticsEvents = '/analytics/events';
   static const login = '/auth/login';
@@ -43,6 +44,9 @@ class Endpoints {
   static String posterContestDetail(int id) => '/poster-contest/$id';
   static String posterContestSubmit(int id) => '/poster-contest/$id/entries';
   static String posterContestMyEntry(int id) => '/poster-contest/$id/my-entry';
+  static String videoContestDetail(int id) => '/video-contest/$id';
+  static String videoContestSubmit(int id) => '/video-contest/$id/entries';
+  static String videoContestMyEntry(int id) => '/video-contest/$id/my-entry';
 
   static String postsByCategory(String slug) => '$posts?category=$slug';
   static String rehabByRegion(String region) => '$rehabCenters?region=$region';

@@ -84,11 +84,24 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
                       const SizedBox(height: 8),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          l10n.bibleLanguageNote,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondaryLight,
-                              ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.kidListoSaysTitle,
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: AppColors.primaryBlue,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              l10n.bibleLanguageNote,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textSecondaryLight,
+                                  ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

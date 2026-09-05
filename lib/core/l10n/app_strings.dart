@@ -14,7 +14,7 @@ class AppStrings {
   String get navRehab => _t('Services', 'Serbisyo');
   String get navSaved => _t('Saved', 'Naka-save');
   String get navDiary => _t('Diary', 'Talaarawan');
-  String get navBible => _t('Bible', 'Bibliya');
+  String get navBible => _t('Kid Listo', 'Kid Listo');
   String get navAccount => _t('Account', 'Account');
 
   // DDB Services
@@ -366,11 +366,19 @@ class AppStrings {
 
   String authorPost(String name) => _t("$name's Post", 'Post ni $name');
 
-  // Daily verse
-  String get dailyVerseTitle => _t('Verse of the Day', 'Talatang Araw-araw');
+  // Daily verse / Kid Listo Says
+  String get dailyVerseTitle => _t('Kid Listo Says', 'Kid Listo Says');
+  String get kidListoSaysTitle => _t('Kid Listo Says', 'Kid Listo Says');
+  String get todaysScripture => _t("Today's scripture", 'Talata ngayon');
+  String kidListoDayLabel(int day, int total) => _t(
+        'Day $day of $total',
+        'Araw $day sa $total',
+      );
   String get skip => _t('Skip', 'Laktawan');
   String get continueToApp => _t('Continue to app', 'Magpatuloy sa app');
   String get openBible => _t('Open Bible', 'Buksan ang Bibliya');
+  String get openKidListoBible =>
+      _t('Open Kid Listo Bible', 'Buksan ang Kid Listo Bible');
   String get dailyVerseFallback => _t(
         'Trust in the Lord with all your heart.',
         'Manalig ka sa Panginoon ng buong puso mo.',
@@ -378,7 +386,7 @@ class AppStrings {
   String get dailyVerseReferenceFallback => _t('Proverbs 3:5', 'Kawikaan 3:5');
 
   // Bible
-  String get bibleTitle => _t('Holy Bible', 'Banal na Bibliya');
+  String get bibleTitle => _t('Kid Listo Says · Bible', 'Kid Listo Says · Bibliya');
   String get searchBibleBooks => _t('Search books...', 'Maghanap ng aklat...');
   String get oldTestament => _t('Old Testament', 'Lumang Tipan');
   String get newTestament => _t('New Testament', 'Bagong Tipan');
@@ -386,8 +394,8 @@ class AppStrings {
   String get bibleLoadFailed =>
       _t('Could not load passage. Try again.', 'Hindi ma-load ang talata. Subukan muli.');
   String get bibleLanguageNote => _t(
-        'Bible text follows your app language (English or Tagalog).',
-        'Sinusunod ng Bibliya ang wika ng app (English o Tagalog).',
+        'Kid Listo Bible text follows your app language (English or Tagalog).',
+        'Sinusunod ng Kid Listo Bible ang wika ng app (English o Tagalog).',
       );
   String chaptersLabel(int count) => _t(
         '$count chapters',

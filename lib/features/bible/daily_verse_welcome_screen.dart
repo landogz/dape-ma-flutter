@@ -22,24 +22,35 @@ class DailyVerseWelcomeScreen extends StatefulWidget {
 
 class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
   bool _loading = true;
+  String _brand = 'Kid Listo Says';
+  String _brandTagline = '';
   String _reference = '';
   String _verseText = '';
+  String _kidMessage = '';
   String _translation = '';
+  int _dayOfYear = 0;
+  int _totalDays = 365;
 
   @override
   void initState() {
     super.initState();
-    _loadVerse();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadVerse());
   }
 
   Future<void> _loadVerse() async {
     try {
-      final verse = await DailyVerseService.fetchToday();
+      final locale = LocaleScope.of(context).locale.code;
+      final verse = await DailyVerseService.fetchToday(locale: locale);
       if (!mounted) return;
       setState(() {
+        _brand = verse?.brand ?? 'Kid Listo Says';
+        _brandTagline = verse?.brandTagline ?? '';
         _reference = verse?.reference ?? '';
         _verseText = verse?.verseText ?? '';
+        _kidMessage = verse?.kidListoMessage ?? '';
         _translation = verse?.translation ?? '';
+        _dayOfYear = verse?.dayOfYear ?? 0;
+        _totalDays = verse?.totalDays ?? 365;
         _loading = false;
       });
     } catch (_) {
@@ -91,7 +102,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.dailyVerseTitle,
+                            _brand.isNotEmpty ? _brand : l10n.kidListoSaysTitle,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -117,6 +128,30 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                     ),
                   ],
                 ),
+                if (_dayOfYear > 0) ...[
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentYellow,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l10n.kidListoDayLabel(_dayOfYear, _totalDays),
+                        style: const TextStyle(
+                          color: AppColors.secondaryBlue,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.all(24),
@@ -133,48 +168,27 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                   ),
                   child: _loading
                       ? const SizedBox(
-                          height: 120,
+                          height: 140,
                           child: Center(child: CircularProgressIndicator()),
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
-                              Icons.menu_book_rounded,
-                              color: AppColors.primaryBlue.withValues(alpha: 0.85),
-                              size: 32,
-                            ),
-                            const SizedBox(height: 16),
                             Text(
-                              _verseText.isNotEmpty
-                                  ? _verseText
-                                  : l10n.dailyVerseFallback,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    height: 1.5,
-                                    color: AppColors.textPrimaryLight,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _reference.isNotEmpty
-                                  ? _reference
-                                  : l10n.dailyVerseReferenceFallback,
+                              l10n.kidListoSaysTitle,
                               style: Theme.of(context)
                                   .textTheme
                                   .labelLarge
                                   ?.copyWith(
                                     color: AppColors.primaryBlue,
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.3,
                                   ),
                             ),
-                            if (_translation.isNotEmpty) ...[
+                            if (_brandTagline.isNotEmpty) ...[
                               const SizedBox(height: 4),
                               Text(
-                                _translation,
+                                _brandTagline,
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodySmall
@@ -183,6 +197,82 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                     ),
                               ),
                             ],
+                            const SizedBox(height: 14),
+                            Text(
+                              _kidMessage.isNotEmpty
+                                  ? _kidMessage
+                                  : l10n.dailyVerseFallback,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    height: 1.45,
+                                    color: AppColors.textPrimaryLight,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryBlue.withValues(alpha: 0.06),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.todaysScripture,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelMedium
+                                        ?.copyWith(
+                                          color: AppColors.primaryBlue,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _verseText.isNotEmpty
+                                        ? _verseText
+                                        : l10n.dailyVerseFallback,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          height: 1.5,
+                                          color: AppColors.textPrimaryLight,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    _reference.isNotEmpty
+                                        ? _reference
+                                        : l10n.dailyVerseReferenceFallback,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelLarge
+                                        ?.copyWith(
+                                          color: AppColors.primaryBlue,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                  ),
+                                  if (_translation.isNotEmpty) ...[
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      _translation,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondaryLight,
+                                          ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
                           ],
                         ),
                 ),
@@ -218,7 +308,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                       ),
                     ),
                     icon: const Icon(Icons.auto_stories_outlined),
-                    label: Text(l10n.openBible),
+                    label: Text(l10n.openKidListoBible),
                   ),
                 ),
               ],

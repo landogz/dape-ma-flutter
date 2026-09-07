@@ -1,0 +1,81 @@
+class Contest {
+  final int id;
+  final String category;
+  final String title;
+  final String? description;
+  final String? rules;
+  final String? theme;
+  final String? allowedEntryTypes;
+  final int? contestYear;
+  final String? submissionStartsAt;
+  final String? submissionEndsAt;
+  final String status;
+  final String? coverImageUrl;
+  final bool isOpenForSubmission;
+  final int entriesCount;
+  final int pendingCount;
+
+  Contest({
+    required this.id,
+    required this.category,
+    required this.title,
+    this.description,
+    this.rules,
+    this.theme,
+    this.allowedEntryTypes,
+    this.contestYear,
+    this.submissionStartsAt,
+    this.submissionEndsAt,
+    required this.status,
+    this.coverImageUrl,
+    required this.isOpenForSubmission,
+    required this.entriesCount,
+    required this.pendingCount,
+  });
+
+  bool get isSong => category.toLowerCase() == 'song';
+  bool get isPoster => category.toLowerCase() == 'poster';
+  bool get isVideo => category.toLowerCase() == 'video';
+
+  /// Show submit CTA for open contests; API still enforces the real window.
+  bool get canSubmitEntry =>
+      isOpenForSubmission || status.toLowerCase() == 'open';
+
+  factory Contest.fromJson(Map<String, dynamic> json) {
+    return Contest(
+      id: json['id'] is int
+          ? json['id'] as int
+          : int.tryParse('${json['id']}') ?? 0,
+      category: json['category'] as String? ?? 'song',
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String?,
+      rules: json['rules'] as String?,
+      theme: json['theme'] as String?,
+      allowedEntryTypes: json['allowed_entry_types'] as String?,
+      contestYear: json['contest_year'] is int
+          ? json['contest_year'] as int
+          : int.tryParse('${json['contest_year'] ?? ''}'),
+      submissionStartsAt: json['submission_starts_at']?.toString(),
+      submissionEndsAt: json['submission_ends_at']?.toString(),
+      status: json['status'] as String? ?? 'draft',
+      coverImageUrl: json['cover_image_url'] as String?,
+      isOpenForSubmission: _parseBool(json['is_open_for_submission']),
+      entriesCount: json['entries_count'] is int
+          ? json['entries_count'] as int
+          : int.tryParse('${json['entries_count'] ?? 0}') ?? 0,
+      pendingCount: json['pending_count'] is int
+          ? json['pending_count'] as int
+          : int.tryParse('${json['pending_count'] ?? 0}') ?? 0,
+    );
+  }
+}
+
+bool _parseBool(dynamic value, {bool defaultValue = false}) {
+  if (value == true || value == 1 || value == '1' || value == 'true') {
+    return true;
+  }
+  if (value == false || value == 0 || value == '0' || value == 'false') {
+    return false;
+  }
+  return defaultValue;
+}

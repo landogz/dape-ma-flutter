@@ -20,8 +20,29 @@ class AppStrings {
   // DDB Services
   String get ddbServicesTitle => _t('DDB Services', 'Mga Serbisyo ng DDB');
   String get ddbServicesSubtitle => _t(
-        'Browse DDB trainings, rehab centers, and song contest entries.',
-        'Tingnan ang mga training, rehab center, at song contest ng DDB.',
+        'Browse DDB trainings, rehab centers, IEC materials, and contests.',
+        'Tingnan ang mga training, rehab center, IEC materials, at contests ng DDB.',
+      );
+  String get contestsTitle => _t('Contests', 'Mga Contest');
+  String get contestsSubtitle => _t(
+        'Browse song, poster, and video contests in one place.',
+        'Tingnan ang song, poster, at video contests sa isang lugar.',
+      );
+  String get contestDetailTitle =>
+      _t('Contest details', 'Detalye ng contest');
+  String get searchContestsHint =>
+      _t('Search contests...', 'Maghanap ng contest...');
+  String get noContestsFound =>
+      _t('No contests found', 'Walang nahanap na contest');
+  String get contestCategoryAll => _t('All', 'Lahat');
+  String get contestCategorySong => _t('Song', 'Kanta');
+  String get contestCategoryPoster => _t('Poster', 'Poster');
+  String get contestCategoryVideo => _t('Video', 'Video');
+  String get posterImageUrlLabel =>
+      _t('Poster image URL', 'URL ng poster image');
+  String get mediaOrLyricsRequired => _t(
+        'Provide a media URL or lyrics.',
+        'Maglagay ng media URL o lyrics.',
       );
   String get trainingsTitle => _t('Trainings', 'Mga Training');
   String get trainingsSubtitle => _t(

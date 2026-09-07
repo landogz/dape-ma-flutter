@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
+import '../contests/contests_screen.dart';
 import '../rehab_centers/rehab_centers_screen.dart';
-import '../song_contest/song_contest_screen.dart';
-import '../poster_contest/poster_contest_screen.dart';
 import '../trainings/trainings_screen.dart';
-import '../video_contest/video_contest_screen.dart';
 import '../iec_materials/iec_materials_screen.dart';
 
 class DdbServicesScreen extends StatelessWidget {
@@ -69,38 +67,12 @@ class DdbServicesScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _ServiceTile(
-              icon: Icons.music_note_outlined,
-              title: l10n.songContestTitle,
-              subtitle: l10n.songContestSubtitle,
+              icon: Icons.emoji_events_outlined,
+              title: l10n.contestsTitle,
+              subtitle: l10n.contestsSubtitle,
               onTap: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SongContestScreen()),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            _ServiceTile(
-              icon: Icons.image_outlined,
-              title: l10n.posterContestTitle,
-              subtitle: l10n.posterContestSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const PosterContestScreen(),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 12),
-            _ServiceTile(
-              icon: Icons.videocam_outlined,
-              title: l10n.videoContestTitle,
-              subtitle: l10n.videoContestSubtitle,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const VideoContestScreen(),
-                  ),
+                  MaterialPageRoute(builder: (_) => const ContestsScreen()),
                 );
               },
             ),

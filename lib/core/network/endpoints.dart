@@ -5,8 +5,12 @@ class Endpoints {
   static const posts = '/posts';
   static const rehabCenters = '/rehab-centers';
   static const trainings = '/trainings';
+  static const contests = '/contests';
+  /// Deprecated: use [contests]. Kept for unused legacy screens.
   static const songContest = '/song-contest';
+  /// Deprecated: use [contests]. Kept for unused legacy screens.
   static const posterContest = '/poster-contest';
+  /// Deprecated: use [contests]. Kept for unused legacy screens.
   static const videoContest = '/video-contest';
   static const iecMaterials = '/iec-materials';
   static const search = '/search';
@@ -39,14 +43,26 @@ class Endpoints {
       '/posts/$postId/comments/$commentId';
   static String postReviews(int postId) => '/posts/$postId/reviews';
   static String trainingDetail(int id) => '/trainings/$id';
+  static String contestDetail(int id) => '/contests/$id';
+  static String contestSubmit(int id) => '/contests/$id/entries';
+  static String contestMyEntry(int id) => '/contests/$id/my-entry';
+  /// Deprecated: use [contestDetail].
   static String songContestDetail(int id) => '/song-contest/$id';
+  /// Deprecated: use [contestSubmit].
   static String songContestSubmit(int id) => '/song-contest/$id/entries';
+  /// Deprecated: use [contestMyEntry].
   static String songContestMyEntry(int id) => '/song-contest/$id/my-entry';
+  /// Deprecated: use [contestDetail].
   static String posterContestDetail(int id) => '/poster-contest/$id';
+  /// Deprecated: use [contestSubmit].
   static String posterContestSubmit(int id) => '/poster-contest/$id/entries';
+  /// Deprecated: use [contestMyEntry].
   static String posterContestMyEntry(int id) => '/poster-contest/$id/my-entry';
+  /// Deprecated: use [contestDetail].
   static String videoContestDetail(int id) => '/video-contest/$id';
+  /// Deprecated: use [contestSubmit].
   static String videoContestSubmit(int id) => '/video-contest/$id/entries';
+  /// Deprecated: use [contestMyEntry].
   static String videoContestMyEntry(int id) => '/video-contest/$id/my-entry';
   static String iecMaterialDetail(int id) => '/iec-materials/$id';
 

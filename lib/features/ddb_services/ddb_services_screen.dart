@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import '../contests/contests_screen.dart';
 import '../rehab_centers/rehab_centers_screen.dart';
 import '../trainings/trainings_screen.dart';
@@ -27,7 +28,7 @@ class DdbServicesScreen extends StatelessWidget {
             Text(
               l10n.ddbServicesSubtitle,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: context.textSecondary,
                   ),
             ),
             const SizedBox(height: 20),
@@ -99,7 +100,7 @@ class _ServiceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       elevation: 1,
       shadowColor: Colors.black.withOpacity(0.06),
       borderRadius: BorderRadius.circular(16),
@@ -128,14 +129,14 @@ class _ServiceTile extends StatelessWidget {
                       title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimaryLight,
+                            color: context.textPrimary,
                           ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondaryLight,
+                            color: context.textSecondary,
                           ),
                     ),
                   ],
@@ -143,7 +144,7 @@ class _ServiceTile extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color: AppColors.textSecondaryLight,
+                color: context.textSecondary,
               ),
             ],
           ),

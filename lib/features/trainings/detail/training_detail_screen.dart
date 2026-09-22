@@ -1,14 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/training.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
-class TrainingDetailScreen extends StatelessWidget {
+class TrainingDetailScreen extends StatefulWidget {
   final Training training;
 
   const TrainingDetailScreen({super.key, required this.training});
+
+  @override
+  State<TrainingDetailScreen> createState() => _TrainingDetailScreenState();
+}
+
+class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsClient.instance.trackTrainingJoin(widget.training.id);
+  }
 
   Future<void> _launchUrl(String raw) async {
     final uri = Uri.tryParse(raw);
@@ -30,6 +43,7 @@ class TrainingDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final training = widget.training;
 
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +59,7 @@ class TrainingDetailScreen extends StatelessWidget {
               training.title,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
+                    color: context.textPrimary,
                   ),
             ),
             const SizedBox(height: 12),
@@ -65,14 +79,14 @@ class TrainingDetailScreen extends StatelessWidget {
                 l10n.aboutTraining,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimaryLight,
+                      color: context.textPrimary,
                     ),
               ),
               const SizedBox(height: 8),
               Text(
                 training.description!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimaryLight,
+                      color: context.textPrimary,
                       height: 1.45,
                     ),
               ),
@@ -197,7 +211,7 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: AppColors.textSecondaryLight),
+          Icon(icon, size: 20, color: context.textSecondary),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
@@ -206,7 +220,7 @@ class _DetailRow extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: AppColors.textSecondaryLight,
+                        color: context.textSecondary,
                       ),
                 ),
                 const SizedBox(height: 2),
@@ -215,7 +229,7 @@ class _DetailRow extends StatelessWidget {
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isLink
                             ? AppColors.primaryBlue
-                            : AppColors.textPrimaryLight,
+                            : context.textPrimary,
                         decoration:
                             isLink ? TextDecoration.underline : null,
                       ),

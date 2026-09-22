@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class DiaryRichTextToolbar extends StatelessWidget {
   const DiaryRichTextToolbar({
@@ -77,8 +78,8 @@ class DiaryRichTextToolbar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        color: context.cardBackground,
+        border: Border.all(color: context.borderSubtle),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(

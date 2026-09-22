@@ -1,466 +1,184 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
-import '../../core/network/api_client.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
+import '../../core/utils/api_url.dart';
 import '../auth/forgot_password_screen.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
-import '../auth/widgets/auth_header.dart';
-import '../settings/widgets/language_picker_card.dart';
+import '../bookmarks/bookmarks_screen.dart';
+import '../diary/diary_list_screen.dart';
+import '../post_detail/post_detail_screen.dart';
+import '../post_engagement/post_engagement_service.dart';
+import '../settings/settings_hub_screen.dart';
+import 'edit_profile_screen.dart';
+import 'profile/profile_lists_screen.dart';
+import 'profile/profile_models.dart';
+import 'profile/profile_stats_service.dart';
+import 'widgets/profile_cards.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key});
+  const AccountScreen({super.key, this.embeddedInShell = false});
+
+  final bool embeddedInShell;
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
 }
 
 class _AccountScreenState extends State<AccountScreen> {
-  bool _checking = true;
+  bool _loading = true;
   bool _loggedIn = false;
-  String? _userName;
-  String? _userProfileImageUrl;
+  String _name = '';
+  String? _photoUrl;
+  String? _memberSince;
+  bool _isChampion = false;
+  int _lessons = 0;
+  int _articles = 0;
+  int _events = 0;
+  int _streak = 0;
+  List<ProfileBadge> _badges = const [];
+  // Kept for when Certificates / Gains are re-enabled.
+  // ignore: unused_field
+  List<ProfileCertificate> _certificates = const [];
+  // ignore: unused_field
+  List<ProfileGain> _gains = const [];
+  List<ProfileActivityItem> _lessonActivity = const [];
+  List<ProfileActivityItem> _articleActivity = const [];
+  List<ProfileActivityItem> _eventActivity = const [];
+  File? _pickedFile;
 
   @override
   void initState() {
     super.initState();
-    _checkAuth();
+    _load();
   }
 
-  Future<void> _checkAuth() async {
+  Future<void> _load() async {
     final token = await AuthService.getToken();
-    if (!mounted) return;
     final loggedIn = token != null && token.isNotEmpty;
-    setState(() {
-      _loggedIn = loggedIn;
-      _checking = false;
-    });
-    if (loggedIn) _loadProfile();
-  }
+    if (!loggedIn) {
+      if (!mounted) return;
+      setState(() {
+        _loggedIn = false;
+        _loading = false;
+        _name = '';
+        _photoUrl = null;
+        _memberSince = null;
+        _isChampion = false;
+        _lessons = 0;
+        _articles = 0;
+        _events = 0;
+        _streak = 0;
+        _badges = const [];
+        _certificates = const [];
+        _gains = const [];
+        _lessonActivity = const [];
+        _articleActivity = const [];
+        _eventActivity = const [];
+      });
+      return;
+    }
 
-  Future<void> _loadProfile() async {
     try {
-      final res = await AuthService.authedGet<Map<String, dynamic>>(Endpoints.me);
-      final data = res.data ?? <String, dynamic>{};
-      final user = data['data'] is Map<String, dynamic>
-          ? data['data'] as Map<String, dynamic>
-          : data;
-      if (mounted) {
-        setState(() {
-          _userName = user['name'] as String?;
-          _userProfileImageUrl = user['profile_image_url'] as String?;
-        });
+      final summary = await ProfileStatsService.instance.fetchSummary();
+      String? memberSince;
+      if (summary.memberSinceRaw != null) {
+        final parsed = DateTime.tryParse(summary.memberSinceRaw!);
+        if (parsed != null) {
+          memberSince = DateFormat.yMMMM().format(parsed);
+        }
       }
+
+      if (!mounted) return;
+      setState(() {
+        _loggedIn = true;
+        _name = summary.name;
+        _photoUrl = ApiUrl.resolve(summary.photoUrl);
+        _pickedFile = null;
+        _memberSince = memberSince;
+        _isChampion = summary.isChampion;
+        _lessons = summary.lessonsCompleted;
+        _articles = summary.articlesRead;
+        _events = summary.eventsJoined;
+        _streak = summary.dayStreak;
+        _badges = summary.badges;
+        _certificates = summary.certificates;
+        _gains = summary.gains;
+        _lessonActivity = summary.lessonActivity;
+        _articleActivity = summary.articleActivity;
+        _eventActivity = summary.eventActivity;
+        _loading = false;
+      });
     } catch (_) {
-      if (mounted) setState(() {
-        _userName = null;
-        _userProfileImageUrl = null;
+      if (!mounted) return;
+      setState(() {
+        _loggedIn = true;
+        _loading = false;
       });
     }
   }
 
-  Future<void> _logout() async {
-    try {
-      await AuthService.authedPost<Map<String, dynamic>>(Endpoints.logout);
-    } catch (_) {
-      // ignore API errors on logout
-    } finally {
-      await AuthService.logout();
-      if (mounted) {
-        setState(() {
-          _loggedIn = false;
-        });
-      }
-    }
+  Future<void> _open(Widget screen) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => screen),
+    );
+    if (mounted) await _load();
   }
 
-  void _showEditProfileSheet(BuildContext context) {
-    showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => _EditProfileSheet(
-        initialName: _userName ?? '',
-        currentPhotoUrl: _userProfileImageUrl,
-        onSave: (String name, File? photoFile) async {
-          try {
-            final token = await AuthService.getToken();
-            final client = ApiClient(token: token);
-            if (photoFile != null) {
-              final formData = FormData.fromMap({
-                'name': name,
-                'profile_photo': await MultipartFile.fromFile(
-                  photoFile.path,
-                  filename: photoFile.path.split(RegExp(r'[/\\]')).last,
-                ),
-              });
-              await client.put<Map<String, dynamic>>(
-                Endpoints.profileUpdate,
-                data: formData,
-              );
-            } else {
-              await AuthService.authedPut<Map<String, dynamic>>(
-                Endpoints.profileUpdate,
-                data: <String, dynamic>{'name': name},
-              );
-            }
-            if (mounted) Navigator.of(ctx).pop(true);
-          } catch (e) {
-            rethrow;
-          }
-        },
-      ),
-    ).then((success) {
-      if (success == true && mounted) {
-        _loadProfile();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.profileUpdated),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    });
-  }
-
-  void _showChangePasswordSheet(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => const _ChangePasswordSheet(),
-    ).then((_) {
-      if (mounted) _loadProfile();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _showFeatureUnavailable() async {
     final l10n = context.l10n;
-
-    return Scaffold(
-      backgroundColor: AppColors.lightBackground,
-      appBar: AppBar(
-        title: Text(l10n.accountTitle),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: AppColors.textPrimaryLight,
-      ),
-      body: SafeArea(
-        child: _checking
-            ? const Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.primaryBlue,
-                ),
-              )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 8),
-                    const AuthHeader(),
-                    const SizedBox(height: 20),
-                    const LanguagePickerCard(),
-                    const SizedBox(height: 20),
-                    if (_loggedIn) ...[
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFE5E7EB),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 28,
-                                  backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
-                                  backgroundImage: _userProfileImageUrl != null
-                                      ? NetworkImage(_userProfileImageUrl!)
-                                      : null,
-                                  child: _userProfileImageUrl == null
-                                      ? Text(
-                                          _userName != null && _userName!.isNotEmpty
-                                              ? _userName!.trim().substring(0, 1).toUpperCase()
-                                              : '?',
-                                          style: const TextStyle(
-                                            color: AppColors.primaryBlue,
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 22,
-                                          ),
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        _userName ?? l10n.youAreSignedIn,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.w600,
-                                              color: AppColors.textPrimaryLight,
-                                            ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        l10n.signedInHint,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: AppColors.textSecondaryLight,
-                                            ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: ElevatedButton.icon(
-                                onPressed: () => _showEditProfileSheet(context),
-                                icon: const Icon(Icons.person_rounded, size: 20),
-                                label: Text(l10n.editProfile),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryBlue,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: OutlinedButton.icon(
-                                onPressed: () => _showChangePasswordSheet(context),
-                                icon: const Icon(Icons.lock_rounded, size: 20),
-                                label: Text(l10n.changePassword),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.primaryBlue,
-                                  side: const BorderSide(color: AppColors.primaryBlue),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              height: 48,
-                              child: OutlinedButton.icon(
-                                onPressed: _logout,
-                                icon: const Icon(Icons.logout_rounded, size: 20),
-                                label: Text(l10n.logOut),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: AppColors.accentRed,
-                                  side: const BorderSide(
-                                    color: AppColors.accentRed,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ] else ...[
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: const Color(0xFFE5E7EB),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              l10n.welcomeTitle,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleLarge
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimaryLight,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.welcomeBody,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.textSecondaryLight,
-                                    height: 1.4,
-                                  ),
-                            ),
-                            const SizedBox(height: 24),
-                            SizedBox(
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final result =
-                                      await Navigator.of(context).push<bool>(
-                                    MaterialPageRoute(
-                                      builder: (_) => const LoginScreen(),
-                                    ),
-                                  );
-                                  if (mounted && result == true) {
-                                    _checkAuth();
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primaryBlue,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(l10n.login),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              height: 52,
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final result =
-                                      await Navigator.of(context).push<bool>(
-                                    MaterialPageRoute(
-                                      builder: (_) => const RegisterScreen(),
-                                    ),
-                                  );
-                                  if (mounted && result == true) {
-                                    _checkAuth();
-                                  }
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.secondaryBlue,
-                                  foregroundColor: Colors.white,
-                                  elevation: 0,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                child: Text(l10n.register),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Center(
-                              child: TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          const ForgotPasswordScreen(),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  l10n.forgotPassword,
-                                  style: TextStyle(
-                                    color: AppColors.primaryBlue,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 32),
-                  ],
-                ),
-              ),
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Text(l10n.featureUnavailableNow),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.gotIt),
+          ),
+        ],
       ),
     );
   }
-}
 
-class _EditProfileSheet extends StatefulWidget {
-  const _EditProfileSheet({
-    required this.initialName,
-    required this.currentPhotoUrl,
-    required this.onSave,
-  });
-
-  final String initialName;
-  final String? currentPhotoUrl;
-  final Future<void> Function(String name, File? photoFile) onSave;
-
-  @override
-  State<_EditProfileSheet> createState() => _EditProfileSheetState();
-}
-
-class _EditProfileSheetState extends State<_EditProfileSheet> {
-  late final TextEditingController _nameController;
-  File? _pickedFile;
-  bool _loading = false;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _nameController = TextEditingController(text: widget.initialName);
+  Future<void> _requireAuthThen(Widget screen) async {
+    if (!_loggedIn) {
+      await _open(const LoginScreen());
+      if (!_loggedIn || !mounted) return;
+    }
+    await _open(screen);
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
+  Future<void> _openPostActivity(ProfileActivityItem item) async {
+    try {
+      final Post post = await PostEngagementService.fetchPost(item.id);
+      if (!mounted) return;
+      await _open(PostDetailScreen(post: post));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.updateFailed)),
+      );
+    }
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickPhoto() async {
+    if (!_loggedIn) {
+      await _open(const LoginScreen());
+      return;
+    }
+
     final picker = ImagePicker();
     final xFile = await picker.pickImage(
       source: ImageSource.gallery,
@@ -468,333 +186,746 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
       maxHeight: 800,
       imageQuality: 85,
     );
-    if (xFile != null && mounted) {
-      setState(() {
-        _pickedFile = File(xFile.path);
-        _error = null;
+    if (xFile == null || !mounted) return;
+
+    final file = File(xFile.path);
+    setState(() => _pickedFile = file);
+
+    try {
+      // POST multipart — PHP does not reliably parse files on PUT.
+      final formData = FormData.fromMap({
+        if (_name.trim().isNotEmpty) 'name': _name.trim(),
+        'profile_photo': await MultipartFile.fromFile(
+          file.path,
+          filename: file.path.split(RegExp(r'[/\\]')).last,
+        ),
       });
-    }
-  }
-
-  Future<void> _submit() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) {
-      setState(() => _error = context.l10n.nameRequired);
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      await widget.onSave(name, _pickedFile);
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = e.toString().contains('422') || e.toString().contains('message')
-              ? context.l10n.updateFailed
-              : context.l10n.updateFailed;
-        });
-      }
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Container(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.editProfile,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryLight,
-                  ),
-            ),
-            const SizedBox(height: 20),
-            Center(
-              child: GestureDetector(
-                onTap: _loading ? null : _pickImage,
-                child: CircleAvatar(
-                  radius: 48,
-                  backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
-                  backgroundImage: _pickedFile != null
-                      ? FileImage(_pickedFile!)
-                      : (widget.currentPhotoUrl != null
-                          ? NetworkImage(widget.currentPhotoUrl!) as ImageProvider
-                          : null),
-                  child: _pickedFile == null && widget.currentPhotoUrl == null
-                      ? const Icon(
-                          Icons.person_rounded,
-                          size: 48,
-                          color: AppColors.primaryBlue,
-                        )
-                      : null,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Center(
-              child: TextButton.icon(
-                onPressed: _loading ? null : _pickImage,
-                icon: const Icon(Icons.photo_camera_rounded, size: 20),
-                label: Text(l10n.changePhoto),
-                style: TextButton.styleFrom(
-                  foregroundColor: AppColors.primaryBlue,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _nameController,
-              decoration: InputDecoration(
-                labelText: l10n.name,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                prefixIcon: const Icon(Icons.person_outline),
-              ),
-              textCapitalization: TextCapitalization.words,
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _error!,
-                style: const TextStyle(color: AppColors.accentRed, fontSize: 13),
-              ),
-            ],
-            const SizedBox(height: 24),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _loading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                      )
-                    : Text(l10n.save),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChangePasswordSheet extends StatefulWidget {
-  const _ChangePasswordSheet();
-
-  @override
-  State<_ChangePasswordSheet> createState() => _ChangePasswordSheetState();
-}
-
-class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
-  final _currentController = TextEditingController();
-  final _newController = TextEditingController();
-  final _confirmController = TextEditingController();
-  bool _obscureCurrent = true;
-  bool _obscureNew = true;
-  bool _obscureConfirm = true;
-  bool _loading = false;
-  String? _error;
-
-  Future<void> _submit() async {
-    final current = _currentController.text;
-    final newPass = _newController.text;
-    final confirm = _confirmController.text;
-    if (current.isEmpty) {
-      setState(() => _error = context.l10n.currentPasswordRequired);
-      return;
-    }
-    if (newPass.length < 6) {
-      setState(() => _error = context.l10n.passwordMinLength);
-      return;
-    }
-    if (newPass != confirm) {
-      setState(() => _error = context.l10n.passwordsDoNotMatch);
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      await AuthService.authedPut<Map<String, dynamic>>(
-        Endpoints.changePassword,
-        data: <String, dynamic>{
-          'current_password': current,
-          'password': newPass,
-          'password_confirmation': confirm,
-        },
+      final res = await AuthService.authedPost<Map<String, dynamic>>(
+        Endpoints.profileUpdate,
+        data: formData,
       );
-      if (mounted) {
-        Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.passwordUpdated),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-          _error = context.l10n.passwordUpdateFailed;
-        });
-      }
+      final root = res.data ?? <String, dynamic>{};
+      final data = root['data'] is Map<String, dynamic>
+          ? root['data'] as Map<String, dynamic>
+          : root;
+      final uploadedUrl = ApiUrl.resolve(data['profile_image_url'] as String?);
+
+      if (!mounted) return;
+      setState(() {
+        _pickedFile = null;
+        if (uploadedUrl != null) _photoUrl = uploadedUrl;
+      });
+      await _load();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.profileUpdated),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _pickedFile = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.updateFailed),
+          backgroundColor: AppColors.accentRed,
+        ),
+      );
     }
   }
 
-  @override
-  void dispose() {
-    _currentController.dispose();
-    _newController.dispose();
-    _confirmController.dispose();
-    super.dispose();
+  String get _firstName {
+    final parts = _name.split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return context.l10n.youAreSignedIn;
+    return parts.first;
+  }
+
+  String get _handle {
+    final base = _firstName
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]'), '');
+    if (base.isEmpty) return '@member';
+    return '@$base';
+  }
+
+  /// Setup prompt for new accounts: photo, name, learning activity, badge/streak.
+  double get _profileCompleteness {
+    if (!_loggedIn) return 0;
+    var score = 0.0;
+    if (_name.trim().isNotEmpty) score += 0.25;
+    if (_photoUrl != null || _pickedFile != null) score += 0.30;
+    if (_lessons + _articles + _events > 0) score += 0.25;
+    if (_badges.any((b) => b.earned) || _streak > 0) score += 0.20;
+    return score.clamp(0.0, 1.0);
+  }
+
+  List<ProfileBadge> get _displayBadges {
+    if (_badges.isEmpty) return const [];
+    // Prefer earned first, then locked — keeps progress visible and fills the row.
+    final earned = _badges.where((b) => b.earned).toList();
+    final locked = _badges.where((b) => !b.earned).toList();
+    return [...earned, ...locked];
+  }
+
+  int get _earnedBadgeCount => _badges.where((b) => b.earned).length;
+
+  IconData _badgeIcon(String key) {
+    switch (key) {
+      case 'healthy_decision_maker':
+        return Icons.search_rounded;
+      case 'empowered_peer':
+        return Icons.handshake_rounded;
+      case 'stress_buster':
+        return Icons.bolt_rounded;
+      case 'dape_champion':
+        return Icons.emoji_events_rounded;
+      default:
+        return Icons.star_rounded;
+    }
+  }
+
+  Color _badgeColor(String hex) {
+    final cleaned = hex.replaceAll('#', '');
+    if (cleaned.length != 6) return AppColors.primaryBlue;
+    return Color(int.parse('FF$cleaned', radix: 16));
+  }
+
+  Widget _avatarWidget(BuildContext context) {
+    final avatar = CircleAvatar(
+      radius: 42,
+      backgroundColor: context.pageBackground,
+      backgroundImage: _pickedFile != null
+          ? FileImage(_pickedFile!)
+          : (_photoUrl != null ? NetworkImage(_photoUrl!) as ImageProvider : null),
+      child: _pickedFile == null && _photoUrl == null
+          ? Icon(Icons.person_rounded, size: 44, color: Colors.grey.shade400)
+          : null,
+    );
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        if (_loggedIn)
+          ProfileCompletenessAvatar(
+            progress: _profileCompleteness,
+            child: avatar,
+          )
+        else
+          avatar,
+        Positioned(
+          right: 0,
+          bottom: 0,
+          child: Material(
+            color: Colors.white,
+            shape: const CircleBorder(),
+            elevation: 2,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: _pickPhoto,
+              child: const Padding(
+                padding: EdgeInsets.all(7),
+                child: Icon(
+                  Icons.photo_camera_rounded,
+                  size: 16,
+                  color: AppColors.secondaryBlue,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final inputDecoration = InputDecoration(
-      filled: true,
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    );
-    return Container(
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 24,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.changePassword,
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimaryLight,
+    final topPad = MediaQuery.of(context).padding.top;
+    final completenessPct = (_profileCompleteness * 100).round();
+    final bottomSafe = MediaQuery.of(context).padding.bottom;
+
+    return Scaffold(
+      backgroundColor: context.pageBackground,
+      body: _loading
+          ? const Center(
+              child: CircularProgressIndicator(color: AppColors.primaryBlue),
+            )
+          : RefreshIndicator(
+              color: AppColors.primaryBlue,
+              onRefresh: _load,
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.fromLTRB(8, topPad + 4, 8, 28),
+                          decoration: const BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xFF123A60),
+                                Color(0xFF055498),
+                                Color(0xFF7C3AED),
+                              ],
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                children: [
+                                  if (!widget.embeddedInShell)
+                                    IconButton(
+                                      onPressed: () =>
+                                          Navigator.of(context).maybePop(),
+                                      icon: const Icon(
+                                        Icons.arrow_back_ios_new_rounded,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    )
+                                  else
+                                    const SizedBox(width: 48),
+                                  Expanded(
+                                    child: Text(
+                                      l10n.myProfileTitle,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 48),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 16),
+                                child: Row(
+                                  children: [
+                                    _avatarWidget(context),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: _loggedIn
+                                          ? Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () => _open(
+                                                    const EditProfileScreen(),
+                                                  ),
+                                                  child: FittedBox(
+                                                    fit: BoxFit.scaleDown,
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: Text(
+                                                      _name.trim().isNotEmpty
+                                                          ? _name.trim()
+                                                          : _firstName,
+                                                      maxLines: 1,
+                                                      softWrap: false,
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 21,
+                                                        fontWeight:
+                                                            FontWeight.w900,
+                                                        height: 1.15,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                Text(
+                                                  '$_handle · ${l10n.learnerStatus}',
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                  style: TextStyle(
+                                                    color: Colors.white
+                                                        .withValues(alpha: 0.88),
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                                if (_memberSince != null) ...[
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    '${l10n.memberSince} $_memberSince',
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      color: Colors.white
+                                                          .withValues(
+                                                              alpha: 0.85),
+                                                      fontSize: 12.5,
+                                                    ),
+                                                  ),
+                                                ],
+                                                const SizedBox(height: 8),
+                                                Container(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 5,
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color: completenessPct >= 100
+                                                        ? const Color(
+                                                            0xFF059669)
+                                                        : Colors.white
+                                                            .withValues(
+                                                                alpha: 0.92),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        completenessPct >= 100
+                                                            ? Icons
+                                                                .check_circle_rounded
+                                                            : Icons
+                                                                .radio_button_checked_rounded,
+                                                        size: 14,
+                                                        color: completenessPct >=
+                                                                100
+                                                            ? Colors.white
+                                                            : const Color(
+                                                                0xFF047857),
+                                                      ),
+                                                      const SizedBox(width: 6),
+                                                      Text(
+                                                        completenessPct >= 100
+                                                            ? l10n
+                                                                .profileCompleteLabel
+                                                            : l10n
+                                                                .profilePercentComplete(
+                                                                completenessPct,
+                                                              ),
+                                                        style: TextStyle(
+                                                          color: completenessPct >=
+                                                                  100
+                                                              ? Colors.white
+                                                              : const Color(
+                                                                  0xFF065F46),
+                                                          fontSize: 11.5,
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                if (_isChampion) ...[
+                                                  const SizedBox(height: 10),
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 6,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white
+                                                          .withValues(
+                                                              alpha: 0.22),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              20),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        const Icon(
+                                                          Icons
+                                                              .emoji_events_rounded,
+                                                          color: AppColors
+                                                              .accentYellow,
+                                                          size: 16,
+                                                        ),
+                                                        const SizedBox(
+                                                            width: 6),
+                                                        Text(
+                                                          l10n.championBadge,
+                                                          style:
+                                                              const TextStyle(
+                                                            color: Colors.white,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ],
+                                            )
+                                          : Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  l10n.welcomeTitle,
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 18,
+                                                    fontWeight: FontWeight.w800,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Text(
+                                                  l10n.guestProfileHint,
+                                                  style: TextStyle(
+                                                    color: Colors.white
+                                                        .withValues(alpha: 0.9),
+                                                    fontSize: 13,
+                                                    height: 1.3,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 10),
+                                                Wrap(
+                                                  spacing: 8,
+                                                  children: [
+                                                    TextButton(
+                                                      onPressed: () => _open(
+                                                        const LoginScreen(),
+                                                      ),
+                                                      style: TextButton
+                                                          .styleFrom(
+                                                        backgroundColor:
+                                                            Colors.white,
+                                                        foregroundColor:
+                                                            AppColors
+                                                                .primaryBlue,
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 14,
+                                                          vertical: 8,
+                                                        ),
+                                                      ),
+                                                      child: Text(l10n.login),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () => _open(
+                                                        const RegisterScreen(),
+                                                      ),
+                                                      style: TextButton
+                                                          .styleFrom(
+                                                        foregroundColor:
+                                                            Colors.white,
+                                                        side:
+                                                            const BorderSide(
+                                                          color: Colors.white,
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 14,
+                                                          vertical: 8,
+                                                        ),
+                                                      ),
+                                                      child:
+                                                          Text(l10n.register),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Transform.translate(
+                          offset: const Offset(0, -22),
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              18,
+                              16,
+                              (widget.embeddedInShell ? 96 : 64) + bottomSafe,
+                            ),
+                            decoration: BoxDecoration(
+                              color: context.pageBackground,
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(28),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.myStats,
+                                  style: TextStyle(
+                                    color: context.isDarkMode
+                                        ? context.textPrimary
+                                        : AppColors.secondaryBlue,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                SizedBox(
+                                  height: (96 *
+                                          MediaQuery.textScalerOf(context)
+                                              .scale(1.0))
+                                      .clamp(96.0, 128.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons.menu_book_rounded,
+                                          iconColor: AppColors.primaryBlue,
+                                          value: '$_lessons',
+                                          label: l10n.lessonsCompleted,
+                                          onTap: () => _requireAuthThen(
+                                            ActivityListScreen(
+                                              title: l10n.lessonsCompleted,
+                                              items: _lessonActivity,
+                                              emptyTitle: l10n.noActivityYet,
+                                              emptyBody: l10n.noLessonsBody,
+                                              onOpenPost: _openPostActivity,
+                                              listIcon: Icons.menu_book_rounded,
+                                              accentColor: AppColors.primaryBlue,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons.article_outlined,
+                                          iconColor: const Color(0xFFEA580C),
+                                          value: '$_articles',
+                                          label: l10n.articlesRead,
+                                          onTap: () => _requireAuthThen(
+                                            ActivityListScreen(
+                                              title: l10n.articlesRead,
+                                              items: _articleActivity,
+                                              emptyTitle: l10n.noActivityYet,
+                                              emptyBody: l10n.noArticlesBody,
+                                              onOpenPost: _openPostActivity,
+                                              listIcon: Icons.article_outlined,
+                                              accentColor: const Color(0xFFEA580C),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons
+                                              .play_circle_fill_rounded,
+                                          iconColor: AppColors.accentRed,
+                                          value: '$_events',
+                                          label: l10n.eventsJoined,
+                                          onTap: () => _requireAuthThen(
+                                            ActivityListScreen(
+                                              title: l10n.eventsJoined,
+                                              items: _eventActivity,
+                                              emptyTitle: l10n.noActivityYet,
+                                              emptyBody: l10n.noEventsBody,
+                                              listIcon:
+                                                  Icons.play_circle_fill_rounded,
+                                              accentColor: AppColors.accentRed,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: ProfileStatCard(
+                                          icon: Icons
+                                              .local_fire_department_rounded,
+                                          iconColor: const Color(0xFFF97316),
+                                          value: '$_streak',
+                                          label: l10n.dayStreak,
+                                          onTap: () => _requireAuthThen(
+                                            const DiaryListScreen(),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 18),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            l10n.myBadges,
+                                            style: TextStyle(
+                                              color: context.isDarkMode
+                                                  ? context.textPrimary
+                                                  : AppColors.secondaryBlue,
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                          if (_badges.isNotEmpty) ...[
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              l10n.badgesUnlockedProgress(
+                                                _earnedBadgeCount,
+                                                _badges.length,
+                                              ),
+                                              style: TextStyle(
+                                                color: context.textSecondary,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                    TextButton(
+                                      onPressed: _showFeatureUnavailable,
+                                      child: Text(
+                                        l10n.seeAll,
+                                        style: const TextStyle(
+                                          color: AppColors.primaryBlue,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                if (_displayBadges.isEmpty)
+                                  Text(
+                                    l10n.noActivityYet,
+                                    style: TextStyle(
+                                      color: context.textSecondary,
+                                      fontSize: 13,
+                                    ),
+                                  )
+                                else if (_displayBadges.length <= 4)
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      for (final badge in _displayBadges)
+                                        Expanded(
+                                          flex: 1,
+                                          child: ProfileBadgeChip(
+                                            label: badge.title,
+                                            color: _badgeColor(badge.color),
+                                            icon: _badgeIcon(badge.key),
+                                            earned: badge.earned,
+                                            compact: true,
+                                            expand: true,
+                                            onTap: _showFeatureUnavailable,
+                                          ),
+                                        ),
+                                    ],
+                                  )
+                                else
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        for (var i = 0;
+                                            i < _displayBadges.length;
+                                            i++) ...[
+                                          if (i > 0) const SizedBox(width: 14),
+                                          ProfileBadgeChip(
+                                            label: _displayBadges[i].title,
+                                            color: _badgeColor(
+                                              _displayBadges[i].color,
+                                            ),
+                                            icon: _badgeIcon(
+                                              _displayBadges[i].key,
+                                            ),
+                                            earned: _displayBadges[i].earned,
+                                            onTap: _showFeatureUnavailable,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                const SizedBox(height: 18),
+                                Text(
+                                  l10n.quickLinks,
+                                  style: TextStyle(
+                                    color: context.isDarkMode
+                                        ? context.textPrimary
+                                        : AppColors.secondaryBlue,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ProfileQuickLinkTile(
+                                  icon: Icons.bookmark_rounded,
+                                  label: l10n.savedArticles,
+                                  onTap: () => _requireAuthThen(
+                                    const BookmarksScreen(),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                ProfileQuickLinkTile(
+                                  icon: Icons.workspace_premium_rounded,
+                                  label: l10n.myCertificates,
+                                  onTap: _showFeatureUnavailable,
+                                ),
+                                const SizedBox(height: 8),
+                                ProfileQuickLinkTile(
+                                  icon: Icons.emoji_events_rounded,
+                                  label: l10n.myGains,
+                                  onTap: _showFeatureUnavailable,
+                                ),
+                                const SizedBox(height: 8),
+                                ProfileQuickLinkTile(
+                                  icon: Icons.settings_rounded,
+                                  label: l10n.dapeSettings,
+                                  onTap: () =>
+                                      _open(const SettingsHubScreen()),
+                                ),
+                                if (!_loggedIn) ...[
+                                  const SizedBox(height: 20),
+                                  TextButton(
+                                    onPressed: () =>
+                                        _open(const ForgotPasswordScreen()),
+                                    child: Text(
+                                      l10n.forgotPassword,
+                                      style: const TextStyle(
+                                        color: AppColors.primaryBlue,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: _currentController,
-              decoration: inputDecoration.copyWith(
-                labelText: l10n.currentPassword,
-                prefixIcon: const Icon(Icons.lock_outline),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureCurrent ? Icons.visibility_off : Icons.visibility,
-                    size: 22,
-                  ),
-                  onPressed: () =>
-                      setState(() => _obscureCurrent = !_obscureCurrent),
-                ),
-              ),
-              obscureText: _obscureCurrent,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _newController,
-              decoration: inputDecoration.copyWith(
-                labelText: l10n.newPassword,
-                prefixIcon: const Icon(Icons.lock_rounded),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureNew ? Icons.visibility_off : Icons.visibility,
-                    size: 22,
-                  ),
-                  onPressed: () => setState(() => _obscureNew = !_obscureNew),
-                ),
-              ),
-              obscureText: _obscureNew,
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _confirmController,
-              decoration: inputDecoration.copyWith(
-                labelText: l10n.confirmNewPassword,
-                prefixIcon: const Icon(Icons.lock_rounded),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscureConfirm ? Icons.visibility_off : Icons.visibility,
-                    size: 22,
-                  ),
-                  onPressed: () =>
-                      setState(() => _obscureConfirm = !_obscureConfirm),
-                ),
-              ),
-              obscureText: _obscureConfirm,
-            ),
-            if (_error != null) ...[
-              const SizedBox(height: 12),
-              Text(
-                _error!,
-                style: const TextStyle(color: AppColors.accentRed, fontSize: 13),
-              ),
-            ],
-            const SizedBox(height: 24),
-            SizedBox(
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _loading ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryBlue,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: _loading
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white),
-                      )
-                    : Text(l10n.updatePassword),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
-

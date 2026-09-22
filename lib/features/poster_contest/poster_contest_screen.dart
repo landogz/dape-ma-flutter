@@ -5,6 +5,7 @@ import '../../core/models/poster_contest.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'widgets/poster_contest_card.dart';
 
 class PosterContestScreen extends StatefulWidget {
@@ -85,7 +86,7 @@ class _PosterContestScreenState extends State<PosterContestScreen> {
                   hintText: l10n.searchPosterContestHint,
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -105,7 +106,7 @@ class _PosterContestScreenState extends State<PosterContestScreen> {
                               Icon(
                                 Icons.image_not_supported_outlined,
                                 size: 64,
-                                color: AppColors.textSecondaryLight,
+                                color: context.textSecondary,
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -114,7 +115,7 @@ class _PosterContestScreenState extends State<PosterContestScreen> {
                                     .textTheme
                                     .titleMedium
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                             ],

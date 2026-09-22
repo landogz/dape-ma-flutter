@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class DiaryBodyHtml extends StatelessWidget {
   const DiaryBodyHtml({
@@ -22,7 +22,7 @@ class DiaryBodyHtml extends StatelessWidget {
     return HtmlWidget(
       html,
       textStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textPrimaryLight,
+            color: context.textPrimary,
             height: 1.45,
           ),
     );

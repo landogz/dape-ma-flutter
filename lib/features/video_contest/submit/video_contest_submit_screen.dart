@@ -6,6 +6,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/video_contest.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class VideoContestSubmitScreen extends StatefulWidget {
   final VideoContest contest;

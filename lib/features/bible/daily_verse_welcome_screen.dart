@@ -4,7 +4,8 @@ import 'package:intl/intl.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/theme/app_colors.dart';
-import '../home/home_screen.dart';
+import '../../core/theme/app_theme_colors.dart';
+import '../shell/main_shell_screen.dart';
 import 'bible_home_screen.dart';
 import 'daily_verse_service.dart';
 
@@ -61,7 +62,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
   void _openHome() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => HomeScreen(initialPosts: widget.initialPosts),
+        builder: (_) => MainShellScreen(initialPosts: widget.initialPosts),
       ),
     );
   }
@@ -76,6 +77,11 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final today = DateFormat.yMMMMEEEEd().format(DateTime.now());
+    final isDark = context.isDarkMode;
+    final cardColor = isDark ? AppColors.cardDark : AppColors.cardLight;
+    final titleAccent = isDark
+        ? const Color(0xFF7DD3FC)
+        : AppColors.primaryBlue;
 
     return Scaffold(
       body: Container(
@@ -156,20 +162,27 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     borderRadius: BorderRadius.circular(24),
+                    border: isDark
+                        ? Border.all(color: context.borderSubtle)
+                        : null,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.12),
+                        color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.12),
                         blurRadius: 24,
                         offset: const Offset(0, 8),
                       ),
                     ],
                   ),
                   child: _loading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 140,
-                          child: Center(child: CircularProgressIndicator()),
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: titleAccent,
+                            ),
+                          ),
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -180,7 +193,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                   .textTheme
                                   .labelLarge
                                   ?.copyWith(
-                                    color: AppColors.primaryBlue,
+                                    color: titleAccent,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.3,
                                   ),
@@ -193,7 +206,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                             ],
@@ -207,7 +220,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                   .titleMedium
                                   ?.copyWith(
                                     height: 1.45,
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     fontWeight: FontWeight.w700,
                                   ),
                             ),
@@ -216,7 +229,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                               width: double.infinity,
                               padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: AppColors.primaryBlue.withValues(alpha: 0.06),
+                                color: context.softBrandSurface,
                                 borderRadius: BorderRadius.circular(14),
                               ),
                               child: Column(
@@ -228,7 +241,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                         .textTheme
                                         .labelMedium
                                         ?.copyWith(
-                                          color: AppColors.primaryBlue,
+                                          color: titleAccent,
                                           fontWeight: FontWeight.w700,
                                         ),
                                   ),
@@ -242,7 +255,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                         .bodyMedium
                                         ?.copyWith(
                                           height: 1.5,
-                                          color: AppColors.textPrimaryLight,
+                                          color: context.textPrimary,
                                         ),
                                   ),
                                   const SizedBox(height: 10),
@@ -254,7 +267,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                         .textTheme
                                         .labelLarge
                                         ?.copyWith(
-                                          color: AppColors.primaryBlue,
+                                          color: titleAccent,
                                           fontWeight: FontWeight.w700,
                                         ),
                                   ),
@@ -266,7 +279,7 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                                           .textTheme
                                           .bodySmall
                                           ?.copyWith(
-                                            color: AppColors.textSecondaryLight,
+                                            color: context.textSecondary,
                                           ),
                                     ),
                                   ],

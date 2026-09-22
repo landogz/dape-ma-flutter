@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/song_contest.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../detail/song_contest_detail_screen.dart';
 
 class SongContestCard extends StatelessWidget {
@@ -58,7 +59,7 @@ class SongContestCard extends StatelessWidget {
                           style:
                               Theme.of(context).textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                   ),
                         ),
                         if (contest.theme != null &&
@@ -70,15 +71,15 @@ class SongContestCard extends StatelessWidget {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: AppColors.textSecondaryLight,
+                                  color: context.textSecondary,
                                 ),
                           ),
                         ],
                       ],
                     ),
                   ),
-                  const Icon(Icons.chevron_right,
-                      color: AppColors.textSecondaryLight),
+                  Icon(Icons.chevron_right,
+                      color: context.textSecondary),
                 ],
               ),
               const SizedBox(height: 10),
@@ -101,7 +102,7 @@ class SongContestCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondaryLight,
+                        color: context.textSecondary,
                       ),
                 ),
               ],

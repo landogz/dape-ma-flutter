@@ -5,6 +5,7 @@ import '../../core/models/song_contest.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'widgets/song_contest_card.dart';
 
 class SongContestScreen extends StatefulWidget {
@@ -85,7 +86,7 @@ class _SongContestScreenState extends State<SongContestScreen> {
                   hintText: l10n.searchSongContestHint,
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: context.inputFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
@@ -105,7 +106,7 @@ class _SongContestScreenState extends State<SongContestScreen> {
                               Icon(
                                 Icons.music_off_outlined,
                                 size: 64,
-                                color: AppColors.textSecondaryLight,
+                                color: context.textSecondary,
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -114,7 +115,7 @@ class _SongContestScreenState extends State<SongContestScreen> {
                                     .textTheme
                                     .titleMedium
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                               const SizedBox(height: 8),
@@ -126,7 +127,7 @@ class _SongContestScreenState extends State<SongContestScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                             ],

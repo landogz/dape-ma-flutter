@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import '../post_detail/post_detail_screen.dart';
+import '../settings/notification_settings_screen.dart';
 import 'models/app_notification.dart';
 import 'notifications_service.dart';
+import 'widgets/notification_card.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -44,7 +48,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       if (!mounted) return;
       setState(() {
         _loading = false;
-        _error = 'Failed to load notifications.';
+        _error = context.l10n.notificationsLoadFailed;
       });
     }
   }
@@ -73,53 +77,121 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not mark all as read.')),
+        SnackBar(content: Text(context.l10n.notificationsMarkAllFailed)),
       );
     } finally {
       if (mounted) setState(() => _markingAll = false);
     }
   }
 
-  IconData _iconForType(String type) {
+  bool _isToday(DateTime? date) {
+    if (date == null) return false;
+    final local = date.toLocal();
+    final now = DateTime.now();
+    return local.year == now.year &&
+        local.month == now.month &&
+        local.day == now.day;
+  }
+
+  ({IconData icon, Color color, Color background}) _styleForType(String type) {
     switch (type) {
-      case 'comment_reply':
-        return Icons.reply_rounded;
-      case 'post_comment':
-        return Icons.chat_bubble_outline_rounded;
-      case 'post_liked':
-        return Icons.favorite_outline_rounded;
       case 'new_post':
-        return Icons.article_outlined;
+      case 'lesson':
+      case 'article':
+        return (
+          icon: Icons.menu_book_rounded,
+          color: AppColors.primaryBlue,
+          background: const Color(0xFFDBEAFE),
+        );
+      case 'lesson_complete':
+      case 'completed':
+      case 'goal':
+      case 'goals':
+        return (
+          icon: Icons.check_circle_rounded,
+          color: const Color(0xFF16A34A),
+          background: const Color(0xFFDCFCE7),
+        );
+      case 'event':
+      case 'seminar':
+      case 'training':
+        return (
+          icon: Icons.play_circle_filled_rounded,
+          color: AppColors.accentRed,
+          background: const Color(0xFFFEE2E2),
+        );
+      case 'badge':
+      case 'achievement':
+        return (
+          icon: Icons.workspace_premium_rounded,
+          color: AppColors.accentPurple,
+          background: const Color(0xFFEDE9FE),
+        );
+      case 'comment_reply':
+        return (
+          icon: Icons.reply_rounded,
+          color: AppColors.accentPurple,
+          background: const Color(0xFFEDE9FE),
+        );
+      case 'post_comment':
+        return (
+          icon: Icons.chat_bubble_outline_rounded,
+          color: AppColors.primaryBlue,
+          background: const Color(0xFFDBEAFE),
+        );
+      case 'post_liked':
+        return (
+          icon: Icons.favorite_rounded,
+          color: AppColors.accentRed,
+          background: const Color(0xFFFEE2E2),
+        );
       default:
-        return Icons.notifications_none_rounded;
+        return (
+          icon: Icons.notifications_rounded,
+          color: AppColors.primaryBlue,
+          background: const Color(0xFFDBEAFE),
+        );
     }
   }
 
-  Color _colorForType(String type) {
+  String _typeLabel(String type) {
+    final l10n = context.l10n;
     switch (type) {
-      case 'comment_reply':
-        return AppColors.accentPurple;
-      case 'post_comment':
-        return AppColors.primaryBlue;
-      case 'post_liked':
-        return AppColors.accentRed;
       case 'new_post':
-        return AppColors.secondaryBlue;
+      case 'lesson':
+      case 'article':
+        return l10n.notifTypeNewLesson;
+      case 'lesson_complete':
+      case 'completed':
+        return l10n.notifTypeCompletedLesson;
+      case 'event':
+      case 'seminar':
+      case 'training':
+        return l10n.notifTypeSeminar;
+      case 'goal':
+      case 'goals':
+        return l10n.notifTypeGoals;
+      case 'badge':
+      case 'achievement':
+        return l10n.notifTypeBadges;
+      case 'comment_reply':
+        return l10n.notifTypeReply;
+      case 'post_comment':
+        return l10n.notifTypeComment;
+      case 'post_liked':
+        return l10n.notifTypeLiked;
       default:
-        return AppColors.primaryBlue;
+        return l10n.notifTypeGeneral;
     }
   }
 
   String _timeLabel(DateTime? createdAt) {
     if (createdAt == null) return '';
     final local = createdAt.toLocal();
-    final now = DateTime.now();
-    final diff = now.difference(local);
-    if (diff.inMinutes < 1) return 'Just now';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    if (diff.inDays < 7) return '${diff.inDays}d ago';
-    return DateFormat('MMM d, yyyy').format(local);
+    if (_isToday(local)) {
+      return DateFormat.jm().format(local);
+    }
+    return '${DateFormat('dd MMMM yyyy').format(local)} | ${DateFormat.jm().format(local)}';
   }
 
   Future<void> _openNotification(AppNotification item) async {
@@ -170,205 +242,223 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Could not open this post.')),
+        SnackBar(content: Text(context.l10n.notificationsOpenFailed)),
       );
     }
   }
 
+  Future<void> _openSettings() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const NotificationSettingsScreen()),
+    );
+  }
+
+  Widget _sectionHeader(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 10),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: context.textPrimary,
+          fontWeight: FontWeight.w800,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildList(BuildContext context) {
+    final l10n = context.l10n;
+    final today = _items.where((n) => _isToday(n.createdAt)).toList();
+    final earlier = _items.where((n) => !_isToday(n.createdAt)).toList();
+
+    final children = <Widget>[];
+    if (today.isNotEmpty) {
+      children.add(_sectionHeader(l10n.notificationsToday));
+      for (final item in today) {
+        final style = _styleForType(item.type);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: NotificationCard(
+              item: item,
+              typeLabel: _typeLabel(item.type),
+              timeLabel: _timeLabel(item.createdAt),
+              icon: style.icon,
+              iconColor: style.color,
+              iconBackground: style.background,
+              onTap: () => _openNotification(item),
+            ),
+          ),
+        );
+      }
+    }
+    if (earlier.isNotEmpty) {
+      children.add(_sectionHeader(l10n.notificationsEarlier));
+      for (final item in earlier) {
+        final style = _styleForType(item.type);
+        children.add(
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: NotificationCard(
+              item: item,
+              typeLabel: _typeLabel(item.type),
+              timeLabel: _timeLabel(item.createdAt),
+              icon: style.icon,
+              iconColor: style.color,
+              iconBackground: style.background,
+              onTap: () => _openNotification(item),
+            ),
+          ),
+        );
+      }
+    }
+
+    return RefreshIndicator(
+      color: AppColors.primaryBlue,
+      onRefresh: _load,
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+        children: children,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final unreadCount = _items.where((n) => n.isUnread).length;
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
-      appBar: AppBar(
-        title: const Text('Notifications'),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-        actions: [
-          if (unreadCount > 0)
-            TextButton(
-              onPressed: _markingAll ? null : _markAllRead,
-              child: _markingAll
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text(
-                      'Mark all read',
-                      style: TextStyle(color: Colors.white),
-                    ),
-            ),
-        ],
-      ),
+      backgroundColor: context.pageBackground,
       body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : _error != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          _error!,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
+              child: Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+                    color: context.textPrimary,
+                    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                  ),
+                  Expanded(
+                    child: Text(
+                      l10n.notificationsTitle,
+                      style: TextStyle(
+                        color: context.textPrimary,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: _openSettings,
+                    icon: const Icon(Icons.settings_rounded),
+                    color: AppColors.primaryBlue,
+                    tooltip: l10n.notificationSettingsTitle,
+                  ),
+                ],
+              ),
+            ),
+            if (unreadCount > 0)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _markingAll ? null : _markAllRead,
+                  child: _markingAll
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.primaryBlue,
+                          ),
+                        )
+                      : Text(
+                          l10n.markAllRead,
                           style: const TextStyle(
-                            color: AppColors.textSecondaryLight,
+                            color: AppColors.primaryBlue,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        TextButton(onPressed: _load, child: const Text('Retry')),
-                      ],
-                    ),
-                  )
-                : _items.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.notifications_none_rounded,
-                              size: 64,
-                              color: AppColors.textSecondaryLight.withOpacity(0.6),
+                ),
+              ),
+            Expanded(
+              child: _loading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryBlue,
+                      ),
+                    )
+                  : _error != null
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  _error!,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: context.textSecondary),
+                                ),
+                                const SizedBox(height: 12),
+                                TextButton(
+                                  onPressed: _load,
+                                  child: Text(l10n.retry),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'No notifications yet',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    color: AppColors.textSecondaryLight,
-                                  ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Replies, likes, and new posts will appear here.',
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSecondaryLight,
-                                  ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : RefreshIndicator(
-                        onRefresh: _load,
-                        child: ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                          itemCount: _items.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 10),
-                          itemBuilder: (context, index) {
-                            final item = _items[index];
-                            final color = _colorForType(item.type);
-                            return Material(
-                              color: item.isUnread
-                                  ? AppColors.primaryBlue.withOpacity(0.06)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              child: InkWell(
-                                onTap: () => _openNotification(item),
-                                borderRadius: BorderRadius.circular(14),
-                                child: Container(
-                                  padding: const EdgeInsets.all(14),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(
-                                      color: const Color(0xFFE5E7EB),
+                          ),
+                        )
+                      : _items.isEmpty
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.all(28),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.notifications_none_rounded,
+                                      size: 64,
+                                      color: context.textSecondary
+                                          .withValues(alpha: 0.55),
                                     ),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 42,
-                                        height: 42,
-                                        decoration: BoxDecoration(
-                                          color: color.withOpacity(0.12),
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        child: Icon(
-                                          _iconForType(item.type),
-                                          color: color,
-                                          size: 22,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    item.title,
-                                                    style: TextStyle(
-                                                      fontWeight: item.isUnread
-                                                          ? FontWeight.w700
-                                                          : FontWeight.w600,
-                                                      color: AppColors
-                                                          .textPrimaryLight,
-                                                      fontSize: 15,
-                                                    ),
-                                                  ),
-                                                ),
-                                                if (item.isUnread)
-                                                  Container(
-                                                    width: 8,
-                                                    height: 8,
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                      color:
-                                                          AppColors.primaryBlue,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                  ),
-                                              ],
-                                            ),
-                                            if (item.body != null &&
-                                                item.body!.trim().isNotEmpty) ...[
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                item.body!,
-                                                maxLines: 3,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  color: AppColors
-                                                      .textSecondaryLight,
-                                                  fontSize: 13,
-                                                  height: 1.35,
-                                                ),
-                                              ),
-                                            ],
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              _timeLabel(item.createdAt),
-                                              style: TextStyle(
-                                                color: AppColors
-                                                    .textSecondaryLight
-                                                    .withOpacity(0.8),
-                                                fontSize: 12,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      l10n.notificationsEmptyTitle,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: context.textSecondary,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      l10n.notificationsEmptyBody,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: context.textSecondary,
+                                          ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      ),
+                            )
+                          : _buildList(context),
+            ),
+          ],
+        ),
       ),
     );
   }

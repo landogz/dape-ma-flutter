@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../review_service.dart';
 
 class ReviewSheet extends StatefulWidget {
@@ -110,7 +111,7 @@ class _ReviewSheetState extends State<ReviewSheet> {
             decoration: InputDecoration(
               labelText: l10n.commentOptional,
               filled: true,
-              fillColor: AppColors.lightBackground,
+              fillColor: context.inputFill,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,

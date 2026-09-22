@@ -5,6 +5,7 @@ import '../../core/models/training.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'widgets/training_card.dart';
 
 class TrainingsScreen extends StatefulWidget {
@@ -108,7 +109,7 @@ class _TrainingsScreenState extends State<TrainingsScreen> {
                       hintText: l10n.searchTrainingsHint,
                       prefixIcon: const Icon(Icons.search),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: context.inputFill,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -184,7 +185,7 @@ class _TrainingsScreenState extends State<TrainingsScreen> {
                               Icon(
                                 Icons.school_outlined,
                                 size: 64,
-                                color: AppColors.textSecondaryLight,
+                                color: context.textSecondary,
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -193,7 +194,7 @@ class _TrainingsScreenState extends State<TrainingsScreen> {
                                     .textTheme
                                     .titleMedium
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                               const SizedBox(height: 8),
@@ -207,7 +208,7 @@ class _TrainingsScreenState extends State<TrainingsScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                             ],

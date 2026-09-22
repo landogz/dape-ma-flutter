@@ -66,8 +66,37 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>This app needs camera access so you can add photos to your journal entries.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to set your profile picture.</string>
+	<string>This app needs access to your photo library to set your profile picture and add photos to journal entries.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone access may be required when recording video with the camera.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+		<key>NSExceptionDomains</key>
+		<dict>
+			<key>localhost</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+				<key>NSIncludesSubdomains</key>
+				<true/>
+			</dict>
+			<key>127.0.0.1</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+			<key>192.168.100.84</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
+		</dict>
+	</dict>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>https</string>

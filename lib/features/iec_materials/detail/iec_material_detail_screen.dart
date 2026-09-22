@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../core/accessibility/accessibility_controller.dart';
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/iec_material.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../hope/hope_colors.dart';
 
 class IecMaterialDetailScreen extends StatefulWidget {
   final int materialId;
@@ -52,7 +54,11 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
         if (id != null) {
           yt = YoutubePlayerController(
             initialVideoId: id,
-            flags: const YoutubePlayerFlags(autoPlay: false),
+            flags: YoutubePlayerFlags(
+              autoPlay: false,
+              enableCaption: AccessibilityController.instance.captions,
+              captionLanguage: 'en',
+            ),
           );
         }
       }
@@ -64,6 +70,9 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
         _material = material;
         _yt = yt;
       });
+      if (material != null) {
+        AnalyticsClient.instance.trackIecView(material.id);
+      }
     } catch (_) {
       if (mounted) setState(() => _material = null);
     } finally {
@@ -85,53 +94,68 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
     final material = _material;
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(l10n.iecMaterialDetailTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: HopeColors.purple,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          l10n.iecMaterialDetailTitle,
+          style: const TextStyle(
+            color: HopeColors.purple,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: HopeColors.purple),
+            )
           : material == null
-              ? Center(child: Text(l10n.noIecMaterialsFound))
+              ? Center(
+                  child: Text(
+                    l10n.noIecMaterialsFound,
+                    style: const TextStyle(color: HopeColors.muted),
+                  ),
+                )
               : ListView(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                   children: [
                     Text(
                       material.title,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimaryLight,
-                          ),
-                    ),
-                    if (material.topic != null &&
-                        material.topic!.isNotEmpty) ...[
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          material.topic!,
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelMedium
-                              ?.copyWith(
-                                color: AppColors.primaryBlue,
-                                fontWeight: FontWeight.w700,
-                              ),
-                        ),
+                      style: const TextStyle(
+                        color: HopeColors.purple,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                        height: 1.25,
                       ),
-                    ],
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _HopePill(label: material.mediaType.toUpperCase()),
+                        if (material.topic != null &&
+                            material.topic!.isNotEmpty)
+                          _HopePill(label: material.topic!),
+                      ],
+                    ),
                     const SizedBox(height: 16),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: HopeColors.cardBorder),
+                        boxShadow: [
+                          BoxShadow(
+                            color: HopeColors.purple.withValues(alpha: 0.06),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
                       child: _yt != null
                           ? YoutubePlayer(
                               controller: _yt!,
@@ -141,57 +165,98 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                               ? Image.network(
                                   material.mediaUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Container(
+                                  errorBuilder: (_, _, _) => Container(
                                     height: 220,
-                                    color: Colors.grey.shade200,
+                                    color: HopeColors.purpleSoft,
                                     alignment: Alignment.center,
-                                    child: const Icon(Icons.broken_image_outlined),
+                                    child: const Icon(
+                                      Icons.broken_image_outlined,
+                                      color: HopeColors.purple,
+                                    ),
                                   ),
                                 )
                               : Container(
                                   height: 180,
-                                  color: AppColors.primaryBlue
-                                      .withValues(alpha: 0.08),
+                                  color: HopeColors.purpleSoft,
                                   alignment: Alignment.center,
                                   child: TextButton.icon(
                                     onPressed: _openExternal,
                                     icon: const Icon(Icons.open_in_new),
                                     label: Text(l10n.openMediaLink),
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: HopeColors.purple,
+                                    ),
                                   ),
                                 ),
                     ),
                     if (material.description != null &&
                         material.description!.isNotEmpty) ...[
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 20),
                       Text(
                         l10n.aboutIecMaterial,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
+                        style: const TextStyle(
+                          color: HopeColors.purple,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         material.description!,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textSecondaryLight,
-                              height: 1.45,
-                            ),
+                        style: const TextStyle(
+                          color: HopeColors.muted,
+                          height: 1.5,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                     if (_yt == null && material.isYoutube) ...[
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: _openExternal,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryBlue,
-                          foregroundColor: Colors.white,
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 48,
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _openExternal,
+                          icon: const Icon(Icons.play_arrow_rounded),
+                          label: Text(l10n.openOnYoutube),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: HopeColors.purple,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
                         ),
-                        icon: const Icon(Icons.play_arrow),
-                        label: Text(l10n.openOnYoutube),
                       ),
                     ],
                   ],
                 ),
+    );
+  }
+}
+
+class _HopePill extends StatelessWidget {
+  const _HopePill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: HopeColors.purpleSoft,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: HopeColors.cardBorder),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: HopeColors.purple,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 }

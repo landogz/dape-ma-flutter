@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/app_locale.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class LanguagePickerCard extends StatelessWidget {
   const LanguagePickerCard({super.key});
@@ -15,12 +16,12 @@ class LanguagePickerCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: context.borderSubtle),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withValues(alpha: context.isDarkMode ? 0.25 : 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -35,7 +36,7 @@ class LanguagePickerCard extends StatelessWidget {
                 height: 40,
                 width: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.1),
+                  color: context.softBrandSurface,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -52,14 +53,14 @@ class LanguagePickerCard extends StatelessWidget {
                       l10n.languageTitle,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimaryLight,
+                            color: context.textPrimary,
                           ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       l10n.languageSubtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondaryLight,
+                            color: context.textSecondary,
                           ),
                     ),
                   ],
@@ -75,8 +76,8 @@ class LanguagePickerCard extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8),
               child: Material(
                 color: selected
-                    ? AppColors.primaryBlue.withValues(alpha: 0.08)
-                    : const Color(0xFFF8FAFC),
+                    ? context.softBrandSurface
+                    : context.mutedSurface,
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
                   onTap: () => controller.setLocale(locale),
@@ -92,7 +93,7 @@ class LanguagePickerCard extends StatelessWidget {
                       border: Border.all(
                         color: selected
                             ? AppColors.primaryBlue.withValues(alpha: 0.35)
-                            : const Color(0xFFE5E7EB),
+                            : context.borderSubtle,
                       ),
                     ),
                     child: Row(
@@ -108,7 +109,7 @@ class LanguagePickerCard extends StatelessWidget {
                                     .titleSmall
                                     ?.copyWith(
                                       fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimaryLight,
+                                      color: context.textPrimary,
                                     ),
                               ),
                               Text(
@@ -117,7 +118,7 @@ class LanguagePickerCard extends StatelessWidget {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                                      color: context.textSecondary,
                                     ),
                               ),
                             ],

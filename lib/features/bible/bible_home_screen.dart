@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/bible_models.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'bible_reader_screen.dart';
 import 'bible_service.dart';
 
@@ -74,7 +75,7 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
                           hintText: l10n.searchBibleBooks,
                           prefixIcon: const Icon(Icons.search),
                           filled: true,
-                          fillColor: Colors.white,
+                          fillColor: context.inputFill,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -98,7 +99,7 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
                             Text(
                               l10n.bibleLanguageNote,
                               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.textSecondaryLight,
+                                    color: context.textSecondary,
                                   ),
                             ),
                           ],
@@ -130,7 +131,7 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
                               child: Text(
                                 l10n.noBibleBooksFound,
                                 style: TextStyle(
-                                  color: AppColors.textSecondaryLight,
+                                  color: context.textSecondary,
                                 ),
                               ),
                             ),
@@ -167,7 +168,7 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
   Future<void> _openChapterPicker(BibleBook book) async {
     final chapter = await showModalBottomSheet<int>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

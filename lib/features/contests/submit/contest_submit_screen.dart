@@ -6,6 +6,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/contest.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class ContestSubmitScreen extends StatefulWidget {
   final Contest contest;
@@ -173,7 +174,7 @@ class _ContestSubmitScreenState extends State<ContestSubmitScreen> {
                 widget.contest.title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimaryLight,
+                      color: context.textPrimary,
                     ),
               ),
               const SizedBox(height: 16),

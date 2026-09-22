@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/training.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../detail/training_detail_screen.dart';
 
 class TrainingCard extends StatelessWidget {
@@ -50,13 +51,13 @@ class TrainingCard extends StatelessWidget {
                       training.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimaryLight,
+                            color: context.textPrimary,
                           ),
                     ),
                   ),
                   Icon(
                     Icons.chevron_right,
-                    color: AppColors.textSecondaryLight,
+                    color: context.textSecondary,
                   ),
                 ],
               ),
@@ -75,13 +76,13 @@ class TrainingCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(Icons.event_outlined,
-                      size: 18, color: AppColors.textSecondaryLight),
+                      size: 18, color: context.textSecondary),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       training.scheduleLabel,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textPrimaryLight,
+                            color: context.textPrimary,
                           ),
                     ),
                   ),
@@ -93,13 +94,13 @@ class TrainingCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.place_outlined,
-                        size: 18, color: AppColors.textSecondaryLight),
+                        size: 18, color: context.textSecondary),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         training.venue!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textPrimaryLight,
+                              color: context.textPrimary,
                             ),
                       ),
                     ),
@@ -116,7 +117,7 @@ class TrainingCard extends StatelessWidget {
                     child: Row(
                       children: [
                         Icon(Icons.phone_outlined,
-                            size: 18, color: AppColors.textSecondaryLight),
+                            size: 18, color: context.textSecondary),
                         const SizedBox(width: 6),
                         Expanded(
                           child: Text(

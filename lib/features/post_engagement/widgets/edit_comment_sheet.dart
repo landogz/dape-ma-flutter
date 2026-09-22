@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class EditCommentSheet extends StatefulWidget {
   const EditCommentSheet({
@@ -86,7 +87,7 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
             decoration: InputDecoration(
               hintText: l10n.updateCommentHint,
               filled: true,
-              fillColor: AppColors.lightBackground,
+              fillColor: context.inputFill,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,

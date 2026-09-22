@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../core/accessibility/accessibility_controller.dart';
+import '../../core/accessibility/read_aloud_service.dart';
+import '../../core/accessibility/youtube_a11y.dart';
 import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
@@ -8,6 +12,7 @@ import '../../core/models/post.dart';
 import '../../core/models/post_comment.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/json_parsers.dart';
 import '../auth/login_screen.dart';
 import '../post_engagement/comment_tree_utils.dart';
@@ -15,6 +20,7 @@ import '../post_engagement/post_engagement_service.dart';
 import '../post_engagement/widgets/comment_bubble.dart';
 import '../post_engagement/widgets/edit_comment_sheet.dart';
 import '../reviews/widgets/review_sheet.dart';
+import 'widgets/post_article_layout.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final Post post;
@@ -49,20 +55,36 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   bool _submittingComment = false;
   PostComment? _replyingTo;
 
-  static String _formatTime(DateTime? d) {
-    if (d == null) return '';
-    return '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
-  }
-
   static String _formatTimeAgo(DateTime? published) {
-    if (published == null) return '';
+    if (published == null) return 'Just now';
     final now = DateTime.now();
     final diff = now.difference(published);
     if (diff.inMinutes < 1) return 'Just now';
     if (diff.inMinutes < 60) return '${diff.inMinutes} min ago';
     if (diff.inHours < 24) return '${diff.inHours} h ago';
     if (diff.inDays < 7) return '${diff.inDays} d ago';
-    return '${published.day}/${published.month}/${published.year}';
+    return formatPostDate(published);
+  }
+
+
+  void _showFloatingSnack(String message) {
+    if (!mounted) return;
+    final bottomClearance =
+        96 + MediaQuery.viewPaddingOf(context).bottom;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          bottom: bottomClearance,
+          left: 20,
+          right: 20,
+        ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 
   static String _stripHtml(String html) {
@@ -86,6 +108,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     });
     _loadComments();
     _refreshPostEngagement();
+    AnalyticsClient.instance.trackPostView(widget.post.id);
     if (widget.focusCommentOnOpen) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
@@ -99,9 +122,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (id != null) {
         _ytController = YoutubePlayerController(
           initialVideoId: id,
-          flags: const YoutubePlayerFlags(
-            autoPlay: false,
-            mute: false,
+          flags: buildYoutubeFlags(
+            enableCaptions: AccessibilityController.instance.captions,
           ),
         );
       }
@@ -212,21 +234,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            PostEngagementService.friendlyError(
+      _showFloatingSnack(
+        PostEngagementService.friendlyError(
               e,
               'like this post',
               context.l10n,
             ),
-          ),
-        ),
       );
     }
   }
 
   Future<void> _submitComment(String value) async {
+    if (!_post.commentsEnabled) return;
     final body = value.trim();
     if (body.isEmpty || _submittingComment) return;
 
@@ -255,27 +274,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _replyingTo = null;
       });
       _commentFocus.unfocus();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
+      _showFloatingSnack(
             parentId == null
                 ? context.l10n.commentPosted
                 : context.l10n.replyPosted,
-          ),
-        ),
-      );
+          );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            PostEngagementService.friendlyError(
+      _showFloatingSnack(
+        PostEngagementService.friendlyError(
               e,
               'post a comment',
               context.l10n,
             ),
-          ),
-        ),
       );
     } finally {
       if (mounted) setState(() => _submittingComment = false);
@@ -309,7 +320,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final updated = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -329,9 +340,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
     );
     if (updated == true && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.commentUpdated)),
-      );
+      _showFloatingSnack(context.l10n.commentUpdated);
     }
   }
 
@@ -369,21 +378,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _comments = removeCommentFromTree(_comments, comment.id);
         _post = _post.copyWith(commentsCount: commentsCount);
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.commentDeleted)),
-      );
+      _showFloatingSnack(context.l10n.commentDeleted);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            PostEngagementService.friendlyError(
+      _showFloatingSnack(
+        PostEngagementService.friendlyError(
               e,
               'delete this comment',
               context.l10n,
             ),
-          ),
-        ),
       );
     }
   }
@@ -407,23 +410,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         await AnalyticsClient.instance.trackBookmark(_post.id);
       }
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            _isBookmarked
-                ? context.l10n.savedToBookmarks
-                : context.l10n.removedFromBookmarks,
-          ),
-          duration: const Duration(seconds: 2),
-        ),
+      _showFloatingSnack(
+        _isBookmarked
+            ? context.l10n.savedToBookmarks
+            : context.l10n.removedFromBookmarks,
       );
     } catch (_) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.bookmarkUpdateFailed),
-        ),
-      );
+      _showFloatingSnack(context.l10n.bookmarkUpdateFailed);
     }
   }
 
@@ -432,544 +426,509 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     _commentFocus.dispose();
     _commentController.dispose();
     _ytController?.dispose();
+    ReadAloudService.instance.stop();
     super.dispose();
   }
+
+  Future<void> _onShareTap() async {
+    final l10n = context.l10n;
+    final shareText = [
+      _post.title,
+      if (_post.excerpt.trim().isNotEmpty) _post.excerpt.trim(),
+    ].join('\n\n');
+    await Clipboard.setData(ClipboardData(text: shareText));
+    if (!mounted) return;
+    _showFloatingSnack(l10n.linkCopied);
+  }
+
+  Future<void> _toggleReadAloud() async {
+    final service = ReadAloudService.instance;
+    if (service.isSpeaking) {
+      await service.stop();
+      if (mounted) setState(() {});
+      return;
+    }
+    final text = '${_post.title}. ${_stripHtml(_post.content)}';
+    await service.speak(text);
+    if (mounted) setState(() {});
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
     final post = _post;
     final l10n = context.l10n;
-    final hasImage = post.imageUrl != null && post.imageUrl!.isNotEmpty;
-    final initial = post.authorName.isNotEmpty
-        ? post.authorName.trim().substring(0, 1).toUpperCase()
-        : '?';
-    final timeStr = _formatTime(post.publishedAt);
+    final a11y = AccessibilityController.instance;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
+    final topInset = MediaQuery.viewPaddingOf(context).top;
+    final statusTop = topInset > 0 ? topInset : 59.0;
+    final pinnedTopHeight = kToolbarHeight + statusTop;
+    // Keep last comment fully above the floating composer when comments are on.
+    final listBottomPadding = post.commentsEnabled ? 110.0 : 24.0;
+    final scrollBottomClearance = listBottomPadding + bottomInset;
 
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(_post),
-        ),
-        title: Text(
-          l10n.authorPost(post.authorName),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              _isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-              color: Colors.white,
-            ),
-            onPressed: _onBookmarkTap,
-          ),
-          if (timeStr.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: Center(
-                child: Text(
-                  timeStr,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
+      backgroundColor: context.pageBackground,
+      primary: true,
+      extendBodyBehindAppBar: false,
+      body: Column(
+        children: [
+          AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle.light,
+            child: SizedBox(
+              height: pinnedTopHeight,
+              width: double.infinity,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF123A60),
+                      Color(0xFF055498),
+                    ],
+                  ),
+                ),
+                child: SafeArea(
+                  top: true,
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 20,
+                            color: Colors.white,
+                          ),
+                          onPressed: () => Navigator.of(context).pop(_post),
+                        ),
+                        const Spacer(),
+                        if (a11y.readAloud)
+                          IconButton(
+                            tooltip: ReadAloudService.instance.isSpeaking
+                                ? l10n.stopListening
+                                : l10n.listenToArticle,
+                            onPressed: _toggleReadAloud,
+                            icon: Icon(
+                              ReadAloudService.instance.isSpeaking
+                                  ? Icons.stop_circle_outlined
+                                  : Icons.record_voice_over_rounded,
+                              color: Colors.white,
+                            ),
+                          ),
+                        IconButton(
+                          tooltip: l10n.bookmarksTitle,
+                          icon: Icon(
+                            _isBookmarked
+                                ? Icons.bookmark_rounded
+                                : Icons.bookmark_border_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: _onBookmarkTap,
+                        ),
+                        IconButton(
+                          tooltip: l10n.sharePost,
+                          icon: const Icon(
+                            Icons.ios_share_rounded,
+                            color: Colors.white,
+                          ),
+                          onPressed: _onShareTap,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-        ],
-      ),
-      body: Column(
-        children: [
+          ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── Post header (avatar, name, time) ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor:
-                              AppColors.primaryBlue.withOpacity(0.2),
-                          child: Text(
-                            initial,
-                            style: const TextStyle(
-                              color: AppColors.primaryBlue,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
+            child: Stack(
+              clipBehavior: Clip.hardEdge,
+              children: [
+                CustomScrollView(
+                  primary: true,
+                  clipBehavior: Clip.hardEdge,
+                  slivers: [
+                    SliverToBoxAdapter(child: PostHeroHeader(post: post)),
+                    SliverToBoxAdapter(
+                      child: Transform.translate(
+                        offset: const Offset(0, -28),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: context.pageBackground,
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(28),
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.08),
+                                blurRadius: 16,
+                                offset: const Offset(0, -4),
+                              ),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                post.authorName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.textPrimaryLight,
-                                    ),
+                              const SizedBox(height: 10),
+                              Center(
+                                child: Container(
+                                  width: 40,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    color: context.borderSubtle
+                                        .withValues(alpha: 0.9),
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
+                                ),
                               ),
-                              Text(
-                                _formatTimeAgo(post.publishedAt),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
+                              if (_ytController != null) ...[
+                                const SizedBox(height: 16),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: AspectRatio(
+                                      aspectRatio: 16 / 9,
+                                      child: YoutubePlayer(
+                                        controller: _ytController!,
+                                        showVideoProgressIndicator: true,
+                                      ),
                                     ),
+                                  ),
+                                ),
+                              ],
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(20, 16, 20, 4),
+                                child: PostArticleBody(
+                                  htmlOrText: post.content.isNotEmpty
+                                      ? post.content
+                                      : post.excerpt,
+                                ),
+                              ),
+                              PostEngagementBar(
+                                likesCount: post.likesCount,
+                                commentsCount: post.commentsCount,
+                                isLiked: post.isLiked,
+                                onLike: _onLikeTap,
+                                onComment: post.commentsEnabled
+                                    ? () {
+                                        FocusScope.of(context)
+                                            .requestFocus(_commentFocus);
+                                      }
+                                    : null,
+                                onShare: _onShareTap,
+                              ),
+                              PostRatingCard(
+                                averageRating: post.averageRating,
+                                reviewsCount: post.reviewsCount,
+                                userRating: post.userRating,
+                                onStarTap: _onRateStarTap,
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                                child: Divider(
+                                  height: 1,
+                                  color: context.borderSubtle,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  12,
+                                  16,
+                                  16,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      l10n.commentsTitle,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                    if (post.commentsCount > 0) ...[
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        l10n.commentsCount(post.commentsCount),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(
+                                              color: context.textSecondary,
+                                            ),
+                                      ),
+                                    ],
+                                    const SizedBox(height: 12),
+                                    if (_hasMoreComments &&
+                                        _comments.isNotEmpty)
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8),
+                                        child: Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: TextButton(
+                                            onPressed: _loadingMoreComments
+                                                ? null
+                                                : () => _loadComments(
+                                                      loadMore: true,
+                                                    ),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  AppColors.primaryBlue,
+                                              padding: EdgeInsets.zero,
+                                            ),
+                                            child: _loadingMoreComments
+                                                ? const SizedBox(
+                                                    width: 18,
+                                                    height: 18,
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                                  )
+                                                : Text(
+                                                    l10n.loadPreviousComments,
+                                                  ),
+                                          ),
+                                        ),
+                                      ),
+                                    if (_loadingComments)
+                                      const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(16),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      )
+                                    else if (_commentsError != null)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _commentsError!,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color: AppColors.accentRed,
+                                                ),
+                                          ),
+                                          TextButton(
+                                            onPressed: _loadComments,
+                                            child: Text(l10n.retry),
+                                          ),
+                                        ],
+                                      )
+                                    else if (_comments.isEmpty)
+                                      post.commentsEnabled
+                                          ? const CommentsEmptyState()
+                                          : Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                vertical: 12,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    l10n.commentsDisabledTitle,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .titleSmall
+                                                        ?.copyWith(
+                                                          fontWeight:
+                                                              FontWeight.w700,
+                                                        ),
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    l10n.commentsDisabledBody,
+                                                    style: Theme.of(context)
+                                                        .textTheme
+                                                        .bodySmall
+                                                        ?.copyWith(
+                                                          color: context
+                                                              .textSecondary,
+                                                        ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )
+                                    else
+                                      ..._comments.map(
+                                        (comment) => CommentThread(
+                                          comment: comment,
+                                          timeAgoBuilder: _formatTimeAgo,
+                                          canManageBuilder: _canManageComment,
+                                          onEdit: _editComment,
+                                          onDelete: _deleteComment,
+                                          onReply: post.commentsEnabled
+                                              ? _startReply
+                                              : (_) {},
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        IconButton(
-                          icon: const Icon(Icons.keyboard_arrow_down),
-                          color: AppColors.textSecondaryLight,
-                          onPressed: () {},
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
-                  // ── Category ──
-                  if (post.categoryName.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
+                    SliverPadding(
+                      padding: EdgeInsets.only(bottom: scrollBottomClearance),
+                      sliver: const SliverToBoxAdapter(
+                        child: SizedBox.shrink(),
+                      ),
+                    ),
+                  ],
+                ),
+                if (post.commentsEnabled)
+                  Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (_replyingTo != null)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          color: context.mutedSurface,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${l10n.replyingTo} ${_replyingTo!.authorName}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.primaryBlue,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close, size: 18),
+                                color: context.textSecondary,
+                                onPressed: _cancelReply,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 32,
+                                  minHeight: 32,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      Container(
+                        padding: EdgeInsets.only(
+                          left: 16,
+                          right: 16,
+                          top: 8,
+                          bottom: 12 + bottomInset,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryBlue.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          post.categoryName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: AppColors.primaryBlue,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                      ),
-                    ),
-                  // ── Title ──
-                  if (post.title.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                      child: Text(
-                        post.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge
-                            ?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryLight,
+                          color: context.cardBackground,
+                          border: Border(
+                            top: BorderSide(
+                              color: context.borderSubtle,
+                              width: 1,
                             ),
-                      ),
-                    ),
-                  // ── Body (rich text as plain text) ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                    child: Text(
-                      _stripHtml(
-                        post.content.isNotEmpty
-                            ? post.content
-                            : post.excerpt,
-                      ),
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyLarge
-                          ?.copyWith(
-                            color: AppColors.textPrimaryLight,
-                            height: 1.5,
                           ),
-                    ),
-                  ),
-                  // ── Media ──
-                  if (hasImage) ...[
-                    const SizedBox(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          post.imageUrl!,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (_ytController != null) ...[
-                    const SizedBox(height: 16),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: YoutubePlayer(
-                            controller: _ytController!,
-                            showVideoProgressIndicator: true,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 16),
-                  // ── Reactions summary ──
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${post.likesCount} ${post.likesCount == 1 ? 'like' : 'likes'}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: AppColors.textSecondaryLight,
-                              ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.commentsCount(post.commentsCount),
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(
-                                color: AppColors.textSecondaryLight,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const Divider(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _DetailActionButton(
-                        icon: post.isLiked
-                            ? Icons.thumb_up
-                            : Icons.thumb_up_outlined,
-                        label: l10n.like,
-                        isActive: post.isLiked,
-                        onTap: _onLikeTap,
-                      ),
-                      _DetailActionButton(
-                        icon: Icons.chat_bubble_outline,
-                        label: l10n.comment,
-                        onTap: () {
-                          FocusScope.of(context).requestFocus(_commentFocus);
-                        },
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  // ── Rate & Review ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            ...List.generate(5, (index) {
-                              final filled = index < post.averageRating.round();
-                              return Icon(
-                                filled ? Icons.star : Icons.star_border,
-                                size: 18,
-                                color: Colors.amber,
-                              );
-                            }),
-                            const SizedBox(width: 8),
-                            Text(
-                              post.reviewsCount > 0
-                                  ? l10n.ratingAverageSummary(
-                                      post.averageRating,
-                                      post.reviewsCount,
-                                    )
-                                  : l10n.noRatingsYet,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSecondaryLight,
-                                  ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, -2),
                             ),
                           ],
                         ),
-                        if (post.userRating != null) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            l10n.youRatedStars(post.userRating!),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: AppColors.primaryBlue,
-                                  fontWeight: FontWeight.w600,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                Icons.camera_alt_outlined,
+                                color: context.textSecondary,
+                              ),
+                              onPressed: () {},
+                            ),
+                            Expanded(
+                              child: TextField(
+                                controller: _commentController,
+                                focusNode: _commentFocus,
+                                enabled: !_submittingComment,
+                                textInputAction: TextInputAction.send,
+                                decoration: InputDecoration(
+                                  hintText: _replyingTo == null
+                                      ? l10n.writeComment
+                                      : l10n.writeReply,
+                                  hintStyle: TextStyle(
+                                    color: context.textSecondary,
+                                    fontSize: 15,
+                                  ),
+                                  filled: true,
+                                  fillColor: context.inputFill,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
                                 ),
-                          ),
-                        ],
-                        const SizedBox(height: 4),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: TextButton.icon(
-                            onPressed: _onRateAndReview,
-                            icon: Icon(
-                              post.userRating != null
-                                  ? Icons.star
-                                  : Icons.star_outline,
-                              size: 20,
+                                onSubmitted: _submitComment,
+                                onChanged: (_) => setState(() {}),
+                              ),
                             ),
-                            label: Text(
-                              post.userRating != null
-                                  ? l10n.updateYourRating
-                                  : l10n.rateAndReview,
-                            ),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.primaryBlue,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // ── Comments section ──
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.commentsTitle,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleSmall
-                              ?.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        if (post.commentsCount > 0) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            l10n.commentsCount(post.commentsCount),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondaryLight,
-                                ),
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        if (_hasMoreComments && _comments.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: TextButton(
-                                onPressed: _loadingMoreComments
+                            if (_commentController.text.trim().isNotEmpty)
+                              IconButton(
+                                onPressed: _submittingComment
                                     ? null
-                                    : () => _loadComments(loadMore: true),
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.primaryBlue,
-                                  padding: EdgeInsets.zero,
-                                ),
-                                child: _loadingMoreComments
-                                    ? const SizedBox(
-                                        width: 18,
-                                        height: 18,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
+                                    : () => _submitComment(
+                                          _commentController.text,
                                         ),
-                                      )
-                                    : Text(l10n.loadPreviousComments),
-                              ),
-                            ),
-                          ),
-                        if (_loadingComments)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        else if (_commentsError != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _commentsError!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.accentRed,
-                                    ),
-                              ),
-                              TextButton(
-                                onPressed: _loadComments,
-                                child: Text(l10n.retry),
-                              ),
-                            ],
-                          )
-                        else if (_comments.isEmpty)
-                          Text(
-                            l10n.noCommentsYet,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondaryLight,
-                                  fontStyle: FontStyle.italic,
+                                icon: const Icon(
+                                  Icons.send_rounded,
+                                  color: AppColors.primaryBlue,
                                 ),
-                          )
-                        else
-                          ..._comments.map(
-                            (comment) => CommentThread(
-                              comment: comment,
-                              timeAgoBuilder: _formatTimeAgo,
-                              canManageBuilder: _canManageComment,
-                              onEdit: _editComment,
-                              onDelete: _deleteComment,
-                              onReply: _startReply,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          // ── Write comment bar (Facebook-style bottom input) ──
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (_replyingTo != null)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  color: AppColors.lightBackground,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          '${l10n.replyingTo} ${_replyingTo!.authorName}',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.primaryBlue,
-                                fontWeight: FontWeight.w600,
+                              )
+                            else
+                              IconButton(
+                                icon: Icon(
+                                  Icons.emoji_emotions_outlined,
+                                  color: context.textSecondary,
+                                ),
+                                onPressed: () {},
                               ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, size: 18),
-                        color: AppColors.textSecondaryLight,
-                        onPressed: _cancelReply,
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(
-                          minWidth: 32,
-                          minHeight: 32,
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              Container(
-            padding: EdgeInsets.only(
-              left: 16,
-              right: 16,
-              top: 8,
-              bottom: 8 + MediaQuery.of(context).padding.bottom,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.06),
-                  blurRadius: 4,
-                  offset: const Offset(0, -2),
-                ),
               ],
             ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.camera_alt_outlined,
-                    color: AppColors.textSecondaryLight,
-                  ),
-                  onPressed: () {},
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    focusNode: _commentFocus,
-                    enabled: !_submittingComment,
-                    textInputAction: TextInputAction.send,
-                    decoration: InputDecoration(
-                      hintText: _replyingTo == null
-                          ? l10n.writeComment
-                          : l10n.writeReply,
-                      hintStyle: TextStyle(
-                        color: AppColors.textSecondaryLight,
-                        fontSize: 15,
-                      ),
-                      filled: true,
-                      fillColor: AppColors.lightBackground,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(24),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                    ),
-                    onSubmitted: _submitComment,
-                    onChanged: (_) => setState(() {}),
-                  ),
-                ),
-                if (_commentController.text.trim().isNotEmpty)
-                  IconButton(
-                    onPressed:
-                        _submittingComment ? null : () => _submitComment(_commentController.text),
-                    icon: Icon(
-                      Icons.send_rounded,
-                      color: AppColors.primaryBlue,
-                    ),
-                  )
-                else
-                  IconButton(
-                    icon: Icon(
-                      Icons.emoji_emotions_outlined,
-                      color: AppColors.textSecondaryLight,
-                    ),
-                    onPressed: () {},
-                  ),
-              ],
-            ),
-          ),
-            ],
           ),
         ],
       ),
@@ -982,7 +941,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         comment.userId == _currentUserId;
   }
 
-  Future<void> _onRateAndReview() async {
+  Future<void> _onRateStarTap(int rating) async {
     final token = await AuthService.getToken();
     if (!mounted) return;
     if (token == null) {
@@ -994,10 +953,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       _loadCurrentUser();
     }
     if (!mounted) return;
-    await _showReviewSheet();
+    await _showReviewSheet(initialRating: rating);
   }
 
-  Future<void> _showReviewSheet({String? initialComment}) async {
+  Future<void> _showReviewSheet({
+    String? initialComment,
+    int? initialRating,
+  }) async {
     final result = await showModalBottomSheet<({
       int rating,
       int reviewsCount,
@@ -1005,13 +967,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     })>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.cardBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => ReviewSheet(
         postId: _post.id,
-        initialRating: _post.userRating ?? 5,
+        initialRating: initialRating ?? _post.userRating ?? 5,
         initialComment: initialComment,
       ),
     );
@@ -1029,53 +991,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     await AnalyticsClient.instance.trackReview(_post.id);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.ratingSubmitted)),
-    );
-  }
-}
-
-class _DetailActionButton extends StatelessWidget {
-  const _DetailActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-    this.isActive = false,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    final color =
-        isActive ? AppColors.primaryBlue : AppColors.textSecondaryLight;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 22, color: color),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: color,
-                      fontWeight:
-                          isActive ? FontWeight.w600 : FontWeight.normal,
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    _showFloatingSnack(context.l10n.ratingSubmitted);
   }
 }

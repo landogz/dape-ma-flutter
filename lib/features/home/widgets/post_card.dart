@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../core/accessibility/accessibility_controller.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
@@ -41,10 +43,12 @@ class _PostCardState extends State<PostCard> {
       if (videoId != null && videoId.isNotEmpty) {
         _ytController = YoutubePlayerController(
           initialVideoId: videoId,
-          flags: const YoutubePlayerFlags(
+          flags: YoutubePlayerFlags(
             autoPlay: false,
             mute: false,
             controlsVisibleAtStart: true,
+            enableCaption: AccessibilityController.instance.captions,
+            captionLanguage: 'en',
           ),
         );
       }
@@ -136,7 +140,7 @@ class _PostCardState extends State<PostCard> {
                           post.authorName,
                           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.textPrimaryLight,
+                                color: context.textPrimary,
                               ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -145,7 +149,7 @@ class _PostCardState extends State<PostCard> {
                           Text(
                             timeAgo,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textSecondaryLight,
+                                  color: context.textSecondary,
                                 ),
                           ),
                       ],
@@ -160,7 +164,7 @@ class _PostCardState extends State<PostCard> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.keyboard_arrow_down),
-                    color: AppColors.textSecondaryLight,
+                    color: context.textSecondary,
                     onPressed: () {},
                   ),
                 ],
@@ -174,7 +178,7 @@ class _PostCardState extends State<PostCard> {
                   post.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimaryLight,
+                        color: context.textPrimary,
                       ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -186,7 +190,7 @@ class _PostCardState extends State<PostCard> {
               child: Text(
                 displayText,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textPrimaryLight,
+                      color: context.textPrimary,
                     ),
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
@@ -199,7 +203,7 @@ class _PostCardState extends State<PostCard> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primaryBlue.withOpacity(0.08),
+                    color: context.softBrandSurface,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
@@ -264,14 +268,14 @@ class _PostCardState extends State<PostCard> {
                   Text(
                     l10n.likesCount(post.likesCount),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondaryLight,
+                          color: context.textSecondary,
                         ),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     l10n.commentsCount(post.commentsCount),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondaryLight,
+                          color: context.textSecondary,
                         ),
                   ),
                   if (post.reviewsCount > 0) ...[
@@ -279,13 +283,13 @@ class _PostCardState extends State<PostCard> {
                     Icon(
                       Icons.star,
                       size: 14,
-                      color: Colors.amber.shade700,
+                      color: Colors.amber,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       '${post.averageRating.toStringAsFixed(1)} (${post.reviewsCount})',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.textSecondaryLight,
+                            color: context.textSecondary,
                             fontWeight: FontWeight.w600,
                           ),
                     ),
@@ -339,7 +343,7 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color =
-        isActive ? AppColors.primaryBlue : AppColors.textSecondaryLight;
+        isActive ? AppColors.primaryBlue : context.textSecondary;
     return Material(
       color: Colors.transparent,
       child: InkWell(

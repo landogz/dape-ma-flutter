@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/bible_models.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'bible_service.dart';
 
 class BibleReaderScreen extends StatefulWidget {
@@ -109,7 +110,7 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
                       Text(
                         _passage!.translation,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondaryLight,
+                              color: context.textSecondary,
                             ),
                       ),
                       const SizedBox(height: 20),

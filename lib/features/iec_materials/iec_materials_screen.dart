@@ -4,7 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/iec_material.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
-import '../../core/theme/app_colors.dart';
+import '../hope/hope_colors.dart';
 import 'widgets/iec_material_card.dart';
 
 class IecMaterialsScreen extends StatefulWidget {
@@ -19,6 +19,7 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
   bool _loading = false;
   String _topic = '';
   String _mediaType = '';
+  String _search = '';
   final _searchController = TextEditingController();
 
   static const _topics = [
@@ -28,13 +29,6 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
     'Youth',
     'Family',
     'Recovery',
-  ];
-
-  static const _mediaTypes = [
-    {'value': '', 'labelKey': 'all'},
-    {'value': 'gif', 'label': 'GIF'},
-    {'value': 'youtube', 'label': 'YouTube'},
-    {'value': 'image', 'label': 'Image'},
   ];
 
   @override
@@ -58,8 +52,7 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
           'per_page': 48,
           if (_topic.isNotEmpty) 'topic': _topic,
           if (_mediaType.isNotEmpty) 'media_type': _mediaType,
-          if (_searchController.text.trim().isNotEmpty)
-            'search': _searchController.text.trim(),
+          if (_search.trim().isNotEmpty) 'search': _search.trim(),
         },
       );
       final root = res.data ?? <String, dynamic>{};
@@ -87,128 +80,183 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final topicChips = _topics
+        .map((topic) => (topic, topic.isEmpty ? l10n.allTopics : topic))
+        .toList();
+    final mediaChips = <(String, String)>[
+      ('', l10n.allMediaTypes),
+      ('gif', 'GIF'),
+      ('youtube', 'YouTube'),
+      ('image', 'Image'),
+    ];
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(l10n.iecMaterialsTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: HopeColors.purple,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          l10n.iecMaterialsTitle,
+          style: const TextStyle(
+            color: HopeColors.purple,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
+      body: Column(
+        children: [
+          if (l10n.iecMaterialsSubtitle.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.iecMaterialsSubtitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondaryLight,
-                        ),
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  l10n.iecMaterialsSubtitle,
+                  style: const TextStyle(
+                    color: HopeColors.muted,
+                    fontSize: 13,
+                    height: 1.35,
                   ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchIecMaterialsHint,
-                      prefixIcon: const Icon(Icons.search),
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    onSubmitted: (_) => _load(),
-                  ),
-                  const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _topics.map((topic) {
-                        final selected = _topic == topic;
-                        final label =
-                            topic.isEmpty ? l10n.allTopics : topic;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(label),
-                            selected: selected,
-                            onSelected: (_) {
-                              setState(
-                                () => _topic = selected ? '' : topic,
-                              );
-                              _load();
-                            },
-                            selectedColor:
-                                AppColors.primaryBlue.withValues(alpha: 0.2),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _mediaTypes.map((type) {
-                        final value = type['value']!;
-                        final selected = _mediaType == value;
-                        final label = value.isEmpty
-                            ? l10n.allMediaTypes
-                            : type['label']!;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: FilterChip(
-                            label: Text(label),
-                            selected: selected,
-                            onSelected: (_) {
-                              setState(
-                                () => _mediaType = selected ? '' : value,
-                              );
-                              _load();
-                            },
-                            selectedColor: AppColors.secondaryBlue
-                                .withValues(alpha: 0.18),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _items.isEmpty
-                      ? Center(child: Text(l10n.noIecMaterialsFound))
-                      : RefreshIndicator(
-                          onRefresh: _load,
-                          child: GridView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              mainAxisSpacing: 12,
-                              crossAxisSpacing: 12,
-                              childAspectRatio: 0.72,
-                            ),
-                            itemCount: _items.length,
-                            itemBuilder: (context, index) {
-                              return IecMaterialCard(
-                                material: _items[index],
-                                index: index,
-                              );
-                            },
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+            child: Row(
+              children: topicChips.map((chip) {
+                final selected = _topic == chip.$1;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(chip.$2),
+                    selected: selected,
+                    onSelected: (_) {
+                      setState(() => _topic = chip.$1);
+                      _load();
+                    },
+                    selectedColor: HopeColors.purple,
+                    labelStyle: TextStyle(
+                      color: selected ? Colors.white : HopeColors.muted,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color:
+                          selected ? HopeColors.purple : HopeColors.cardBorder,
+                    ),
+                    showCheckmark: false,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Row(
+              children: mediaChips.map((chip) {
+                final selected = _mediaType == chip.$1;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(chip.$2),
+                    selected: selected,
+                    onSelected: (_) {
+                      setState(() => _mediaType = chip.$1);
+                      _load();
+                    },
+                    selectedColor: HopeColors.purple,
+                    labelStyle: TextStyle(
+                      color: selected ? Colors.white : HopeColors.muted,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color:
+                          selected ? HopeColors.purple : HopeColors.cardBorder,
+                    ),
+                    showCheckmark: false,
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: TextField(
+              controller: _searchController,
+              onSubmitted: (v) {
+                setState(() => _search = v);
+                _load();
+              },
+              onChanged: (v) {
+                if (v.isEmpty && _search.isNotEmpty) {
+                  setState(() => _search = '');
+                  _load();
+                }
+              },
+              decoration: InputDecoration(
+                hintText: l10n.searchIecMaterialsHint,
+                hintStyle: const TextStyle(color: HopeColors.muted),
+                prefixIcon:
+                    const Icon(Icons.search, color: HopeColors.purple),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide:
+                      const BorderSide(color: HopeColors.purple, width: 1.5),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: HopeColors.purple),
+                  )
+                : _items.isEmpty
+                    ? Center(
+                        child: Text(
+                          l10n.noIecMaterialsFound,
+                          style: const TextStyle(
+                            color: HopeColors.muted,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-            ),
-          ],
-        ),
+                      )
+                    : RefreshIndicator(
+                        color: HopeColors.purple,
+                        onRefresh: _load,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: _items.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            return IecMaterialCard(
+                              material: _items[index],
+                              index: index,
+                            );
+                          },
+                        ),
+                      ),
+          ),
+        ],
       ),
     );
   }

@@ -4,7 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/contest.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
-import '../../core/theme/app_colors.dart';
+import '../hope/hope_colors.dart';
 import 'widgets/contest_card.dart';
 
 enum ContestCategoryFilter { all, song, poster, video }
@@ -21,6 +21,7 @@ class _ContestsScreenState extends State<ContestsScreen> {
   bool _loading = false;
   ContestCategoryFilter _categoryFilter = ContestCategoryFilter.all;
   final _searchController = TextEditingController();
+  String _search = '';
 
   @override
   void initState() {
@@ -35,16 +36,12 @@ class _ContestsScreenState extends State<ContestsScreen> {
   }
 
   String? get _categoryQuery {
-    switch (_categoryFilter) {
-      case ContestCategoryFilter.all:
-        return null;
-      case ContestCategoryFilter.song:
-        return 'song';
-      case ContestCategoryFilter.poster:
-        return 'poster';
-      case ContestCategoryFilter.video:
-        return 'video';
-    }
+    return switch (_categoryFilter) {
+      ContestCategoryFilter.all => null,
+      ContestCategoryFilter.song => 'song',
+      ContestCategoryFilter.poster => 'poster',
+      ContestCategoryFilter.video => 'video',
+    };
   }
 
   Future<void> _loadContests() async {
@@ -54,8 +51,7 @@ class _ContestsScreenState extends State<ContestsScreen> {
       final res = await api.get<Map<String, dynamic>>(
         Endpoints.contests,
         query: <String, dynamic>{
-          if (_searchController.text.trim().isNotEmpty)
-            'search': _searchController.text.trim(),
+          if (_search.trim().isNotEmpty) 'search': _search.trim(),
           if (_categoryQuery != null) 'category': _categoryQuery,
         },
       );
@@ -90,152 +86,161 @@ class _ContestsScreenState extends State<ContestsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final chips = <(ContestCategoryFilter, String)>[
+      (ContestCategoryFilter.all, l10n.contestCategoryAll),
+      (ContestCategoryFilter.song, l10n.contestCategorySong),
+      (ContestCategoryFilter.poster, l10n.contestCategoryPoster),
+      (ContestCategoryFilter.video, l10n.contestCategoryVideo),
+    ];
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(l10n.contestsTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: HopeColors.purple,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          l10n.contestsTitle,
+          style: const TextStyle(
+            color: HopeColors.purple,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: l10n.searchContestsHint,
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+      body: Column(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            child: Row(
+              children: chips.map((chip) {
+                final selected = _categoryFilter == chip.$1;
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(chip.$2),
+                    selected: selected,
+                    onSelected: (_) => _onCategorySelected(chip.$1),
+                    selectedColor: HopeColors.purple,
+                    labelStyle: TextStyle(
+                      color: selected ? Colors.white : HopeColors.muted,
+                      fontWeight: FontWeight.w700,
+                    ),
+                    backgroundColor: Colors.white,
+                    side: BorderSide(
+                      color:
+                          selected ? HopeColors.purple : HopeColors.cardBorder,
+                    ),
+                    showCheckmark: false,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
                   ),
+                );
+              }).toList(),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+            child: TextField(
+              controller: _searchController,
+              onSubmitted: (v) {
+                setState(() => _search = v);
+                _loadContests();
+              },
+              onChanged: (v) {
+                if (v.isEmpty && _search.isNotEmpty) {
+                  setState(() => _search = '');
+                  _loadContests();
+                }
+              },
+              decoration: InputDecoration(
+                hintText: l10n.searchContestsHint,
+                hintStyle: const TextStyle(color: HopeColors.muted),
+                prefixIcon:
+                    const Icon(Icons.search, color: HopeColors.purple),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: HopeColors.cardBorder),
                 ),
-                onSubmitted: (_) => _loadContests(),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  borderSide:
+                      const BorderSide(color: HopeColors.purple, width: 1.5),
+                ),
               ),
             ),
-            SizedBox(
-              height: 48,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                children: [
-                  _FilterChip(
-                    label: l10n.contestCategoryAll,
-                    selected: _categoryFilter == ContestCategoryFilter.all,
-                    onSelected: () =>
-                        _onCategorySelected(ContestCategoryFilter.all),
-                  ),
-                  _FilterChip(
-                    label: l10n.contestCategorySong,
-                    selected: _categoryFilter == ContestCategoryFilter.song,
-                    onSelected: () =>
-                        _onCategorySelected(ContestCategoryFilter.song),
-                  ),
-                  _FilterChip(
-                    label: l10n.contestCategoryPoster,
-                    selected: _categoryFilter == ContestCategoryFilter.poster,
-                    onSelected: () =>
-                        _onCategorySelected(ContestCategoryFilter.poster),
-                  ),
-                  _FilterChip(
-                    label: l10n.contestCategoryVideo,
-                    selected: _categoryFilter == ContestCategoryFilter.video,
-                    onSelected: () =>
-                        _onCategorySelected(ContestCategoryFilter.video),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _contests.isEmpty
-                      ? Center(
+          ),
+          Expanded(
+            child: _loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: HopeColors.purple),
+                  )
+                : _contests.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.emoji_events_outlined,
-                                size: 64,
-                                color: AppColors.textSecondaryLight,
+                                size: 56,
+                                color: HopeColors.muted,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                               Text(
                                 l10n.noContestsFound,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
-                                    ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: HopeColors.purple,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 6),
                               Text(
-                                _searchController.text.isNotEmpty ||
+                                _search.isNotEmpty ||
                                         _categoryFilter !=
                                             ContestCategoryFilter.all
                                     ? l10n.tryDifferentSearch
                                     : l10n.checkBackLater,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.textSecondaryLight,
-                                    ),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: HopeColors.muted,
+                                  fontSize: 13,
+                                ),
                               ),
                             ],
                           ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _loadContests,
-                          child: ListView.builder(
-                            padding: const EdgeInsets.only(bottom: 24),
-                            physics: const AlwaysScrollableScrollPhysics(),
-                            itemCount: _contests.length,
-                            itemBuilder: (context, index) {
-                              return ContestCard(contest: _contests[index]);
-                            },
-                          ),
                         ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final VoidCallback onSelected;
-
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        onSelected: (_) => onSelected(),
-        selectedColor: AppColors.primaryBlue.withOpacity(0.2),
-        labelStyle: TextStyle(
-          color: selected
-              ? AppColors.primaryBlue
-              : AppColors.textSecondaryLight,
-          fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-        ),
+                      )
+                    : RefreshIndicator(
+                        color: HopeColors.purple,
+                        onRefresh: _loadContests,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          itemCount: _contests.length,
+                          separatorBuilder: (_, _) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            return ContestCard(contest: _contests[index]);
+                          },
+                        ),
+                      ),
+          ),
+        ],
       ),
     );
   }

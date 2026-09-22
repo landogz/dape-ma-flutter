@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Branding header for login, register, and forgot password screens.
 class AuthHeader extends StatelessWidget {
@@ -31,7 +32,7 @@ class AuthHeader extends StatelessWidget {
           'DAPE-MA',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimaryLight,
+                color: context.textPrimary,
                 letterSpacing: 0.5,
               ),
         ),
@@ -39,7 +40,7 @@ class AuthHeader extends StatelessWidget {
         Text(
           'Citizen information & rehab directory',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondaryLight,
+                color: context.textSecondary,
               ),
           textAlign: TextAlign.center,
         ),

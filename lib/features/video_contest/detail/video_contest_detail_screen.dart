@@ -9,6 +9,7 @@ import '../../../core/models/video_contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../../auth/login_screen.dart';
 import '../submit/video_contest_submit_screen.dart';
 
@@ -182,7 +183,7 @@ class _VideoContestDetailScreenState extends State<VideoContestDetailScreen> {
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimaryLight,
+                                  color: context.textPrimary,
                                 ),
                       ),
                       const SizedBox(height: 8),
@@ -204,7 +205,7 @@ class _VideoContestDetailScreenState extends State<VideoContestDetailScreen> {
                           _contest!.description!,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     height: 1.45,
                                   ),
                         ),
@@ -224,7 +225,7 @@ class _VideoContestDetailScreenState extends State<VideoContestDetailScreen> {
                           _contest!.rules!,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     height: 1.45,
                                   ),
                         ),
@@ -305,7 +306,7 @@ class _VideoContestDetailScreenState extends State<VideoContestDetailScreen> {
                           l10n.noPublishedVideosYet,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondaryLight,
+                                    color: context.textSecondary,
                                   ),
                         )
                       else
@@ -391,7 +392,7 @@ class _PublishedVideoTileState extends State<_PublishedVideoTile> {
             Text(
               entry.creatorName,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: context.textSecondary,
                   ),
             ),
             if (_yt != null) ...[

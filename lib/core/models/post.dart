@@ -14,6 +14,7 @@ class Post {
   final int likesCount;
   final int commentsCount;
   final bool isLiked;
+  final bool commentsEnabled;
   final double averageRating;
   final int reviewsCount;
   final int? userRating;
@@ -32,6 +33,7 @@ class Post {
     this.likesCount = 0,
     this.commentsCount = 0,
     this.isLiked = false,
+    this.commentsEnabled = true,
     this.averageRating = 0,
     this.reviewsCount = 0,
     this.userRating,
@@ -41,6 +43,7 @@ class Post {
     int? likesCount,
     int? commentsCount,
     bool? isLiked,
+    bool? commentsEnabled,
     double? averageRating,
     int? reviewsCount,
     int? userRating,
@@ -60,6 +63,7 @@ class Post {
       likesCount: likesCount ?? this.likesCount,
       commentsCount: commentsCount ?? this.commentsCount,
       isLiked: isLiked ?? this.isLiked,
+      commentsEnabled: commentsEnabled ?? this.commentsEnabled,
       averageRating: averageRating ?? this.averageRating,
       reviewsCount: reviewsCount ?? this.reviewsCount,
       userRating: clearUserRating ? null : (userRating ?? this.userRating),
@@ -87,6 +91,9 @@ class Post {
       likesCount: parseJsonInt(json['likes_count']),
       commentsCount: parseJsonInt(json['comments_count']),
       isLiked: parseJsonBool(json['is_liked']),
+      commentsEnabled: json.containsKey('comments_enabled')
+          ? parseJsonBool(json['comments_enabled'], true)
+          : true,
       averageRating: parseJsonDouble(avg),
       reviewsCount: parseJsonInt(reviewCount),
       userRating: json['user_rating'] == null

@@ -1,64 +1,173 @@
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_client.dart';
+import '../../core/auth/auth_service.dart';
+import '../../core/l10n/app_strings.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
-import '../../core/auth/auth_service.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/analytics/analytics_client.dart';
-import '../../core/l10n/locale_scope.dart';
-import '../account/account_screen.dart';
+import '../account/profile/profile_models.dart';
+import '../account/profile/profile_stats_service.dart';
 import '../auth/login_screen.dart';
-import '../bible/bible_home_screen.dart';
-import '../bookmarks/bookmarks_screen.dart';
-import '../chat/botpress_chat_screen.dart';
-import '../diary/diary_list_screen.dart';
+import '../care/care_hub_screen.dart';
+import '../hope/hope_hub_screen.dart';
+import '../kid_listo/kid_listo_welcome_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../notifications/notifications_service.dart';
-import '../ddb_services/ddb_services_screen.dart';
-import '../post_engagement/post_engagement_service.dart';
 import '../post_detail/post_detail_screen.dart';
-import 'widgets/category_tabs.dart';
-import 'widgets/post_card.dart';
+import '../post_engagement/post_engagement_service.dart';
+import '../posts/posts_screen.dart';
+import 'widgets/dape_service_tiles.dart';
+import 'widgets/featured_post_card.dart';
+import 'widgets/home_banner_carousel.dart';
+import 'widgets/home_header.dart';
+import 'widgets/recent_activity_list.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Post> initialPosts;
+  final ValueChanged<int>? onSwitchTab;
 
-  const HomeScreen({super.key, required this.initialPosts});
+  const HomeScreen({
+    super.key,
+    required this.initialPosts,
+    this.onSwitchTab,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  static const _lessonGoal = 6;
+
   List<Post> _posts = [];
-  bool _loading = false;
-  String _currentCategory = 'all';
-  int _currentTabIndex = 0;
   bool _isLoggedIn = false;
   Set<int> _bookmarkedIds = {};
   String? _userName;
-  String? _userProfileImageUrl;
   int _unreadNotifications = 0;
+  int _lessonsCompleted = 0;
+  int _bannerRefreshKey = 0;
+  List<HomeActivityRow> _recentActivity = const [];
 
-  final _searchController = TextEditingController();
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _posts = widget.initialPosts;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _refreshAuthState();
+      if (!_isLoggedIn) {
+        setState(() => _recentActivity = _guestDiscoverActivity());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  String get _firstName {
+    final name = _userName?.trim() ?? '';
+    if (name.isEmpty) return '';
+    return name.split(RegExp(r'\s+')).first;
+  }
+
+  String _displayGreeting(AppStrings l10n) {
+    final name = _firstName.isNotEmpty ? _firstName : l10n.guest;
+    return l10n.homeHiName(name);
+  }
+
+  Post? get _featuredPost {
+    if (_posts.isEmpty) return null;
+    final withImage = _posts.where((p) {
+      final url = p.imageUrl?.trim() ?? '';
+      return url.isNotEmpty;
+    });
+    return withImage.isNotEmpty ? withImage.first : _posts.first;
+  }
 
   Future<void> _refreshAuthState() async {
     final token = await AuthService.getToken();
     if (mounted) {
       setState(() => _isLoggedIn = token != null && token.isNotEmpty);
       if (_isLoggedIn) {
-        _loadBookmarkedIds();
-        _loadUserProfile();
-        _loadUnreadNotifications();
+        await Future.wait([
+          _loadBookmarkedIds(),
+          _loadUserProfile(),
+          _loadUnreadNotifications(),
+          _loadProfileExtras(),
+        ]);
       } else {
         setState(() {
           _userName = null;
-          _userProfileImageUrl = null;
           _unreadNotifications = 0;
+          _lessonsCompleted = 0;
+          _recentActivity = _guestDiscoverActivity();
         });
       }
     }
+  }
+
+  List<HomeActivityRow> _guestDiscoverActivity() {
+    final l10n = context.l10n;
+    return _posts.take(2).map((p) {
+      return HomeActivityRow(
+        id: p.id,
+        title: p.title,
+        subtitle: l10n.homeDiscover,
+        isLesson: false,
+      );
+    }).toList();
+  }
+
+  Future<void> _loadProfileExtras() async {
+    if (!_isLoggedIn) return;
+    try {
+      final summary = await ProfileStatsService.instance.fetchSummary();
+      if (!mounted) return;
+      final rows = <HomeActivityRow>[];
+      for (final item in summary.lessonActivity.take(2)) {
+        rows.add(_activityRow(item, isLesson: true));
+      }
+      if (rows.length < 2) {
+        for (final item in summary.articleActivity) {
+          if (rows.length >= 2) break;
+          rows.add(_activityRow(item, isLesson: false));
+        }
+      }
+      setState(() {
+        _lessonsCompleted = summary.lessonsCompleted;
+        _recentActivity = rows;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _lessonsCompleted = 0;
+        _recentActivity = _guestDiscoverActivity();
+      });
+    }
+  }
+
+  HomeActivityRow _activityRow(
+    ProfileActivityItem item, {
+    required bool isLesson,
+  }) {
+    final l10n = context.l10n;
+    final title = isLesson
+        ? l10n.homeYouCompleted(item.title)
+        : l10n.homeYouRead(item.title);
+    return HomeActivityRow(
+      id: item.id,
+      title: title,
+      subtitle: item.subtitle?.trim() ?? '',
+      isLesson: isLesson,
+    );
   }
 
   Future<void> _loadUserProfile() async {
@@ -72,18 +181,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ? data['data'] as Map<String, dynamic>
           : data;
       final name = user['name'] as String?;
-      final profileImageUrl = user['profile_image_url'] as String?;
       if (mounted) {
         setState(() {
-          _userName = name != null && name.trim().isNotEmpty ? name.trim() : null;
-          _userProfileImageUrl = profileImageUrl != null && profileImageUrl.isNotEmpty ? profileImageUrl : null;
+          _userName =
+              name != null && name.trim().isNotEmpty ? name.trim() : null;
         });
       }
     } catch (_) {
-      if (mounted) setState(() {
-        _userName = null;
-        _userProfileImageUrl = null;
-      });
+      if (mounted) {
+        setState(() {
+          _userName = null;
+        });
+      }
     }
   }
 
@@ -116,25 +225,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    _posts = widget.initialPosts;
-    _refreshAuthState();
-  }
-
-  Future<void> _loadPosts({String? category}) async {
-    final selectedCategory = category ?? 'all';
-    setState(() => _loading = true);
+  Future<void> _loadPosts() async {
     try {
       final token = await AuthService.getToken();
       final api = ApiClient(token: token);
-      final queryParams = (selectedCategory != 'all')
-          ? <String, dynamic>{'category': selectedCategory}
-          : null;
       final res = await api.get<Map<String, dynamic>>(
         Endpoints.posts,
-        query: queryParams,
       );
       final root = res.data ?? <String, dynamic>{};
       List<dynamic> rawList = const [];
@@ -146,84 +242,49 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       if (!mounted) return;
       setState(() {
-        _currentCategory = selectedCategory;
         _posts = rawList
             .map((e) => Post.fromJson(e as Map<String, dynamic>))
             .toList();
-      });
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _search(String query) async {
-    if (query.isEmpty) {
-      await _loadPosts(category: _currentCategory);
-      return;
-    }
-    setState(() => _loading = true);
-    try {
-      final api = ApiClient();
-      final res = await api.get<Map<String, dynamic>>(
-        Endpoints.searchQuery(
-          query,
-          category: _currentCategory,
-        ),
-      );
-      final root = res.data ?? <String, dynamic>{};
-      final data = (root['data'] is Map<String, dynamic>)
-          ? (root['data']['posts'] as List<dynamic>? ?? const [])
-          : <dynamic>[];
-      setState(() {
-        _posts = data
-            .map((e) => Post.fromJson(e as Map<String, dynamic>))
-            .toList();
-      });
-
-      // Fire analytics for mobile searches
-      await AnalyticsClient.instance.trackSearch();
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _onLikeTap(Post post) async {
-    if (!_isLoggedIn) {
-      final loggedIn = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-      if (loggedIn != true || !mounted) return;
-      await _refreshAuthState();
-    }
-    try {
-      final result = await PostEngagementService.toggleLike(post.id);
-      if (!mounted) return;
-      setState(() {
-        final index = _posts.indexWhere((p) => p.id == post.id);
-        if (index != -1) {
-          _posts[index] = _posts[index].copyWith(
-            isLiked: result.liked,
-            likesCount: result.likesCount,
-          );
+        if (!_isLoggedIn) {
+          _recentActivity = _guestDiscoverActivity();
         }
       });
-      if (result.liked) {
-        await AnalyticsClient.instance.trackLike(post.id);
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            PostEngagementService.friendlyError(
-              e,
-              'like this post',
-              context.l10n,
-            ),
-          ),
-        ),
-      );
+    } catch (_) {
+      // Keep existing posts on refresh failure.
     }
+  }
+
+  Future<void> _refreshHome() async {
+    await Future.wait([
+      _loadPosts(),
+      _refreshAuthState(),
+    ]);
+    if (mounted) {
+      setState(() => _bannerRefreshKey++);
+    }
+  }
+
+  void _openKidListo() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => KidListoWelcomeScreen(
+          initialPosts: _posts,
+          replaceOnContinue: false,
+        ),
+      ),
+    );
+  }
+
+  void _openPosts({String? query}) {
+    final q = (query ?? '').trim();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PostsScreen(
+          initialPosts: _posts,
+          initialQuery: q.isEmpty ? null : q,
+        ),
+      ),
+    );
   }
 
   Future<void> _openPostDetail(
@@ -252,87 +313,48 @@ class _HomeScreenState extends State<HomeScreen> {
     await _loadBookmarkedIds();
   }
 
-  Future<void> _onBookmarkTap(Post post) async {
-    if (!_isLoggedIn) {
-      await Navigator.of(context).push<bool>(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-      _refreshAuthState();
+  Future<void> _openPostById(int id) async {
+    final existing = _posts.where((p) => p.id == id).toList();
+    if (existing.isNotEmpty) {
+      await _openPostDetail(existing.first);
       return;
     }
     try {
-      await AuthService.authedPost<Map<String, dynamic>>(
-        Endpoints.bookmarks,
-        data: <String, dynamic>{'post_id': post.id},
-      );
-      await _loadBookmarkedIds();
+      final post = await PostEngagementService.fetchPost(id);
       if (!mounted) return;
-      final added = _bookmarkedIds.contains(post.id);
-      if (added) {
-        await AnalyticsClient.instance.trackBookmark(post.id);
-      }
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            added ? context.l10n.savedToBookmarks : context.l10n.removedFromBookmarks,
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      await _openPostDetail(post);
     } catch (_) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.bookmarkUpdateFailed),
-        ),
-      );
+      // Ignore missing posts from activity feed.
     }
   }
 
-  void _onBottomTabTap(int index) async {
-    setState(() => _currentTabIndex = index);
-    if (index == 1) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const DdbServicesScreen()),
-      );
-    } else if (index == 2) {
-      if (!_isLoggedIn) {
-        await Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        );
-        await _refreshAuthState();
-        if (!_isLoggedIn || !mounted) return;
-      }
-      if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const BookmarksScreen()),
-      );
-    } else if (index == 3) {
-      Navigator.of(context)
-          .push(
-            MaterialPageRoute(builder: (_) => const AccountScreen()),
-          )
-          .then((_) => _refreshAuthState());
+  void _openCare() {
+    if (widget.onSwitchTab != null) {
+      widget.onSwitchTab!(3);
+      return;
     }
-  }
-
-  void _openDiary() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const DiaryListScreen()),
+      MaterialPageRoute(builder: (_) => const CareHubScreen()),
     );
   }
 
-  void _openBible() {
+  void _openHope() {
+    if (widget.onSwitchTab != null) {
+      widget.onSwitchTab!(1);
+      return;
+    }
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const BibleHomeScreen()),
+      MaterialPageRoute(builder: (_) => const HopeHubScreen()),
     );
   }
+
   void _onNotificationTap() {
     if (!_isLoggedIn) {
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      ).then((_) => _refreshAuthState());
+      Navigator.of(context)
+          .push(
+            MaterialPageRoute(builder: (_) => const LoginScreen()),
+          )
+          .then((_) => _refreshAuthState());
     } else {
       Navigator.of(context)
           .push(
@@ -342,274 +364,117 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _showLearnPhase2() {
+    final l10n = context.l10n;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.hopeLearnPhase2)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final greeting = _displayGreeting(l10n);
+    final featured = _featuredPost;
+    final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+      backgroundColor: const Color(0xFFF7F9FC),
+      body: RefreshIndicator(
+        color: AppColors.primaryBlue,
+        onRefresh: _refreshHome,
+        child: CustomScrollView(
+          controller: _scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  HomeHeaderBanner(
+                    greetingName: greeting,
+                    subtitle: l10n.homeExploreSubtitle,
+                    unreadNotifications: _unreadNotifications,
+                    onNotificationTap: _onNotificationTap,
+                  ),
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                    child: HomeBannerCarousel(
+                      key: ValueKey(_bannerRefreshKey),
+                      lessonsCompleted: _lessonsCompleted,
+                      lessonGoal: _lessonGoal,
+                      onContinueTap: _openHope,
+                      onWhatsNewTap: _openHope,
+                      onThoughtTap: _openKidListo,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+            SliverPadding(
+              padding: EdgeInsets.fromLTRB(16, 8, 16, 24 + bottomInset + 88),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundColor: AppColors.primaryBlue.withOpacity(0.15),
-                        backgroundImage: _userProfileImageUrl != null
-                            ? NetworkImage(_userProfileImageUrl!)
-                            : null,
-                        child: _userProfileImageUrl == null
-                            ? Text(
-                                _userName != null && _userName!.isNotEmpty
-                                    ? _userName!.trim().substring(0, 1).toUpperCase()
-                                    : 'G',
-                                style: const TextStyle(
-                                  color: AppColors.primaryBlue,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 18,
-                                ),
-                              )
-                            : null,
-                      ),
-                      const SizedBox(width: 12),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.welcomeBack,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: AppColors.textSecondaryLight,
-                                  ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${_userName ?? l10n.guest} 👋',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .titleMedium
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimaryLight,
-                                  ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _openDiary,
-                        tooltip: l10n.navDiary,
-                        icon: Icon(
-                          Icons.edit_note_outlined,
-                          color: AppColors.textPrimaryLight,
-                          size: 26,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _openBible,
-                        tooltip: l10n.navBible,
-                        icon: Icon(
-                          Icons.menu_book_outlined,
-                          color: AppColors.textPrimaryLight,
-                          size: 26,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: _onNotificationTap,
-                        icon: Badge(
-                          isLabelVisible: _unreadNotifications > 0,
-                          label: Text(
-                            _unreadNotifications > 99
-                                ? '99+'
-                                : '$_unreadNotifications',
-                            style: const TextStyle(fontSize: 10),
+                        child: Text(
+                          l10n.homeFeaturedForYou,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.secondaryBlue,
                           ),
-                          backgroundColor: AppColors.accentRed,
-                          child: Icon(
-                            _unreadNotifications > 0
-                                ? Icons.notifications
-                                : Icons.notifications_none,
-                            color: AppColors.textPrimaryLight,
-                            size: 26,
-                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => _openPosts(),
+                        style: TextButton.styleFrom(
+                          minimumSize: const Size(48, 48),
+                          foregroundColor: AppColors.primaryBlue,
+                        ),
+                        child: Text(
+                          l10n.seeAll,
+                          style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  CategoryTabs(
-                    current: _currentCategory,
-                    onChanged: (c) => _loadPosts(category: c),
-                  ),
                   const SizedBox(height: 8),
-                  Material(
-                    elevation: 1,
-                    shadowColor: Colors.black.withOpacity(0.06),
-                    borderRadius: BorderRadius.circular(999),
-                    child: TextField(
-                      controller: _searchController,
-                      decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search),
-                      hintText: l10n.searchHint,
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: BorderSide(
-                          color: AppColors.textSecondaryLight.withOpacity(0.3),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: BorderSide(
-                          color: AppColors.textSecondaryLight.withOpacity(0.25),
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(999),
-                        borderSide: const BorderSide(
-                          color: AppColors.primaryBlue,
-                          width: 1.5,
-                        ),
-                      ),
+                  if (featured != null)
+                    FeaturedPostCard(
+                      post: featured,
+                      onTap: () => _openPostDetail(featured),
+                    )
+                  else
+                    Text(
+                      l10n.homeNoPostsFound,
+                      style: const TextStyle(color: Color(0xFF64748B)),
                     ),
-                      onChanged: _search,
+                  const SizedBox(height: 24),
+                  Text(
+                    l10n.homeTaraExplore,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.secondaryBlue,
                     ),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: _loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      onRefresh: () => _loadPosts(category: _currentCategory),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: _posts.length,
-                        itemBuilder: (context, index) {
-                          final post = _posts[index];
-                          return PostCard(
-                            post: post,
-                            isBookmarked: _bookmarkedIds.contains(post.id),
-                            onTap: () => _openPostDetail(post),
-                            onLikeTap: () => _onLikeTap(post),
-                            onCommentTap: () =>
-                                _openPostDetail(post, focusComment: true),
-                            onBookmarkTap: () => _onBookmarkTap(post),
-                          );
-                        },
-                      ),
-                    ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF22C55E),
-        elevation: 4,
-        shape: const CircleBorder(),
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const BotpressChatScreen()),
-          );
-        },
-        child: const Icon(
-          Icons.chat_bubble_outline,
-          color: Colors.white,
-        ),
-      ),
-      bottomNavigationBar: BottomAppBar(
-        color: AppColors.secondaryBlue,
-        shape: const CircularNotchedRectangle(),
-        elevation: 8,
-        notchMargin: 8,
-        child: SizedBox(
-          height: 64,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                label: l10n.navHome,
-                selected: _currentTabIndex == 0,
-                onTap: () => _onBottomTabTap(0),
-              ),
-              _NavItem(
-                icon: Icons.apps_outlined,
-                label: l10n.navRehab,
-                selected: _currentTabIndex == 1,
-                onTap: () => _onBottomTabTap(1),
-              ),
-              const SizedBox(width: 40), // space for FAB notch
-              _NavItem(
-                icon: Icons.bookmark_outline,
-                label: l10n.navSaved,
-                selected: _currentTabIndex == 2,
-                onTap: () => _onBottomTabTap(2),
-              ),
-              _NavItem(
-                icon: Icons.person_outline,
-                label: l10n.navAccount,
-                selected: _currentTabIndex == 3,
-                onTap: () => _onBottomTabTap(3),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? Colors.white : Colors.white70;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(24),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: color,
-                fontSize: 11,
+                  const SizedBox(height: 12),
+                  DapeServiceTiles(
+                    onLearn: _showLearnPhase2,
+                    onHope: _openHope,
+                    onCare: _openCare,
+                    learnEnabled: false,
+                  ),
+                  const SizedBox(height: 24),
+                  RecentActivityList(
+                    items: _recentActivity,
+                    onTap: (row) => _openPostById(row.id),
+                    onSeeAll: () => _openPosts(),
+                  ),
+                ]),
               ),
             ),
           ],
@@ -618,4 +483,3 @@ class _NavItem extends StatelessWidget {
     );
   }
 }
-

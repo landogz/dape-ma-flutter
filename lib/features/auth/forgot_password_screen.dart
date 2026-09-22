@@ -4,6 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'widgets/auth_header.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -57,14 +58,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final l10n = context.l10n;
     final inputDecoration = InputDecoration(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: context.inputFill,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: BorderSide(color: context.borderSubtle),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        borderSide: BorderSide(color: context.borderSubtle),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -74,12 +75,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
         title: Text(l10n.forgotPassword),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        foregroundColor: AppColors.textPrimaryLight,
+        foregroundColor: context.textPrimary,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -95,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Text(
                   l10n.resetInstructions,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondaryLight,
+                        color: context.textSecondary,
                       ),
                 ),
                 const SizedBox(height: 24),
@@ -103,9 +104,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   controller: _emailController,
                   decoration: inputDecoration.copyWith(
                     labelText: l10n.email,
-                    prefixIcon: const Icon(
-                      Icons.email_outlined,
-                      color: AppColors.textSecondaryLight,
+                    prefixIcon: Icon(Icons.email_outlined,
+                      color: context.textSecondary,
                       size: 22,
                     ),
                   ),

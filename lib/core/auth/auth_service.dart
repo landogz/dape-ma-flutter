@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 
+import '../accessibility/accessibility_controller.dart';
 import '../network/api_client.dart';
 import '../network/endpoints.dart';
+import '../../features/settings/settings_preferences.dart';
 import 'auth_storage.dart';
 
 class AuthService {
@@ -23,6 +25,52 @@ class AuthService {
   static Future<void> logout() async {
     _cachedToken = null;
     await AuthStorage.clearToken();
+    await AuthStorage.clearUserId();
+    await SettingsPreferences.setUserScope(null);
+    await AccessibilityController.instance.load();
+  }
+
+  /// Loads the signed-in user id and switches accessibility prefs to that user.
+  static Future<void> bindCurrentUser() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) {
+      await AuthStorage.clearUserId();
+      await SettingsPreferences.setUserScope(null);
+      await AccessibilityController.instance.load();
+      return;
+    }
+
+    try {
+      final res = await authedGet<Map<String, dynamic>>(Endpoints.me);
+      final root = res.data ?? <String, dynamic>{};
+      final user = root['data'] is Map<String, dynamic>
+          ? root['data'] as Map<String, dynamic>
+          : root;
+      final id = user['id'];
+      final userId = id == null ? null : '$id';
+      if (userId != null && userId.isNotEmpty) {
+        await AuthStorage.saveUserId(userId);
+        await SettingsPreferences.setUserScope(userId);
+      } else {
+        final cached = await AuthStorage.getUserId();
+        await SettingsPreferences.setUserScope(cached);
+      }
+    } catch (_) {
+      final cached = await AuthStorage.getUserId();
+      await SettingsPreferences.setUserScope(cached);
+    }
+
+    await AccessibilityController.instance.load();
+  }
+
+  static Future<void> restoreUserScope() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) {
+      await SettingsPreferences.setUserScope(null);
+      return;
+    }
+    final cached = await AuthStorage.getUserId();
+    await SettingsPreferences.setUserScope(cached);
   }
 
   static Future<void> login({
@@ -49,6 +97,7 @@ class AuthService {
     }
 
     await _setToken(token);
+    await bindCurrentUser();
   }
 
   static Future<void> register({
@@ -76,7 +125,33 @@ class AuthService {
 
     if (token != null && token.isNotEmpty) {
       await _setToken(token);
+      await bindCurrentUser();
     }
+  }
+
+  static Future<Map<String, dynamic>> updateOnboarding({
+    String? nickname,
+    String? pronouns,
+    String? birthday,
+    String? persona,
+    List<String>? interests,
+    bool complete = false,
+  }) async {
+    final res = await authedPut<Map<String, dynamic>>(
+      Endpoints.onboardingUpdate,
+      data: <String, dynamic>{
+        'nickname': ?nickname,
+        'pronouns': ?pronouns,
+        'birthday': ?birthday,
+        'persona': ?persona,
+        'interests': ?interests,
+        if (complete) 'complete': true,
+      },
+    );
+    final root = res.data ?? <String, dynamic>{};
+    return root['data'] is Map<String, dynamic>
+        ? root['data'] as Map<String, dynamic>
+        : <String, dynamic>{};
   }
 
   static Future<Response<T>> authedGet<T>(
@@ -112,4 +187,3 @@ class AuthService {
     return client.delete<T>(path);
   }
 }
-

@@ -1,6 +1,45 @@
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart';
+
 class Endpoints {
-  // Point to your Laravel API (v1 prefix)
-  static const baseUrl = 'https://dape-ma.alwaysdata.net/api/v1';
+  /// Flip to `false` when pointing back to production.
+  static const bool useLocalApi = true;
+
+  static const String _productionBaseUrl =
+      'https://dape-ma.alwaysdata.net/api/v1';
+
+  /// Your Mac LAN IP for a physical phone on the same Wi‑Fi.
+  /// iOS Simulator / desktop can use 127.0.0.1; Android emulator uses 10.0.2.2.
+  static const String _localLanHost = '192.168.100.84';
+  static const int _localPort = 8000;
+
+  static String get baseUrl {
+    if (!useLocalApi) {
+      return _productionBaseUrl;
+    }
+
+    return 'http://$_localHost:$_localPort/api/v1';
+  }
+
+  static String get _localHost {
+    if (kIsWeb) {
+      return '127.0.0.1';
+    }
+
+    if (Platform.isAndroid) {
+      // Android emulator loopback to the host machine.
+      return '10.0.2.2';
+    }
+
+    // iOS Simulator + macOS desktop.
+    // For a real iPhone, change this to `_localLanHost`.
+    return '127.0.0.1';
+  }
+
+  /// Useful when installing on a physical device instead of the simulator.
+  static String get localLanBaseUrl =>
+      'http://$_localLanHost:$_localPort/api/v1';
 
   static const posts = '/posts';
   static const rehabCenters = '/rehab-centers';
@@ -19,7 +58,9 @@ class Endpoints {
   static const register = '/auth/register';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
+  static const meProfile = '/me/profile';
   static const profileUpdate = '/auth/profile';
+  static const onboardingUpdate = '/auth/onboarding';
   static const changePassword = '/auth/password';
   static const forgotPassword = '/auth/forgot-password';
   static const bookmarks = '/bookmarks';
@@ -27,14 +68,24 @@ class Endpoints {
   static const notifications = '/notifications';
   static const notificationsSummary = '/notifications/summary';
   static const notificationsReadAll = '/notifications/read-all';
-  static const dailyVerseToday = '/daily-verse/today';
+  static const dailyVerseToday = '/kid-listo/random';
+  static const kidListoRandom = '/kid-listo/random';
   static const bibleBooks = '/bible/books';
   static const biblePassage = '/bible/passage';
   static const diaryEntries = '/diary-entries';
   static const diaryToday = '/diary-entries/today';
+  static const hopeDirectory = '/hope-directory';
+  static const hopeEvents = '/hope-events';
+  static const moodCheckins = '/mood-checkins';
+  static const moodCheckinsToday = '/mood-checkins/today';
+  static const careToolkitQuestions = '/care-toolkit/questions';
+  static const careSupportResources = '/care-support/resources';
+  static const legalPages = '/legal-pages';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';
+  static String hopeEventDetail(int id) => '/hope-events/$id';
+  static String legalPage(String slug) => '/legal-pages/$slug';
 
   static String postDetail(int postId) => '/posts/$postId';
   static String postLike(int postId) => '/posts/$postId/like';

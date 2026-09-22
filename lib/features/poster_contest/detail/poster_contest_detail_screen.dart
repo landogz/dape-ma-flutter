@@ -7,6 +7,7 @@ import '../../../core/models/poster_contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../../auth/login_screen.dart';
 import '../submit/poster_contest_submit_screen.dart';
 
@@ -180,7 +181,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimaryLight,
+                                  color: context.textPrimary,
                                 ),
                       ),
                       const SizedBox(height: 8),
@@ -202,7 +203,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                           _contest!.description!,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     height: 1.45,
                                   ),
                         ),
@@ -222,7 +223,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                           _contest!.rules!,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     height: 1.45,
                                   ),
                         ),
@@ -303,7 +304,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                           l10n.noPublishedPostersYet,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondaryLight,
+                                    color: context.textSecondary,
                                   ),
                         )
                       else
@@ -355,7 +356,7 @@ class _PublishedPosterTile extends StatelessWidget {
             Text(
               entry.creatorName,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: context.textSecondary,
                   ),
             ),
             if (entry.hasImage) ...[

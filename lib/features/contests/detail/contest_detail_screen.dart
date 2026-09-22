@@ -8,8 +8,8 @@ import '../../../core/models/contest.dart';
 import '../../../core/models/contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../auth/login_screen.dart';
+import '../../hope/hope_colors.dart';
 import '../submit/contest_submit_screen.dart';
 
 class ContestDetailScreen extends StatefulWidget {
@@ -147,10 +147,19 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(l10n.contestDetailTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: HopeColors.purple,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          l10n.contestDetailTitle,
+          style: const TextStyle(
+            color: HopeColors.purple,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
       ),
       bottomNavigationBar: _loading || _contest == null || !_showSubmitCta
           ? null
@@ -159,7 +168,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                 child: SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  height: 52,
+                  child: FilledButton.icon(
                     onPressed: _onSubmitTap,
                     icon: Icon(
                       _isLoggedIn ? Icons.upload_outlined : Icons.login,
@@ -168,13 +178,13 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                       _isLoggedIn
                           ? l10n.submitContestEntry
                           : l10n.loginToSubmitEntry,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
+                    style: FilledButton.styleFrom(
+                      backgroundColor: HopeColors.purple,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                     ),
                   ),
@@ -182,38 +192,47 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
               ),
             ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: HopeColors.purple),
+            )
           : _contest == null
-              ? Center(child: Text(l10n.noContestsFound))
+              ? Center(
+                  child: Text(
+                    l10n.noContestsFound,
+                    style: const TextStyle(color: HopeColors.muted),
+                  ),
+                )
               : RefreshIndicator(
+                  color: HopeColors.purple,
                   onRefresh: _load,
                   child: ListView(
                     padding: EdgeInsets.fromLTRB(
-                      20,
-                      20,
-                      20,
+                      16,
+                      8,
+                      16,
                       _showSubmitCta ? 24 : 32,
                     ),
                     children: [
                       Text(
                         _contest!.title,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimaryLight,
-                                ),
+                        style: const TextStyle(
+                          color: HopeColors.purple,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 22,
+                          height: 1.25,
+                        ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          _Pill(label: _categoryLabel(context)),
-                          _Pill(label: _contest!.status.toUpperCase()),
+                          _HopePill(label: _categoryLabel(context)),
+                          _HopePill(label: _contest!.status.toUpperCase()),
                           if (_contest!.contestYear != null)
-                            _Pill(label: '${_contest!.contestYear}'),
+                            _HopePill(label: '${_contest!.contestYear}'),
                           if (_contest!.canSubmitEntry)
-                            _Pill(label: l10n.acceptingEntries),
+                            _HopePill(label: l10n.acceptingEntries),
                         ],
                       ),
                       if (_contest!.description != null &&
@@ -221,31 +240,41 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                         const SizedBox(height: 16),
                         Text(
                           _contest!.description!,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
-                                    height: 1.45,
-                                  ),
+                          style: const TextStyle(
+                            color: Color(0xFF4B3B63),
+                            height: 1.5,
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                       if (_contest!.rules != null &&
                           _contest!.rules!.isNotEmpty) ...[
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 20),
                         Text(
                           l10n.contestRules,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          style: const TextStyle(
+                            color: HopeColors.purple,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 17,
+                          ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _contest!.rules!,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
-                                    height: 1.45,
-                                  ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: HopeColors.purpleSoft,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: HopeColors.cardBorder),
+                          ),
+                          child: Text(
+                            _contest!.rules!,
+                            style: const TextStyle(
+                              color: Color(0xFF4B3B63),
+                              height: 1.5,
+                              fontSize: 14,
+                            ),
+                          ),
                         ),
                       ],
                       if (_myEntry != null) ...[
@@ -254,18 +283,17 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: AppColors.primaryBlue.withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(12),
+                            color: HopeColors.purpleSoft,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: HopeColors.cardBorder),
                           ),
                           child: Text(
                             '${l10n.yourEntryStatus}: ${_myEntry!.status.toUpperCase()} — ${_myEntry!.title}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.primaryBlue,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: const TextStyle(
+                              color: HopeColors.purple,
+                              fontWeight: FontWeight.w700,
+                              height: 1.4,
+                            ),
                           ),
                         ),
                       ] else if (!_contest!.canSubmitEntry) ...[
@@ -274,37 +302,37 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(12),
+                            color: const Color(0xFFFFF7ED),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: const Color(0xFFFDBA74),
+                            ),
                           ),
                           child: Text(
                             l10n.submissionsClosed,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: Colors.orange.shade900,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                            style: TextStyle(
+                              color: Colors.orange.shade900,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
                         ),
                       ] else ...[
                         const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
+                          height: 48,
                           child: OutlinedButton.icon(
                             onPressed: _onSubmitTap,
                             icon: const Icon(Icons.upload_outlined),
                             label: Text(l10n.submitContestEntry),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primaryBlue,
+                              foregroundColor: HopeColors.purple,
                               side: const BorderSide(
-                                color: AppColors.primaryBlue,
+                                color: HopeColors.purple,
+                                width: 1.5,
                               ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(999),
                               ),
                             ),
                           ),
@@ -313,19 +341,20 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                       const SizedBox(height: 24),
                       Text(
                         l10n.publishedEntries,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: const TextStyle(
+                          color: HopeColors.purple,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       if (_entries.isEmpty)
                         Text(
                           l10n.noPublishedEntriesYet,
-                          style:
-                              Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondaryLight,
-                                  ),
+                          style: const TextStyle(
+                            color: HopeColors.muted,
+                            fontSize: 14,
+                          ),
                         )
                       else
                         ..._entries.map(
@@ -392,123 +421,130 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
   Widget build(BuildContext context) {
     final entry = widget.entry;
     final posterUrl = entry.effectivePosterUrl;
-    final mediaUrl = _isVideo
-        ? entry.effectiveVideoUrl
-        : entry.effectiveMediaUrl;
+    final mediaUrl =
+        _isVideo ? entry.effectiveVideoUrl : entry.effectiveMediaUrl;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    entry.title,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: HopeColors.cardBorder),
+        boxShadow: [
+          BoxShadow(
+            color: HopeColors.purple.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  entry.title,
+                  style: const TextStyle(
+                    color: HopeColors.purple,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
                   ),
                 ),
-                Text(
-                  entry.status.toUpperCase(),
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w700,
-                      ),
+              ),
+              _HopePill(label: entry.status.toUpperCase()),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            entry.creatorName,
+            style: const TextStyle(color: HopeColors.muted, fontSize: 12),
+          ),
+          if (_isPoster && posterUrl != null && posterUrl.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                posterUrl,
+                height: 220,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Container(
+                  height: 120,
+                  alignment: Alignment.center,
+                  color: HopeColors.purpleSoft,
+                  child: const Icon(
+                    Icons.broken_image_outlined,
+                    color: HopeColors.purple,
+                  ),
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              entry.creatorName,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondaryLight,
-                  ),
+          ] else if (_yt != null) ...[
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: YoutubePlayer(
+                controller: _yt!,
+                showVideoProgressIndicator: true,
+              ),
             ),
-            if (_isPoster && posterUrl != null && posterUrl.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  posterUrl,
-                  height: 220,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => Container(
-                    height: 120,
-                    alignment: Alignment.center,
-                    color: Colors.grey.shade200,
-                    child: const Icon(Icons.broken_image_outlined),
-                  ),
-                ),
+          ] else if (mediaUrl != null && mediaUrl.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () => widget.onOpenUrl(mediaUrl),
+              icon: const Icon(Icons.open_in_new, size: 16),
+              label: Text(
+                entry.isYoutube
+                    ? context.l10n.openOnYoutube
+                    : context.l10n.openMediaLink,
               ),
-            ] else if (_yt != null) ...[
-              const SizedBox(height: 10),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: YoutubePlayer(
-                  controller: _yt!,
-                  showVideoProgressIndicator: true,
-                ),
-              ),
-            ] else if (mediaUrl != null && mediaUrl.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () => widget.onOpenUrl(mediaUrl),
-                icon: const Icon(Icons.open_in_new, size: 16),
-                label: Text(
-                  entry.isYoutube
-                      ? context.l10n.openOnYoutube
-                      : context.l10n.openMediaLink,
-                ),
-              ),
-            ],
-            if (entry.lyrics != null && entry.lyrics!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                entry.lyrics!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-            if (entry.description != null &&
-                entry.description!.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                entry.description!,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+              style: TextButton.styleFrom(foregroundColor: HopeColors.purple),
+            ),
           ],
-        ),
+          if (entry.lyrics != null && entry.lyrics!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              entry.lyrics!,
+              style: const TextStyle(color: Color(0xFF4B3B63), fontSize: 13),
+            ),
+          ],
+          if (entry.description != null && entry.description!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              entry.description!,
+              style: const TextStyle(color: HopeColors.muted, fontSize: 13),
+            ),
+          ],
+        ],
       ),
     );
   }
 }
 
-class _Pill extends StatelessWidget {
+class _HopePill extends StatelessWidget {
   final String label;
 
-  const _Pill({required this.label});
+  const _HopePill({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: HopeColors.purpleSoft,
         borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: HopeColors.cardBorder),
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AppColors.primaryBlue,
-              fontWeight: FontWeight.w600,
-            ),
+        style: const TextStyle(
+          color: HopeColors.purple,
+          fontWeight: FontWeight.w700,
+          fontSize: 12,
+        ),
       ),
     );
   }

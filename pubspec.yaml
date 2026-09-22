@@ -48,6 +48,12 @@ dependencies:
   flutter_widget_from_html: ^0.16.0
   flutter_localizations:
     sdk: flutter
+  package_info_plus: ^9.0.1
+  shared_preferences: ^2.5.5
+  flutter_tts: ^4.2.5
+  image: ^4.10.1
+  path_provider: ^2.1.6
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +89,10 @@ flutter:
   assets:
     - assets/ddb.svg
     - assets/ddb.png
+    - assets/bida/
+    - assets/care/
+    - assets/home/
+    - assets/hope/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

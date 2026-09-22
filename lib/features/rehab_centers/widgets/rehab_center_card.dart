@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/rehab_center.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../hope/hope_colors.dart';
 import '../detail/rehab_center_detail_screen.dart';
 
 class RehabCenterCard extends StatelessWidget {
@@ -29,128 +29,131 @@ class RehabCenterCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+    final initial = center.name.isNotEmpty ? center.name[0].toUpperCase() : '?';
+    final regionLine = [
+      if (center.region.isNotEmpty) center.region,
+      if (center.province.isNotEmpty) center.province,
+    ].join(' · ');
+
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
+        borderRadius: BorderRadius.circular(18),
         onTap: () => _openDetail(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: HopeColors.cardBorder),
+            boxShadow: [
+              BoxShadow(
+                color: HopeColors.purple.withValues(alpha: 0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      center.name,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimaryLight,
-                          ),
-                    ),
+              CircleAvatar(
+                radius: 28,
+                backgroundColor: HopeColors.purpleSoft,
+                child: Text(
+                  initial,
+                  style: const TextStyle(
+                    color: HopeColors.purple,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 20,
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: AppColors.textSecondaryLight,
-                  ),
-                ],
+                ),
               ),
-              if (center.address.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                Row(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.location_on_outlined,
-                        size: 18, color: AppColors.textSecondaryLight),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        center.address,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppColors.textPrimaryLight,
-                            ),
+                    Text(
+                      center.name,
+                      style: const TextStyle(
+                        color: HopeColors.purple,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
                       ),
                     ),
+                    if (regionLine.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        regionLine,
+                        style: const TextStyle(
+                          color: HopeColors.muted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    if (center.address.isNotEmpty)
+                      _InfoRow(Icons.place_outlined, center.address),
+                    if (center.contact.isNotEmpty)
+                      _InfoRow(Icons.phone_outlined, center.contact),
+                    if (center.website != null &&
+                        center.website!.trim().isNotEmpty)
+                      _InfoRow(Icons.language, center.website!),
                   ],
                 ),
-              ],
-              if (center.province.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  '${center.region} • ${center.province}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondaryLight,
-                      ),
-                ),
-              ] else if (center.region.isNotEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    'Region: ${center.region}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondaryLight,
-                        ),
-                  ),
-                ),
-              if (center.contact.isNotEmpty) ...[
-                const SizedBox(height: 8),
-                InkWell(
-                  onTap: () => _launchPhone(center.contact),
-                  borderRadius: BorderRadius.circular(6),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Icon(Icons.phone_outlined,
-                            size: 18, color: AppColors.textSecondaryLight),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            center.contact,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  color: AppColors.primaryBlue,
-                                  decoration: TextDecoration.underline,
-                                ),
-                          ),
-                        ),
-                      ],
+              ),
+              const SizedBox(width: 8),
+              Material(
+                color: HopeColors.chipInactive,
+                shape: const CircleBorder(),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: center.contact.isEmpty
+                      ? null
+                      : () => _launchPhone(center.contact),
+                  child: const SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Icon(
+                      Icons.phone,
+                      color: HopeColors.purple,
+                      size: 20,
                     ),
                   ),
                 ),
-              ],
-              if (center.website != null &&
-                  center.website!.trim().isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Icon(Icons.language,
-                        size: 18, color: AppColors.textSecondaryLight),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        center.website!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppColors.primaryBlue,
-                            ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow(this.icon, this.text);
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: HopeColors.purple),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 12, color: HopeColors.purple),
+            ),
+          ),
+        ],
       ),
     );
   }

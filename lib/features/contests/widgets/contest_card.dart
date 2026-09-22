@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/contest.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../hope/hope_colors.dart';
 import '../detail/contest_detail_screen.dart';
 
 class ContestCard extends StatelessWidget {
@@ -44,112 +44,118 @@ class ContestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final subtitle = contest.theme?.trim().isNotEmpty == true
+        ? contest.theme!
+        : (contest.description ?? '');
 
-    return Card(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
+        borderRadius: BorderRadius.circular(18),
         onTap: () => _openDetail(context),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: HopeColors.cardBorder),
+            boxShadow: [
+              BoxShadow(
+                color: HopeColors.purple.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryBlue.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      _categoryIcon,
-                      color: AppColors.primaryBlue,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          contest.title,
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimaryLight,
-                                  ),
-                        ),
-                        if (contest.theme != null &&
-                            contest.theme!.isNotEmpty) ...[
-                          const SizedBox(height: 2),
-                          Text(
-                            contest.theme!,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.textSecondaryLight,
-                                ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 88,
+                  height: 88,
+                  child: contest.coverImageUrl != null &&
+                          contest.coverImageUrl!.isNotEmpty
+                      ? Image.network(
+                          contest.coverImageUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => _IconThumb(
+                            icon: _categoryIcon,
                           ),
-                        ],
+                        )
+                      : _IconThumb(icon: _categoryIcon),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      contest.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: HopeColors.purple,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                      ),
+                    ),
+                    if (subtitle.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: HopeColors.muted,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: [
+                        _MetaChip(label: _categoryLabel(context)),
+                        _MetaChip(label: contest.status.toUpperCase()),
+                        if (contest.contestYear != null)
+                          _MetaChip(label: '${contest.contestYear}'),
                       ],
                     ),
-                  ),
-                  const Icon(
-                    Icons.chevron_right,
-                    color: AppColors.textSecondaryLight,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _Chip(label: _categoryLabel(context)),
-                  _Chip(label: contest.status.toUpperCase()),
-                  if (contest.contestYear != null)
-                    _Chip(label: '${contest.contestYear}'),
-                  if (contest.canSubmitEntry)
-                    _Chip(label: l10n.acceptingEntries),
-                ],
-              ),
-              if (contest.description != null &&
-                  contest.description!.isNotEmpty) ...[
-                const SizedBox(height: 10),
-                Text(
-                  contest.description!,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondaryLight,
+                    if (contest.canSubmitEntry) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: SizedBox(
+                          height: 34,
+                          child: FilledButton(
+                            onPressed: () => _openDetail(context),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: HopeColors.purple,
+                              foregroundColor: Colors.white,
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                            ),
+                            child: Text(
+                              l10n.submitContestEntry,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
+                    ],
+                  ],
                 ),
-              ],
-              if (contest.canSubmitEntry) ...[
-                const SizedBox(height: 12),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () => _openDetail(context),
-                    icon: const Icon(Icons.upload_outlined, size: 18),
-                    label: Text(l10n.submitContestEntry),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ],
           ),
         ),
@@ -158,25 +164,40 @@ class ContestCard extends StatelessWidget {
   }
 }
 
-class _Chip extends StatelessWidget {
-  final String label;
+class _IconThumb extends StatelessWidget {
+  const _IconThumb({required this.icon});
 
-  const _Chip({required this.label});
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: HopeColors.purpleSoft,
+      child: Icon(icon, color: HopeColors.purple, size: 32),
+    );
+  }
+}
+
+class _MetaChip extends StatelessWidget {
+  const _MetaChip({required this.label});
+
+  final String label;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue.withOpacity(0.1),
+        color: HopeColors.purpleSoft,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.primaryBlue,
-              fontWeight: FontWeight.w600,
-            ),
+        style: const TextStyle(
+          color: HopeColors.purple,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }

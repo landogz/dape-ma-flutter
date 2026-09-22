@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post_comment.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../../../core/widgets/user_avatar.dart';
 
 class CommentBubble extends StatelessWidget {
@@ -25,9 +26,12 @@ class CommentBubble extends StatelessWidget {
   final VoidCallback? onReply;
   final int depth;
 
+  static const _metaColor = Color(0xFF9CA3AF);
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final metaLabel = timeAgo.isNotEmpty ? timeAgo : 'Just now';
 
     return Padding(
       padding: EdgeInsets.only(
@@ -42,11 +46,79 @@ class CommentBubble extends StatelessWidget {
             imageUrl: comment.authorAvatarUrl,
             radius: 16,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        comment.authorName,
+                        style:
+                            Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: context.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.3,
+                                ),
+                      ),
+                    ),
+                    if (canManage)
+                      PopupMenuButton<String>(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 32,
+                          minHeight: 32,
+                        ),
+                        icon: const Icon(
+                          Icons.more_horiz,
+                          size: 18,
+                          color: _metaColor,
+                        ),
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            onEdit?.call();
+                          } else if (value == 'delete') {
+                            onDelete?.call();
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: Row(
+                              children: [
+                                const Icon(Icons.edit_outlined, size: 18),
+                                const SizedBox(width: 8),
+                                Text(l10n.edit),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.delete_outline,
+                                  size: 18,
+                                  color: AppColors.accentRed,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  l10n.deleteAction,
+                                  style: const TextStyle(
+                                    color: AppColors.accentRed,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 4),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(
@@ -54,107 +126,30 @@ class CommentBubble extends StatelessWidget {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.lightBackground,
-                    borderRadius: BorderRadius.circular(16),
+                    color: context.mutedSurface,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.textPrimaryLight,
-                            height: 1.35,
-                          ),
-                      children: [
-                        TextSpan(
-                          text: '${comment.authorName} ',
-                          style: const TextStyle(fontWeight: FontWeight.w700),
+                  child: Text(
+                    comment.body,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: context.textPrimary,
+                          fontWeight: FontWeight.w400,
+                          height: 1.35,
                         ),
-                        TextSpan(text: comment.body),
-                      ],
-                    ),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Padding(
-                  padding: const EdgeInsets.only(left: 4),
-                  child: Row(
-                    children: [
-                      if (timeAgo.isNotEmpty)
-                        Text(
-                          timeAgo,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppColors.textSecondaryLight,
-                                fontSize: 12,
-                              ),
-                        ),
-                      if (timeAgo.isNotEmpty) const SizedBox(width: 12),
-                      TextButton(
-                        onPressed: onReply,
-                        style: TextButton.styleFrom(
-                          minimumSize: Size.zero,
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                          foregroundColor: AppColors.textSecondaryLight,
-                        ),
-                        child: Text(
-                          l10n.reply,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      if (canManage) ...[
-                        const SizedBox(width: 4),
-                        PopupMenuButton<String>(
-                          icon: Icon(
-                            Icons.more_horiz,
-                            size: 18,
-                            color: AppColors.textSecondaryLight,
-                          ),
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(
-                            minWidth: 28,
-                            minHeight: 28,
-                          ),
-                          onSelected: (value) {
-                            if (value == 'edit') {
-                              onEdit?.call();
-                            } else if (value == 'delete') {
-                              onDelete?.call();
-                            }
-                          },
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              value: 'edit',
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.edit_outlined, size: 18),
-                                  const SizedBox(width: 8),
-                                  Text(l10n.edit),
-                                ],
-                              ),
-                            ),
-                            PopupMenuItem(
-                              value: 'delete',
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.delete_outline,
-                                    size: 18,
-                                    color: AppColors.accentRed,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    l10n.deleteAction,
-                                    style: const TextStyle(color: AppColors.accentRed),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
+                const SizedBox(height: 6),
+                GestureDetector(
+                  onTap: onReply,
+                  behavior: HitTestBehavior.opaque,
+                  child: Text(
+                    '$metaLabel · ${l10n.reply}',
+                    style: const TextStyle(
+                      color: _metaColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
                   ),
                 ),
               ],

@@ -9,6 +9,7 @@ import '../../../core/models/song_contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../../auth/login_screen.dart';
 import '../submit/song_contest_submit_screen.dart';
 
@@ -190,7 +191,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                         style:
                             Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimaryLight,
+                                  color: context.textPrimary,
                                 ),
                       ),
                       const SizedBox(height: 8),
@@ -212,7 +213,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                           _contest!.description!,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     height: 1.45,
                                   ),
                         ),
@@ -232,7 +233,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                           _contest!.rules!,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textPrimaryLight,
+                                    color: context.textPrimary,
                                     height: 1.45,
                                   ),
                         ),
@@ -311,7 +312,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                           l10n.noPublishedEntriesYet,
                           style:
                               Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.textSecondaryLight,
+                                    color: context.textSecondary,
                                   ),
                         )
                       else
@@ -400,7 +401,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
             Text(
               entry.artistName,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: context.textSecondary,
                   ),
             ),
             if (_yt != null) ...[

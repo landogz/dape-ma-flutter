@@ -24,6 +24,22 @@ class AnalyticsClient {
     await _sendEvent('post_view', postId: postId);
   }
 
+  Future<void> trackTrainingJoin(int trainingId) async {
+    await _sendEvent(
+      'training_join',
+      resourceType: 'training',
+      resourceId: trainingId,
+    );
+  }
+
+  Future<void> trackIecView(int iecId) async {
+    await _sendEvent(
+      'lesson_complete',
+      resourceType: 'iec_material',
+      resourceId: iecId,
+    );
+  }
+
   Future<void> trackSearch() async {
     await _sendEvent('search');
   }
@@ -47,6 +63,8 @@ class AnalyticsClient {
   Future<void> _sendEvent(
     String eventType, {
     int? postId,
+    String? resourceType,
+    int? resourceId,
   }) async {
     final platform = _platform;
     if (platform == null) {
@@ -62,6 +80,8 @@ class AnalyticsClient {
           'event_type': eventType,
           'platform': platform,
           'post_id': ?postId,
+          'resource_type': ?resourceType,
+          'resource_id': ?resourceId,
         },
       );
     } on DioException catch (error) {

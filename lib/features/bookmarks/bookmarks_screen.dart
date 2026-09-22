@@ -4,9 +4,10 @@ import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
-import '../post_engagement/post_engagement_service.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
+import '../account/widgets/profile_list_widgets.dart';
 import '../post_detail/post_detail_screen.dart';
-import '../home/widgets/post_card.dart';
 
 class BookmarksScreen extends StatefulWidget {
   const BookmarksScreen({super.key});
@@ -18,11 +19,22 @@ class BookmarksScreen extends StatefulWidget {
 class _BookmarksScreenState extends State<BookmarksScreen> {
   List<Post> _bookmarks = [];
   bool _loading = false;
+  String _query = '';
 
   @override
   void initState() {
     super.initState();
     _loadBookmarks();
+  }
+
+  List<Post> get _filtered {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return _bookmarks;
+    return _bookmarks.where((p) {
+      return p.title.toLowerCase().contains(q) ||
+          p.categoryName.toLowerCase().contains(q) ||
+          p.excerpt.toLowerCase().contains(q);
+    }).toList();
   }
 
   Future<void> _loadBookmarks() async {
@@ -43,35 +55,6 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       if (mounted) setState(() => _bookmarks = []);
     } finally {
       if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  Future<void> _onLikeTap(Post post) async {
-    try {
-      final result = await PostEngagementService.toggleLike(post.id);
-      if (!mounted) return;
-      setState(() {
-        final index = _bookmarks.indexWhere((p) => p.id == post.id);
-        if (index != -1) {
-          _bookmarks[index] = _bookmarks[index].copyWith(
-            isLiked: result.liked,
-            likesCount: result.likesCount,
-          );
-        }
-      });
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            PostEngagementService.friendlyError(
-              e,
-              'like this post',
-              context.l10n,
-            ),
-          ),
-        ),
-      );
     }
   }
 
@@ -108,50 +91,163 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.removedFromBookmarks),
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.bookmarkRemoveFailed),
-        ),
+        SnackBar(content: Text(context.l10n.bookmarkRemoveFailed)),
       );
     }
+  }
+
+  String _metaFor(Post post) {
+    final words = '${post.excerpt} ${post.content}'.trim().split(RegExp(r'\s+'));
+    final mins = ((words.length / 180).ceil()).clamp(1, 30);
+    return context.l10n.minReadLabel(mins);
+  }
+
+  String _excerptFor(Post post) {
+    final text = post.excerpt.trim().isNotEmpty
+        ? post.excerpt.trim()
+        : post.content.trim();
+    if (text.isEmpty) return post.categoryName;
+    if (text.length <= 90) return text;
+    return '${text.substring(0, 90).trim()}…';
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final items = _filtered;
+    final bottomSafe = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.bookmarksTitle)),
+      backgroundColor: context.pageBackground,
       body: SafeArea(
-        child: _loading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: _loadBookmarks,
-                child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  itemCount: _bookmarks.length,
-                  itemBuilder: (context, index) {
-                    final post = _bookmarks[index];
-                    return PostCard(
-                      post: post,
-                      isBookmarked: true,
-                      onTap: () => _openPostDetail(post),
-                      onLikeTap: () => _onLikeTap(post),
-                      onCommentTap: () =>
-                          _openPostDetail(post, focusComment: true),
-                      onBookmarkTap: () => _onBookmarkTap(post),
-                    );
-                  },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ProfileListHeader(
+              title: l10n.savedArticles,
+              subtitle: _loading
+                  ? null
+                  : l10n.bookmarksCountLabel(_bookmarks.length),
+            ),
+            if (_bookmarks.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+                child: TextField(
+                  onChanged: (value) => setState(() => _query = value),
+                  decoration: InputDecoration(
+                    hintText: l10n.searchBookmarksHint,
+                    prefixIcon: const Icon(Icons.search_rounded),
+                    filled: true,
+                    fillColor: context.inputFill,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 12,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: context.borderSubtle),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: context.borderSubtle),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: const BorderSide(
+                        color: AppColors.primaryBlue,
+                        width: 1.5,
+                      ),
+                    ),
+                  ),
                 ),
               ),
+            Expanded(
+              child: _loading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primaryBlue,
+                      ),
+                    )
+                  : RefreshIndicator(
+                      color: AppColors.primaryBlue,
+                      onRefresh: _loadBookmarks,
+                      child: _bookmarks.isEmpty
+                          ? ListView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              children: [
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.55,
+                                  child: ProfileListEmptyState(
+                                    icon: Icons.bookmark_border_rounded,
+                                    title: l10n.noBookmarksYet,
+                                    body: l10n.noBookmarksBody,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : items.isEmpty
+                              ? ListView(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  children: [
+                                    SizedBox(
+                                      height: MediaQuery.of(context).size.height *
+                                          0.4,
+                                      child: ProfileListEmptyState(
+                                        icon: Icons.search_off_rounded,
+                                        title: l10n.noSearchResults,
+                                        body: l10n.noSearchResultsBody,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ListView.separated(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  padding: EdgeInsets.fromLTRB(
+                                    20,
+                                    4,
+                                    20,
+                                    28 + bottomSafe,
+                                  ),
+                                  itemCount: items.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 12),
+                                  itemBuilder: (context, index) {
+                                    final post = items[index];
+                                    return ProfileContentTile(
+                                      title: post.title,
+                                      subtitle: _excerptFor(post),
+                                      meta: _metaFor(post),
+                                      chipSubtitle: false,
+                                      imageUrl: post.imageUrl,
+                                      icon: Icons.article_outlined,
+                                      iconColor: AppColors.primaryBlue,
+                                      iconBackground: const Color(0xFFDBEAFE),
+                                      onTap: () => _openPostDetail(post),
+                                      trailing: IconButton(
+                                        tooltip: l10n.removedFromBookmarks,
+                                        onPressed: () => _onBookmarkTap(post),
+                                        icon: const Icon(
+                                          Icons.bookmark_rounded,
+                                          color: AppColors.primaryBlue,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/l10n/locale_scope.dart';
 import 'botpress_config.dart';
 
 class BotpressChatScreen extends StatefulWidget {
-  const BotpressChatScreen({super.key});
+  const BotpressChatScreen({super.key, this.embeddedInShell = false});
+
+  final bool embeddedInShell;
 
   @override
   State<BotpressChatScreen> createState() => _BotpressChatScreenState();
@@ -42,9 +45,13 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final title = context.l10n.navFaq;
     if (!BotpressConfig.isConfigured) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Live Chat')),
+        appBar: AppBar(
+          title: Text(title),
+          automaticallyImplyLeading: !widget.embeddedInShell,
+        ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -79,7 +86,8 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Live Chat'),
+        title: Text(title),
+        automaticallyImplyLeading: !widget.embeddedInShell,
         actions: [
           IconButton(
             onPressed: _openInBrowser,
@@ -89,7 +97,10 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
         ],
       ),
       body: SafeArea(
-        child: Stack(
+        bottom: !widget.embeddedInShell,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: widget.embeddedInShell ? 88 : 0),
+          child: Stack(
           children: [
             InAppWebView(
               key: const ValueKey('botpress_chat_webview'),
@@ -179,6 +190,7 @@ class _BotpressChatScreenState extends State<BotpressChatScreen> {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );

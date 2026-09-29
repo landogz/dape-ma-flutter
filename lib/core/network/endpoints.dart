@@ -68,6 +68,7 @@ class Endpoints {
   static const notifications = '/notifications';
   static const notificationsSummary = '/notifications/summary';
   static const notificationsReadAll = '/notifications/read-all';
+  static const fcmToken = '/device/fcm-token';
   static const dailyVerseToday = '/kid-listo/random';
   static const kidListoRandom = '/kid-listo/random';
   static const bibleBooks = '/bible/books';
@@ -89,6 +90,7 @@ class Endpoints {
 
   static String postDetail(int postId) => '/posts/$postId';
   static String postLike(int postId) => '/posts/$postId/like';
+  static String postReactions(int postId) => '/posts/$postId/reactions';
   static String postComments(int postId) => '/posts/$postId/comments';
   static String postComment(int postId, int commentId) =>
       '/posts/$postId/comments/$commentId';

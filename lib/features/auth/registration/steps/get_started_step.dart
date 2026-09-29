@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../widgets/auth_decor.dart';
+import '../../widgets/auth_scaffold.dart';
 
 class GetStartedStep extends StatefulWidget {
   const GetStartedStep({
@@ -64,202 +65,137 @@ class _GetStartedStepState extends State<GetStartedStep> {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          Text(
-            l10n.regGetStartedTitle,
-            style: const TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimaryLight,
-              height: 1.15,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.regGetStartedSubtitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-              height: 1.4,
-            ),
-          ),
+          const AuthBrandMark(sealSize: 88),
           const SizedBox(height: 28),
-          TextFormField(
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.next,
-            decoration: authFieldDecoration(
-              context: context,
-              hintText: l10n.enterEmailHint,
-              prefixIcon: Icons.email_outlined,
+          AuthHeadline(l10n.regGetStartedTitle, center: false),
+          const SizedBox(height: 10),
+          AuthSubtext(l10n.regGetStartedSubtitle, center: false),
+          const SizedBox(height: 28),
+          AuthFieldShell(
+            child: TextFormField(
+              controller: _emailController,
+              enabled: !widget.loading,
+              keyboardType: TextInputType.emailAddress,
+              textInputAction: TextInputAction.next,
+              style: const TextStyle(fontSize: 15, color: AuthTokens.inputText),
+              decoration: authFieldDecoration(
+                context: context,
+                hintText: l10n.enterEmailHint,
+                prefixIcon: Icons.email_outlined,
+              ),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return l10n.emailRequired;
+                return null;
+              },
             ),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return l10n.emailRequired;
-              return null;
-            },
           ),
           const SizedBox(height: 14),
-          TextFormField(
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            textInputAction: TextInputAction.next,
-            decoration: authFieldDecoration(
-              context: context,
-              hintText: l10n.enterPasswordHint,
-              prefixIcon: Icons.lock_outline,
-              suffixIcon: IconButton(
-                onPressed: () =>
-                    setState(() => _obscurePassword = !_obscurePassword),
-                icon: Icon(
-                  _obscurePassword
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: AppColors.primaryBlue,
+          AuthFieldShell(
+            child: TextFormField(
+              controller: _passwordController,
+              enabled: !widget.loading,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.next,
+              style: const TextStyle(fontSize: 15, color: AuthTokens.inputText),
+              decoration: authFieldDecoration(
+                context: context,
+                hintText: l10n.enterPasswordHint,
+                prefixIcon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  padding: EdgeInsets.zero,
+                  onPressed: widget.loading
+                      ? null
+                      : () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
+                  icon: Icon(
+                    _obscurePassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.mediumElectricBlue,
+                    size: 22,
+                  ),
                 ),
               ),
+              validator: (v) {
+                if (v == null || v.length < 8) return l10n.passwordMinSix;
+                return null;
+              },
             ),
-            validator: (v) {
-              if (v == null || v.length < 6) return l10n.passwordMinSix;
-              return null;
-            },
           ),
           const SizedBox(height: 14),
-          TextFormField(
-            controller: _confirmController,
-            obscureText: _obscureConfirm,
-            textInputAction: TextInputAction.done,
-            onFieldSubmitted: (_) => _submit(),
-            decoration: authFieldDecoration(
-              context: context,
-              hintText: l10n.confirmPassword,
-              prefixIcon: Icons.lock_outline,
-              suffixIcon: IconButton(
-                onPressed: () =>
-                    setState(() => _obscureConfirm = !_obscureConfirm),
-                icon: Icon(
-                  _obscureConfirm
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: AppColors.primaryBlue,
+          AuthFieldShell(
+            child: TextFormField(
+              controller: _confirmController,
+              enabled: !widget.loading,
+              obscureText: _obscureConfirm,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) {
+                if (!widget.loading) _submit();
+              },
+              style: const TextStyle(fontSize: 15, color: AuthTokens.inputText),
+              decoration: authFieldDecoration(
+                context: context,
+                hintText: l10n.confirmPassword,
+                prefixIcon: Icons.lock_outline,
+                suffixIcon: IconButton(
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
+                  padding: EdgeInsets.zero,
+                  onPressed: widget.loading
+                      ? null
+                      : () => setState(
+                            () => _obscureConfirm = !_obscureConfirm,
+                          ),
+                  icon: Icon(
+                    _obscureConfirm
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: AppColors.mediumElectricBlue,
+                    size: 22,
+                  ),
                 ),
               ),
+              validator: (v) {
+                if (v != _passwordController.text) {
+                  return l10n.passwordsDoNotMatch;
+                }
+                return null;
+              },
             ),
-            validator: (v) {
-              if (v != _passwordController.text) {
-                return l10n.passwordsDoNotMatch;
-              }
-              return null;
-            },
           ),
-          if (widget.error != null) ...[
+          if (widget.error != null && widget.error!.trim().isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text(
-              widget.error!,
-              style: const TextStyle(color: AppColors.accentRed, fontSize: 13),
-            ),
+            AuthBanner(message: widget.error!),
           ],
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
+          AuthLegalLine(
+            prefix: l10n.authAgreePrefix,
+            termsLabel: l10n.termsOfUse,
+            andLabel: l10n.authAgreeAnd,
+            privacyLabel: l10n.privacyPolicy,
+          ),
+          const SizedBox(height: 20),
           AuthPrimaryButton(
             label: l10n.continueLabel,
             loading: widget.loading,
             onPressed: _submit,
           ),
           const SizedBox(height: 20),
-          Row(
-            children: [
-              const Expanded(child: Divider(color: Color(0xFFD7E3F0))),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  l10n.orDivider,
-                  style: TextStyle(
-                    color: AppColors.primaryBlue.withValues(alpha: 0.55),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const Expanded(child: Divider(color: Color(0xFFD7E3F0))),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _SocialContinueButton(
-            label: l10n.regContinueGoogle,
+          AuthOrDivider(label: l10n.orDivider),
+          const SizedBox(height: 20),
+          AuthSocialCircleRow(
             onTap: _socialSoon,
-            leading: const Text(
-              'G',
-              style: TextStyle(
-                color: Color(0xFFEA4335),
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          _SocialContinueButton(
-            label: l10n.regContinueFacebook,
-            onTap: _socialSoon,
-            leading: const Icon(
-              Icons.facebook_rounded,
-              color: Color(0xFF1877F2),
-              size: 24,
-            ),
-          ),
-          const SizedBox(height: 10),
-          _SocialContinueButton(
-            label: l10n.regContinueApple,
-            onTap: _socialSoon,
-            leading: const Icon(Icons.apple, color: Colors.black, size: 24),
+            enabled: !widget.loading,
           ),
           const SizedBox(height: 24),
         ],
-      ),
-    );
-  }
-}
-
-class _SocialContinueButton extends StatelessWidget {
-  const _SocialContinueButton({
-    required this.label,
-    required this.onTap,
-    required this.leading,
-  });
-
-  final String label;
-  final VoidCallback onTap;
-  final Widget leading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 52),
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
-          ),
-          child: Row(
-            children: [
-              SizedBox(width: 28, child: Center(child: leading)),
-              Expanded(
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 28),
-            ],
-          ),
-        ),
       ),
     );
   }

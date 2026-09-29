@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/network/endpoints.dart';
@@ -62,8 +63,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
     } finally {
       await AuthService.logout();
       if (mounted) {
-        setState(() => _loggedIn = false);
-        Navigator.of(context).maybePop();
+        AuthNavigator.goToLogin(context);
       }
     }
   }
@@ -112,7 +112,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
                       subtitle: l10n.notificationsMenuSubtitle,
                       icon: Icons.notifications_rounded,
                       iconBackground: const Color(0xFFFFE8D6),
-                      iconColor: const Color(0xFFEA580C),
+                      iconColor: AppColors.brightGold,
                       onTap: () => _open(const NotificationSettingsScreen()),
                     ),
                     const SizedBox(height: 12),

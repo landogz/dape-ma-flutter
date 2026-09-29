@@ -225,23 +225,36 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                             height: 1.35,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextField(
                           controller: _searchController,
                           onChanged: (v) => setState(() => _query = v),
-                          style: const TextStyle(color: HopeColors.purpleDark),
+                          style: const TextStyle(
+                            color: HopeColors.purpleDark,
+                            fontSize: 13,
+                            height: 1.2,
+                          ),
                           decoration: InputDecoration(
+                            isDense: true,
                             hintText: l10n.hopeSearchHint,
-                            hintStyle: const TextStyle(color: HopeColors.muted),
+                            hintStyle: const TextStyle(
+                              color: HopeColors.muted,
+                              fontSize: 13,
+                            ),
                             prefixIcon: const Icon(
                               Icons.search,
                               color: HopeColors.muted,
+                              size: 18,
+                            ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 32,
                             ),
                             filled: true,
                             fillColor: Colors.white,
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(999),

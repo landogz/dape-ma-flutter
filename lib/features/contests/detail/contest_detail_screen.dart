@@ -8,6 +8,7 @@ import '../../../core/models/contest.dart';
 import '../../../core/models/contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../auth/login_screen.dart';
 import '../../hope/hope_colors.dart';
 import '../submit/contest_submit_screen.dart';
@@ -241,7 +242,7 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                         Text(
                           _contest!.description!,
                           style: const TextStyle(
-                            color: Color(0xFF4B3B63),
+                            color: HopeColors.bodyText,
                             height: 1.5,
                             fontSize: 14,
                           ),
@@ -270,7 +271,7 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           child: Text(
                             _contest!.rules!,
                             style: const TextStyle(
-                              color: Color(0xFF4B3B63),
+                              color: HopeColors.bodyText,
                               height: 1.5,
                               fontSize: 14,
                             ),
@@ -311,7 +312,7 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           child: Text(
                             l10n.submissionsClosed,
                             style: TextStyle(
-                              color: Colors.orange.shade900,
+                              color: AppColors.nileBlue,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -508,7 +509,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
             const SizedBox(height: 8),
             Text(
               entry.lyrics!,
-              style: const TextStyle(color: Color(0xFF4B3B63), fontSize: 13),
+              style: const TextStyle(color: HopeColors.bodyText, fontSize: 13),
             ),
           ],
           if (entry.description != null && entry.description!.isNotEmpty) ...[

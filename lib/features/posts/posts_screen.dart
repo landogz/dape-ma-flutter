@@ -9,12 +9,14 @@ import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../auth/login_screen.dart';
 import '../home/widgets/category_tabs.dart';
-import '../home/widgets/featured_post_card.dart';
 import '../home/widgets/post_card.dart';
 import '../post_detail/post_detail_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
+import '../post_engagement/post_reaction.dart';
+import '../post_engagement/reaction_picker.dart';
+import '../post_engagement/reactors_sheet.dart';
 
-/// Dedicated posts listing (Featured + feed) — formerly embedded on Home.
+/// Dedicated posts listing — formerly embedded on Home.
 class PostsScreen extends StatefulWidget {
   const PostsScreen({
     super.key,
@@ -56,21 +58,6 @@ class _PostsScreenState extends State<PostsScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-
-  List<Post> get _featuredPosts {
-    if (_posts.isEmpty) return const [];
-    final withImage = _posts.where((p) {
-      final url = p.imageUrl?.trim() ?? '';
-      return url.isNotEmpty;
-    }).toList();
-    final source = withImage.isNotEmpty ? withImage : _posts;
-    return source.take(5).toList();
-  }
-
-  List<Post> get _feedPosts {
-    final featuredIds = _featuredPosts.map((p) => p.id).toSet();
-    return _posts.where((p) => !featuredIds.contains(p.id)).toList();
   }
 
   Future<void> _bootstrap() async {
@@ -170,6 +157,29 @@ class _PostsScreenState extends State<PostsScreen> {
   }
 
   Future<void> _onLikeTap(Post post) async {
+    await _applyReaction(post, PostReactionType.like);
+  }
+
+  Future<void> _onLikeLongPress(Post post, Offset anchor) async {
+    if (!_isLoggedIn) {
+      final loggedIn = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (loggedIn != true || !mounted) return;
+      await _refreshAuth();
+    }
+    if (!mounted) return;
+
+    final selected = await showReactionPicker(
+      context,
+      selected: post.userReaction,
+      anchor: anchor,
+    );
+    if (!mounted || selected == null) return;
+    await _applyReaction(post, selected);
+  }
+
+  Future<void> _applyReaction(Post post, PostReactionType reaction) async {
     if (!_isLoggedIn) {
       final loggedIn = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -178,7 +188,10 @@ class _PostsScreenState extends State<PostsScreen> {
       await _refreshAuth();
     }
     try {
-      final result = await PostEngagementService.toggleLike(post.id);
+      final result = await PostEngagementService.setReaction(
+        post.id,
+        reaction: reaction,
+      );
       if (!mounted) return;
       setState(() {
         final index = _posts.indexWhere((p) => p.id == post.id);
@@ -186,6 +199,9 @@ class _PostsScreenState extends State<PostsScreen> {
           _posts[index] = _posts[index].copyWith(
             isLiked: result.liked,
             likesCount: result.likesCount,
+            userReaction: result.userReaction,
+            clearUserReaction: result.userReaction == null,
+            reactionCounts: result.reactionCounts,
           );
         }
       });
@@ -199,13 +215,22 @@ class _PostsScreenState extends State<PostsScreen> {
           content: Text(
             PostEngagementService.friendlyError(
               e,
-              'like this post',
+              'react to this post',
               context.l10n,
             ),
           ),
         ),
       );
     }
+  }
+
+  Future<void> _onReactionsTap(Post post) async {
+    if (post.likesCount <= 0) return;
+    await showReactorsSheet(
+      context,
+      postId: post.id,
+      reactionCounts: post.reactionCounts,
+    );
   }
 
   Future<void> _onBookmarkTap(Post post) async {
@@ -272,8 +297,7 @@ class _PostsScreenState extends State<PostsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final featured = _featuredPosts;
-    final feed = _feedPosts;
+    final feed = _posts;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
@@ -281,9 +305,18 @@ class _PostsScreenState extends State<PostsScreen> {
         backgroundColor: AppColors.secondaryBlue,
         foregroundColor: Colors.white,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
+        ),
         title: Text(
           l10n.postsPageTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800),
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
       body: RefreshIndicator(
@@ -326,23 +359,6 @@ class _PostsScreenState extends State<PostsScreen> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   Text(
-                    l10n.homeFeaturedForYou,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      height: 1.4,
-                      color: AppColors.secondaryBlue,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  FeaturedPostCarousel(
-                    posts: featured,
-                    onTap: _openPostDetail,
-                    isBookmarked: (p) => _bookmarkedIds.contains(p.id),
-                    onBookmarkTap: _onBookmarkTap,
-                  ),
-                  const SizedBox(height: 28),
-                  Text(
                     l10n.homeMoreForYou,
                     style: const TextStyle(
                       fontSize: 20,
@@ -365,7 +381,7 @@ class _PostsScreenState extends State<PostsScreen> {
                 hasScrollBody: false,
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (feed.isEmpty && featured.isEmpty)
+            else if (feed.isEmpty)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),
@@ -387,6 +403,9 @@ class _PostsScreenState extends State<PostsScreen> {
                         isBookmarked: _bookmarkedIds.contains(post.id),
                         onTap: () => _openPostDetail(post),
                         onLikeTap: () => _onLikeTap(post),
+                        onLikeLongPress: (offset) =>
+                            _onLikeLongPress(post, offset),
+                        onReactionsTap: () => _onReactionsTap(post),
                         onCommentTap: () =>
                             _openPostDetail(post, focusComment: true),
                         onBookmarkTap: () => _onBookmarkTap(post),

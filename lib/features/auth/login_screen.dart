@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/models/post.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme_colors.dart';
 import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 import 'verification_code_screen.dart';
 import 'widgets/auth_decor.dart';
+import 'widgets/auth_scaffold.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    this.asAuthGate = false,
+    this.initialPosts = const [],
+  });
+
+  /// When true, this screen is the app root for guests (no back to home).
+  final bool asAuthGate;
+
+  /// Prefetched posts from splash to pass into the welcome screen after login.
+  final List<Post> initialPosts;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -24,6 +35,14 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   bool _obscurePassword = true;
   String? _error;
+
+  void _enterAppOrPop() {
+    if (widget.asAuthGate) {
+      AuthNavigator.enterApp(context, posts: widget.initialPosts);
+      return;
+    }
+    Navigator.of(context).pop(true);
+  }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -39,8 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
 
-      // Verification UI preview only — no OTP API yet.
-      final verified = await Navigator.of(context).push<bool>(
+      await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => VerificationCodeScreen(
             destination: _emailController.text.trim(),
@@ -48,12 +66,7 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
       if (!mounted) return;
-      if (verified == true) {
-        Navigator.of(context).pop(true);
-      } else {
-        // User backed out of preview; still treat login as successful.
-        Navigator.of(context).pop(true);
-      }
+      _enterAppOrPop();
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = context.l10n.loginFailed);
@@ -79,297 +92,180 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
-      body: AuthDecorBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                  color: AppColors.secondaryBlue,
+    return AuthScaffold(
+      canPop: !widget.asAuthGate,
+      showBack: !widget.asAuthGate,
+      onBack: _loading ? null : () => Navigator.of(context).maybePop(),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const AuthBrandMark(),
+            const SizedBox(height: 28),
+            AuthHeadline(l10n.welcomeBackExclaim),
+            const SizedBox(height: 10),
+            AuthSubtext(l10n.loginJourneySubtitle),
+            const SizedBox(height: 28),
+            AuthFieldShell(
+              child: TextFormField(
+                controller: _emailController,
+                decoration: authFieldDecoration(
+                  context: context,
+                  hintText: l10n.enterEmailHint,
+                  prefixIcon: Icons.email_outlined,
                 ),
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AuthTokens.inputText,
+                ),
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.next,
+                enabled: !_loading,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.emailRequired;
+                  }
+                  return null;
+                },
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(28, 4, 28, 28),
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Center(
-                          child: SizedBox(
-                            width: 88,
-                            height: 88,
-                            child: SvgPicture.asset(
-                              'assets/ddb.svg',
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'DAPE-MA',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.secondaryBlue,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Text(
-                          l10n.welcomeBackExclaim,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: AppColors.secondaryBlue,
-                            fontSize: 26,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          l10n.loginJourneySubtitle,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.8),
-                            fontSize: 14,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: 28),
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: authFieldDecoration(
-                            context: context,
-                            hintText: l10n.enterEmailHint,
-                            prefixIcon: Icons.email_outlined,
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return l10n.emailRequired;
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 14),
-                        TextFormField(
-                          controller: _passwordController,
-                          decoration: authFieldDecoration(
-                            context: context,
-                            hintText: l10n.enterPasswordHint,
-                            prefixIcon: Icons.lock_outline_rounded,
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_off_outlined
-                                    : Icons.visibility_outlined,
-                                color: AppColors.primaryBlue.withValues(alpha: 0.7),
-                                size: 22,
-                              ),
-                              onPressed: () {
-                                setState(
-                                  () => _obscurePassword = !_obscurePassword,
-                                );
-                              },
-                            ),
-                          ),
-                          obscureText: _obscurePassword,
-                          textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _submit(),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return l10n.passwordRequired;
-                            }
-                            return null;
-                          },
-                        ),
-                        if (_error != null) ...[
-                          const SizedBox(height: 10),
-                          Text(
-                            _error!,
-                            style: const TextStyle(
-                              color: AppColors.accentRed,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 20),
-                        AuthPrimaryButton(
-                          label: l10n.signIn,
-                          loading: _loading,
-                          onPressed: _submit,
-                        ),
-                        const SizedBox(height: 8),
-                        Center(
-                          child: TextButton(
-                            onPressed: _loading
-                                ? null
-                                : () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) =>
-                                            const ForgotPasswordScreen(),
-                                      ),
-                                    );
-                                  },
-                            child: Text(
-                              l10n.forgotPassword,
-                              style: const TextStyle(
-                                color: AppColors.primaryBlue,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            const Expanded(child: Divider(color: Color(0xFFD7E3F0))),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 12),
-                              child: Text(
-                                l10n.orDivider,
-                                style: TextStyle(
-                                  color: AppColors.primaryBlue
-                                      .withValues(alpha: 0.55),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const Expanded(child: Divider(color: Color(0xFFD7E3F0))),
-                          ],
-                        ),
-                        const SizedBox(height: 18),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _SocialButton(
-                              onTap: _socialComingSoon,
-                              child: const Text(
-                                'G',
-                                style: TextStyle(
-                                  color: Color(0xFFEA4335),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            _SocialButton(
-                              onTap: _socialComingSoon,
-                              child: const Icon(
-                                Icons.facebook_rounded,
-                                color: Color(0xFF1877F2),
-                                size: 28,
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            _SocialButton(
-                              onTap: _socialComingSoon,
-                              child: const Icon(
-                                Icons.apple,
-                                color: Colors.black,
-                                size: 28,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              l10n.noAccount,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                shadows: [
-                                  Shadow(
-                                    color: Color(0x66000000),
-                                    blurRadius: 6,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: _loading
-                                  ? null
-                                  : () async {
-                                      final nav = Navigator.of(context);
-                                      final result = await nav.push<bool>(
-                                        MaterialPageRoute(
-                                          builder: (_) =>
-                                              const RegisterScreen(),
-                                        ),
-                                      );
-                                      if (!mounted || result != true) return;
-                                      nav.pop(true);
-                                    },
-                              style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                tapTargetSize:
-                                    MaterialTapTargetSize.shrinkWrap,
-                                foregroundColor: AppColors.accentYellow,
-                              ),
-                              child: Text(
-                                l10n.register,
-                                style: const TextStyle(
-                                  color: AppColors.accentYellow,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 14,
-                                  shadows: [
-                                    Shadow(
-                                      color: Color(0x66000000),
-                                      blurRadius: 6,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+            ),
+            const SizedBox(height: 14),
+            AuthFieldShell(
+              child: TextFormField(
+                controller: _passwordController,
+                decoration: authFieldDecoration(
+                  context: context,
+                  hintText: l10n.enterPasswordHint,
+                  prefixIcon: Icons.lock_outline,
+                  suffixIcon: IconButton(
+                    constraints: const BoxConstraints(
+                      minWidth: 44,
+                      minHeight: 44,
                     ),
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: AppColors.mediumElectricBlue,
+                      size: 22,
+                    ),
+                    onPressed: _loading
+                        ? null
+                        : () {
+                            setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            );
+                          },
+                  ),
+                ),
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AuthTokens.inputText,
+                ),
+                obscureText: _obscurePassword,
+                textInputAction: TextInputAction.done,
+                enabled: !_loading,
+                onFieldSubmitted: (_) {
+                  if (!_loading) _submit();
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.passwordRequired;
+                  }
+                  return null;
+                },
+              ),
+            ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              AuthBanner(message: _error!),
+            ],
+            const SizedBox(height: 24),
+            AuthPrimaryButton(
+              label: l10n.signIn,
+              loading: _loading,
+              onPressed: _submit,
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton(
+                onPressed: _loading
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const ForgotPasswordScreen(),
+                          ),
+                        );
+                      },
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.mediumElectricBlue,
+                  minimumSize: const Size(44, 44),
+                ),
+                child: Text(
+                  l10n.forgotPassword,
+                  style: const TextStyle(
+                    color: AppColors.mediumElectricBlue,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialButton extends StatelessWidget {
-  const _SocialButton({required this.onTap, required this.child});
-
-  final VoidCallback onTap;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: context.cardBackground,
-      shape: const CircleBorder(),
-      elevation: 2,
-      shadowColor: Colors.black.withValues(alpha: 0.12),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: onTap,
-        child: SizedBox(
-          width: 52,
-          height: 52,
-          child: Center(child: child),
+            ),
+            const SizedBox(height: 8),
+            AuthOrDivider(label: l10n.orDivider),
+            const SizedBox(height: 20),
+            AuthSocialCircleRow(
+              onTap: _socialComingSoon,
+              enabled: !_loading,
+            ),
+            const SizedBox(height: 28),
+            AuthFooterFade(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    l10n.noAccount,
+                    style: const TextStyle(
+                      color: AuthTokens.muted,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _loading
+                        ? null
+                        : () async {
+                            final result = await Navigator.of(context)
+                                .push<bool>(
+                              MaterialPageRoute(
+                                builder: (_) => const RegisterScreen(),
+                              ),
+                            );
+                            if (!mounted || result != true) return;
+                            _enterAppOrPop();
+                          },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      minimumSize: const Size(44, 44),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      foregroundColor: AppColors.nileBlue,
+                    ),
+                    child: Text(
+                      l10n.register,
+                      style: const TextStyle(
+                        color: AppColors.nileBlue,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -8,6 +8,7 @@ import 'core/l10n/app_locale.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/l10n/locale_scope.dart';
 import 'core/theme/app_theme.dart';
+import 'features/push/push_notification_service.dart';
 import 'features/splash/splash_screen.dart';
 
 Future<void> main() async {
@@ -17,6 +18,7 @@ Future<void> main() async {
   await AccessibilityController.instance.load();
   // Refresh user-scoped prefs once we can reach /me (optional, non-blocking).
   AuthService.bindCurrentUser();
+  await PushNotificationService.instance.initialize();
   runApp(const DapeMaApp());
 }
 

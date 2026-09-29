@@ -233,7 +233,7 @@ class _NotificationSettingsScreenState extends State<NotificationSettingsScreen>
                             subtitle: l10n.notifyUpdatesBody,
                             icon: Icons.system_update_rounded,
                             iconBackground: const Color(0xFFFFEDD5),
-                            iconColor: const Color(0xFFEA580C),
+                            iconColor: AppColors.brightGold,
                             value: _updates && _allow,
                             enabled: _allow,
                             onChanged: (value) => _set(

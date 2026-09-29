@@ -5,6 +5,7 @@ import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../auth/login_screen.dart';
 import '../kid_listo/kid_listo_welcome_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -48,8 +49,10 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _loadInitialData() async {
     final start = DateTime.now();
     List<Post> posts = [];
+    var loggedIn = false;
 
     try {
+      loggedIn = await AuthService.isLoggedIn();
       final token = await AuthService.getToken();
       final api = ApiClient(token: token);
       final res = await api.get<Map<String, dynamic>>(Endpoints.posts);
@@ -62,16 +65,28 @@ class _SplashScreenState extends State<SplashScreen>
           .toList();
     } catch (_) {
       posts = [];
-    } finally {
-      final elapsed = DateTime.now().difference(start);
-      final remaining = const Duration(seconds: 5) - elapsed;
-      if (remaining > Duration.zero) {
-        await Future<void>.delayed(remaining);
-      }
-      if (!mounted) return;
+    }
+
+    final elapsed = DateTime.now().difference(start);
+    final remaining = const Duration(seconds: 5) - elapsed;
+    if (remaining > Duration.zero) {
+      await Future<void>.delayed(remaining);
+    }
+    if (!mounted) return;
+
+    if (loggedIn) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
+        MaterialPageRoute<void>(
           builder: (_) => KidListoWelcomeScreen(initialPosts: posts),
+        ),
+      );
+    } else {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => LoginScreen(
+            asAuthGate: true,
+            initialPosts: posts,
+          ),
         ),
       );
     }
@@ -101,9 +116,9 @@ class _SplashScreenState extends State<SplashScreen>
                     height: 140,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.3),
                         width: 2,
                       ),
                     ),
@@ -145,4 +160,3 @@ class _SplashScreenState extends State<SplashScreen>
     );
   }
 }
-

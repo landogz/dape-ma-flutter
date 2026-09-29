@@ -7,6 +7,8 @@ import '../../../core/models/post.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../../../core/utils/api_url.dart';
+import '../../post_engagement/post_reaction.dart';
+import '../../post_engagement/reaction_picker.dart';
 
 /// Shared publication date format across post surfaces: `17 Mar 2026`.
 String formatPostDate(DateTime? date) {
@@ -354,7 +356,11 @@ class PostEngagementBar extends StatelessWidget {
     required this.likesCount,
     required this.commentsCount,
     required this.isLiked,
+    this.userReaction,
+    this.reactionCounts = const {},
     required this.onLike,
+    this.onLikeLongPress,
+    this.onReactionsTap,
     required this.onComment,
     required this.onShare,
   });
@@ -362,7 +368,11 @@ class PostEngagementBar extends StatelessWidget {
   final int likesCount;
   final int commentsCount;
   final bool isLiked;
+  final PostReactionType? userReaction;
+  final Map<PostReactionType, int> reactionCounts;
   final VoidCallback onLike;
+  final ValueChanged<Offset>? onLikeLongPress;
+  final VoidCallback? onReactionsTap;
   final VoidCallback? onComment;
   final VoidCallback onShare;
 
@@ -370,32 +380,58 @@ class PostEngagementBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _EngagementChip(
-            icon: isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
-            count: likesCount,
-            active: isLiked,
-            onTap: onLike,
-            tooltip: context.l10n.like,
-          ),
-          const SizedBox(width: 4),
-          _EngagementChip(
-            icon: Icons.chat_bubble_outline_rounded,
-            count: commentsCount,
-            onTap: onComment,
-            tooltip: context.l10n.comment,
-          ),
-          const Spacer(),
-          IconButton(
-            onPressed: onShare,
-            tooltip: context.l10n.sharePost,
-            visualDensity: VisualDensity.compact,
-            icon: Icon(
-              Icons.ios_share_rounded,
-              size: 20,
-              color: context.textSecondary,
+          if (likesCount > 0) ...[
+            ReactionSummaryRow(
+              reactionCounts: reactionCounts.isEmpty
+                  ? {for (final type in PostReactionType.values) type: 0}
+                  : reactionCounts,
+              totalCount: likesCount,
+              onTap: onReactionsTap ?? onLike,
             ),
+            const SizedBox(height: 4),
+          ],
+          Row(
+            children: [
+              _EngagementChip(
+                icon: isLiked ? Icons.thumb_up : Icons.thumb_up_outlined,
+                emoji: userReaction?.emoji,
+                count: likesCount,
+                active: isLiked,
+                onTap: onLike,
+                onLongPress: onLikeLongPress == null
+                    ? null
+                    : () {
+                        final box = context.findRenderObject() as RenderBox?;
+                        final offset = box?.localToGlobal(
+                              box.size.centerLeft(Offset.zero),
+                            ) ??
+                            Offset.zero;
+                        onLikeLongPress!(offset);
+                      },
+                tooltip: userReaction?.label ?? context.l10n.like,
+              ),
+              const SizedBox(width: 4),
+              _EngagementChip(
+                icon: Icons.chat_bubble_outline_rounded,
+                count: commentsCount,
+                onTap: onComment,
+                tooltip: context.l10n.comment,
+              ),
+              const Spacer(),
+              IconButton(
+                onPressed: onShare,
+                tooltip: context.l10n.sharePost,
+                visualDensity: VisualDensity.compact,
+                icon: Icon(
+                  Icons.ios_share_rounded,
+                  size: 20,
+                  color: context.textSecondary,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -409,13 +445,17 @@ class _EngagementChip extends StatelessWidget {
     required this.count,
     required this.onTap,
     required this.tooltip,
+    this.onLongPress,
+    this.emoji,
     this.active = false,
   });
 
   final IconData icon;
   final int count;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final String tooltip;
+  final String? emoji;
   final bool active;
 
   @override
@@ -425,13 +465,17 @@ class _EngagementChip extends StatelessWidget {
       message: tooltip,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(999),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20, color: color),
+              if (emoji != null)
+                Text(emoji!, style: const TextStyle(fontSize: 18))
+              else
+                Icon(icon, size: 20, color: color),
               const SizedBox(width: 6),
               Text(
                 '$count',

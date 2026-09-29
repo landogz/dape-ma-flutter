@@ -236,29 +236,36 @@ class _CareHubScreenState extends State<CareHubScreen> {
                             height: 1.35,
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 12),
                         TextField(
                           controller: _searchController,
                           onChanged: (v) => setState(() => _query = v),
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
+                            height: 1.2,
                             color: CareColors.greenText,
                           ),
                           decoration: InputDecoration(
+                            isDense: true,
                             hintText: l10n.careSearchHint,
                             hintStyle: const TextStyle(
                               color: CareColors.mutedText,
-                              fontSize: 14,
+                              fontSize: 13,
                             ),
                             prefixIcon: const Icon(
                               Icons.search,
                               color: CareColors.mutedText,
+                              size: 18,
+                            ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 36,
+                              minHeight: 32,
                             ),
                             filled: true,
                             fillColor: Colors.white,
                             contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 14,
+                              horizontal: 12,
+                              vertical: 8,
                             ),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(999),

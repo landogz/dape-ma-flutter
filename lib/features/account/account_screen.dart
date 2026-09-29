@@ -152,6 +152,24 @@ class _AccountScreenState extends State<AccountScreen> {
     );
   }
 
+  Future<void> _showBadgesPhase2() async {
+    final l10n = context.l10n;
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(l10n.myBadges),
+        content: Text(l10n.badgesPhase2Body),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.gotIt),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _requireAuthThen(Widget screen) async {
     if (!_loggedIn) {
       await _open(const LoginScreen());
@@ -256,11 +274,67 @@ class _AccountScreenState extends State<AccountScreen> {
     if (_name.trim().isNotEmpty) score += 0.25;
     if (_photoUrl != null || _pickedFile != null) score += 0.30;
     if (_lessons + _articles + _events > 0) score += 0.25;
-    if (_badges.any((b) => b.earned) || _streak > 0) score += 0.20;
+    if (_streak > 0 || (!_badgesPhase2Locked && _badges.any((b) => b.earned))) {
+      score += 0.20;
+    }
     return score.clamp(0.0, 1.0);
   }
 
+  /// Badges unlock in Phase 2 — keep UI visible but fully locked for now.
+  static const bool _badgesPhase2Locked = true;
+
+  static const List<ProfileBadge> _phase2BadgePlaceholders = [
+    ProfileBadge(
+      key: 'healthy_decision_maker',
+      title: 'Healthy Decision Maker',
+      description: '',
+      icon: 'search',
+      color: '#F59E0B',
+      earned: false,
+    ),
+    ProfileBadge(
+      key: 'stress_buster',
+      title: 'Stress Buster',
+      description: '',
+      icon: 'bolt',
+      color: '#22C55E',
+      earned: false,
+    ),
+    ProfileBadge(
+      key: 'empowered_peer',
+      title: 'Empowered Peer',
+      description: '',
+      icon: 'handshake',
+      color: '#EF4444',
+      earned: false,
+    ),
+    ProfileBadge(
+      key: 'dape_champion',
+      title: 'DAPE Champion',
+      description: '',
+      icon: 'trophy',
+      color: '#7C3AED',
+      earned: false,
+    ),
+  ];
+
   List<ProfileBadge> get _displayBadges {
+    if (_badgesPhase2Locked) {
+      final source = _badges.isNotEmpty ? _badges : _phase2BadgePlaceholders;
+      return source
+          .map(
+            (b) => ProfileBadge(
+              key: b.key,
+              title: b.title,
+              description: b.description,
+              icon: b.icon,
+              color: b.color,
+              earned: false,
+            ),
+          )
+          .toList(growable: false);
+    }
+
     if (_badges.isEmpty) return const [];
     // Prefer earned first, then locked — keeps progress visible and fills the row.
     final earned = _badges.where((b) => b.earned).toList();
@@ -268,7 +342,8 @@ class _AccountScreenState extends State<AccountScreen> {
     return [...earned, ...locked];
   }
 
-  int get _earnedBadgeCount => _badges.where((b) => b.earned).length;
+  int get _earnedBadgeCount =>
+      _badgesPhase2Locked ? 0 : _badges.where((b) => b.earned).length;
 
   IconData _badgeIcon(String key) {
     switch (key) {
@@ -368,9 +443,9 @@ class _AccountScreenState extends State<AccountScreen> {
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
                               colors: [
-                                Color(0xFF123A60),
-                                Color(0xFF055498),
-                                Color(0xFF7C3AED),
+                                AppColors.nileBlue,
+                                AppColors.mediumElectricBlue,
+                                AppColors.accentPurple,
                               ],
                             ),
                           ),
@@ -712,7 +787,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                       Expanded(
                                         child: ProfileStatCard(
                                           icon: Icons.article_outlined,
-                                          iconColor: const Color(0xFFEA580C),
+                                          iconColor: AppColors.brightGold,
                                           value: '$_articles',
                                           label: l10n.articlesRead,
                                           onTap: () => _requireAuthThen(
@@ -723,7 +798,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                               emptyBody: l10n.noArticlesBody,
                                               onOpenPost: _openPostActivity,
                                               listIcon: Icons.article_outlined,
-                                              accentColor: const Color(0xFFEA580C),
+                                              accentColor: AppColors.brightGold,
                                             ),
                                           ),
                                         ),
@@ -733,7 +808,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                         child: ProfileStatCard(
                                           icon: Icons
                                               .play_circle_fill_rounded,
-                                          iconColor: AppColors.accentRed,
+                                          iconColor: AppColors.fireEngineRed,
                                           value: '$_events',
                                           label: l10n.eventsJoined,
                                           onTap: () => _requireAuthThen(
@@ -744,7 +819,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                               emptyBody: l10n.noEventsBody,
                                               listIcon:
                                                   Icons.play_circle_fill_rounded,
-                                              accentColor: AppColors.accentRed,
+                                              accentColor: AppColors.fireEngineRed,
                                             ),
                                           ),
                                         ),
@@ -754,7 +829,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                         child: ProfileStatCard(
                                           icon: Icons
                                               .local_fire_department_rounded,
-                                          iconColor: const Color(0xFFF97316),
+                                          iconColor: AppColors.fireEngineRed,
                                           value: '$_streak',
                                           label: l10n.dayStreak,
                                           onTap: () => _requireAuthThen(
@@ -783,27 +858,33 @@ class _AccountScreenState extends State<AccountScreen> {
                                               fontWeight: FontWeight.w800,
                                             ),
                                           ),
-                                          if (_badges.isNotEmpty) ...[
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              l10n.badgesUnlockedProgress(
-                                                _earnedBadgeCount,
-                                                _badges.length,
-                                              ),
-                                              style: TextStyle(
-                                                color: context.textSecondary,
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12.5,
-                                              ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            _badgesPhase2Locked
+                                                ? l10n.badgesPhase2Subtitle
+                                                : (_badges.isNotEmpty
+                                                    ? l10n.badgesUnlockedProgress(
+                                                        _earnedBadgeCount,
+                                                        _badges.length,
+                                                      )
+                                                    : l10n.noActivityYet),
+                                            style: TextStyle(
+                                              color: context.textSecondary,
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 12.5,
                                             ),
-                                          ],
+                                          ),
                                         ],
                                       ),
                                     ),
                                     TextButton(
-                                      onPressed: _showFeatureUnavailable,
+                                      onPressed: _badgesPhase2Locked
+                                          ? _showBadgesPhase2
+                                          : _showFeatureUnavailable,
                                       child: Text(
-                                        l10n.seeAll,
+                                        _badgesPhase2Locked
+                                            ? l10n.comingSoon
+                                            : l10n.seeAll,
                                         style: const TextStyle(
                                           color: AppColors.primaryBlue,
                                           fontWeight: FontWeight.w700,
@@ -836,7 +917,9 @@ class _AccountScreenState extends State<AccountScreen> {
                                             earned: badge.earned,
                                             compact: true,
                                             expand: true,
-                                            onTap: _showFeatureUnavailable,
+                                            onTap: _badgesPhase2Locked
+                                                ? _showBadgesPhase2
+                                                : _showFeatureUnavailable,
                                           ),
                                         ),
                                     ],
@@ -859,7 +942,9 @@ class _AccountScreenState extends State<AccountScreen> {
                                               _displayBadges[i].key,
                                             ),
                                             earned: _displayBadges[i].earned,
-                                            onTap: _showFeatureUnavailable,
+                                            onTap: _badgesPhase2Locked
+                                                ? _showBadgesPhase2
+                                                : _showFeatureUnavailable,
                                           ),
                                         ],
                                       ],

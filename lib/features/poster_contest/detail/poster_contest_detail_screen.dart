@@ -254,7 +254,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.orange.withOpacity(0.12),
+                            color: AppColors.brightGold.withValues(alpha: 0.18),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -263,7 +263,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: Colors.orange.shade900,
+                                  color: AppColors.nileBlue,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),

@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/mood_checkin.dart';
+import '../../core/theme/app_colors.dart';
 import '../auth/login_screen.dart';
 import '../diary/widgets/journal_wizard/journal_wizard_sheet.dart';
 import 'care_colors.dart';
@@ -264,7 +265,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                                     .round(),
                           ),
                           _LegendRow(
-                            color: const Color(0xFFF97316),
+                            color: AppColors.fireEngineRed,
                             label: l10n.careMoodBad,
                             pct: total == 0
                                 ? 0
@@ -595,7 +596,7 @@ class _MoodDonutPainter extends CustomPainter {
 
   static const _colors = {
     'struggling': Color(0xFFCE2028),
-    'difficult': Color(0xFFF97316),
+    'difficult': AppColors.fireEngineRed,
     'meh': Color(0xFFFBD116),
     'good': Color(0xFF86EFAC),
     'great': Color(0xFF0F766E),

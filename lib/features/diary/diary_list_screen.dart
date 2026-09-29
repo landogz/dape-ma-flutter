@@ -7,6 +7,7 @@ import '../../core/models/diary_entry.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../../core/utils/api_url.dart';
 import '../auth/login_screen.dart';
 import 'diary_service.dart';
 import 'widgets/journal_wizard/journal_constants.dart';
@@ -446,6 +447,7 @@ class _EntryCard extends StatelessWidget {
     final accent = JournalConstants.accentForSky(entry.sky);
     final preview = entry.hasNotes ? entry.notesPreview : l10n.journalNoWrittenNotes;
     final feelings = entry.feelings;
+    final imageUrl = ApiUrl.resolve(entry.imageUrl);
 
     return Material(
       color: Colors.white,
@@ -466,9 +468,39 @@ class _EntryCard extends StatelessWidget {
                   ),
                 ),
               ),
+              if (imageUrl != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 12, 0, 12),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: 72,
+                      height: 72,
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, error, stackTrace) => Container(
+                          color: const Color(0xFFF3F4F6),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.broken_image_outlined,
+                            size: 22,
+                            color: AppColors.textSecondaryLight
+                                .withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+                  padding: EdgeInsets.fromLTRB(
+                    imageUrl != null ? 12 : 14,
+                    14,
+                    14,
+                    14,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

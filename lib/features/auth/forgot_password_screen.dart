@@ -4,8 +4,8 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme_colors.dart';
-import 'widgets/auth_header.dart';
+import 'widgets/auth_decor.dart';
+import 'widgets/auth_scaffold.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -37,159 +37,105 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           'email': _emailController.text.trim(),
         },
       );
-      setState(() {
-        _success = context.l10n.resetSuccess;
-      });
+      if (!mounted) return;
+      setState(() => _success = context.l10n.resetSuccess);
     } catch (_) {
-      setState(() {
-        _error = context.l10n.resetFailed;
-      });
+      if (!mounted) return;
+      setState(() => _error = context.l10n.resetFailed);
     } finally {
-      if (mounted) {
-        setState(() {
-          _loading = false;
-        });
-      }
+      if (mounted) setState(() => _loading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final inputDecoration = InputDecoration(
-      filled: true,
-      fillColor: context.inputFill,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: context.borderSubtle),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: BorderSide(color: context.borderSubtle),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    );
 
-    return Scaffold(
-      backgroundColor: context.pageBackground,
-      appBar: AppBar(
-        title: Text(l10n.forgotPassword),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        foregroundColor: context.textPrimary,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 8),
-                const AuthHeader(),
-                const SizedBox(height: 24),
-                Text(
-                  l10n.resetInstructions,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: context.textSecondary,
-                      ),
+    return AuthScaffold(
+      showBack: true,
+      title: l10n.forgotPassword,
+      centerContent: true,
+      onBack: _loading ? null : () => Navigator.of(context).pop(),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const AuthBrandMark(sealSize: 88),
+            const SizedBox(height: 28),
+            AuthHeadline(l10n.forgotPassword),
+            const SizedBox(height: 10),
+            AuthSubtext(l10n.resetInstructions),
+            const SizedBox(height: 28),
+            AuthFieldShell(
+              child: TextFormField(
+                controller: _emailController,
+                enabled: !_loading,
+                decoration: authFieldDecoration(
+                  context: context,
+                  hintText: l10n.enterEmailHint,
+                  prefixIcon: Icons.email_outlined,
                 ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _emailController,
-                  decoration: inputDecoration.copyWith(
-                    labelText: l10n.email,
-                    prefixIcon: Icon(Icons.email_outlined,
-                      color: context.textSecondary,
-                      size: 22,
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  textInputAction: TextInputAction.done,
-                  onFieldSubmitted: (_) => _submit(),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return l10n.emailRequired;
-                    }
-                    return null;
-                  },
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AuthTokens.inputText,
                 ),
-                const SizedBox(height: 20),
-                if (_error != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(
-                        color: AppColors.accentRed,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-                if (_success != null) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      _success!,
-                      style: const TextStyle(
-                        color: Colors.green,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ),
-                ],
-                SizedBox(
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _submit,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryBlue,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: _loading
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(l10n.sendResetLink),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: TextButton(
-                    onPressed: _loading
-                        ? null
-                        : () {
-                            Navigator.of(context).pop();
-                          },
-                    child: Text(
-                      l10n.backToLogin,
-                      style: const TextStyle(
-                        color: AppColors.primaryBlue,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-              ],
+                keyboardType: TextInputType.emailAddress,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) {
+                  if (!_loading) _submit();
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return l10n.emailRequired;
+                  }
+                  return null;
+                },
+              ),
             ),
-          ),
+            if (_error != null) ...[
+              const SizedBox(height: 12),
+              AuthBanner(message: _error!),
+            ],
+            if (_success != null) ...[
+              const SizedBox(height: 12),
+              AuthBanner(message: _success!, isError: false),
+            ],
+            const SizedBox(height: 24),
+            AuthPrimaryButton(
+              label: l10n.sendResetLink,
+              loading: _loading,
+              onPressed: _submit,
+            ),
+            const SizedBox(height: 16),
+            AuthFooterFade(
+              child: Center(
+                child: TextButton(
+                  onPressed: _loading
+                      ? null
+                      : () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.mediumElectricBlue,
+                    minimumSize: const Size(44, 44),
+                  ),
+                  child: Text(
+                    l10n.backToLogin,
+                    style: const TextStyle(
+                      color: AppColors.mediumElectricBlue,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

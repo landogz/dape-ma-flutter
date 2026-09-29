@@ -17,6 +17,11 @@ class AuthService {
     return _cachedToken;
   }
 
+  static Future<bool> isLoggedIn() async {
+    final token = await getToken();
+    return token != null && token.isNotEmpty;
+  }
+
   static Future<void> _setToken(String token) async {
     _cachedToken = token;
     await AuthStorage.saveToken(token);

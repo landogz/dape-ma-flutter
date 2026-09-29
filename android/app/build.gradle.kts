@@ -42,3 +42,8 @@ android {
 flutter {
     source = "../.."
 }
+
+// Apply Google Services only when Firebase Android config is present.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+}

@@ -335,7 +335,7 @@ class _IconBox extends StatelessWidget {
     case 'news':
       return (
         icon: Icons.newspaper_rounded,
-        color: const Color(0xFFEA580C),
+        color: AppColors.brightGold,
         background: const Color(0xFFFFEDD5),
       );
     default:

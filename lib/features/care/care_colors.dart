@@ -1,43 +1,53 @@
 import 'package:flutter/material.dart';
 
-/// Unified Care module palette — teal primary, gold CTA accent only.
+import '../../core/theme/app_colors.dart';
+
+/// Care module palette — aligned to DAPE-MA brand (blues + Bright Gold CTA).
+///
+/// Legacy `teal*` / `calm*` field names kept so existing screens update
+/// visually without renaming every call site.
 class CareColors {
   CareColors._();
 
-  /// Primary brand teal
-  static const teal = Color(0xFF2F7A6B);
-  static const tealDark = Color(0xFF1C5A4E);
-  static const tealMid = Color(0xFF3D8F7D);
+  /// Primary brand (was teal)
+  static const teal = AppColors.mediumElectricBlue;
+  static const tealDark = AppColors.nileBlue;
+  static const tealMid = Color(0xFF1A6BB0);
 
   /// Soft surfaces
-  static const mint = Color(0xFFD8EDE6);
-  static const mintSoft = Color(0xFFFAFAF8);
-  static const mintBar = Color(0xFFE8F3EF);
-  static const cardFill = Color(0xFFF3F9F6);
-  static const cardBorder = Color(0xFF8BBBAE);
+  static const mint = AppColors.softBlue;
+  static const mintSoft = AppColors.lightBackground;
+  static const mintBar = Color(0xFFD6E8F5);
+  static const cardFill = Color(0xFFF0F6FB);
+  static const cardBorder = AppColors.softBlueBorder;
 
   /// Text
-  static const greenText = Color(0xFF1A1F1D);
-  static const heading = Color(0xFF1C5A4E);
-  static const mutedText = Color(0xFF5A6B64);
+  static const greenText = AppColors.textPrimaryLight;
+  static const heading = AppColors.nileBlue;
+  static const mutedText = AppColors.textSecondaryLight;
 
-  /// Deep forest teal (contrast cards / Daily Reflection)
-  static const forestDeep = Color(0xFF143F37);
-  static const forest = Color(0xFF1C5A4E);
-  static const forestMid = Color(0xFF2F7A6B);
+  /// Deep contrast cards / Daily Reflection
+  static const forestDeep = AppColors.nileBlue;
+  static const forest = AppColors.nileBlue;
+  static const forestMid = AppColors.mediumElectricBlue;
 
-  /// Single action accent — primary CTAs only
-  static const accentGold = Color(0xFFF2B035);
-  static const accentGoldText = Color(0xFF1A1F1D);
+  /// Action accent — Bright Gold CTAs
+  static const accentGold = AppColors.brightGold;
+  static const accentGoldText = AppColors.nileBlue;
 
   /// Legacy aliases used elsewhere in Care sub-screens
-  static const leaf = Color(0xFF3D8F7D);
-  static const calmForest = Color(0xFF1C5A4E);
-  static const calmForestMid = Color(0xFF2F7A6B);
-  static const calmMint = Color(0xFF9DCBBB);
-  static const calmMintBtn = Color(0xFF85C4B0);
-  static const calmMintCard = Color(0xFFEAF4F0);
-  static const calmBg = Color(0xFFFAFAF8);
-  static const calmMuted = Color(0xFF5A6B64);
-  static const calmRing = Color(0xFFC5DDD5);
+  static const leaf = tealMid;
+  static const calmForest = tealDark;
+  static const calmForestMid = teal;
+  static const calmMint = Color(0xFF8BB8D9);
+  static const calmMintBtn = Color(0xFF6FA3CC);
+  static const calmMintCard = AppColors.softBlue;
+  static const calmBg = AppColors.lightBackground;
+  static const calmMuted = mutedText;
+  static const calmRing = AppColors.softBlueBorder;
+
+  // Preferred brand aliases
+  static const primary = teal;
+  static const primaryDark = tealDark;
+  static const primaryMid = tealMid;
 }

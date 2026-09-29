@@ -145,6 +145,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           color: AppColors.accentRed,
           background: const Color(0xFFFEE2E2),
         );
+      case 'admin_push':
+        return (
+          icon: Icons.campaign_rounded,
+          color: AppColors.primaryBlue,
+          background: const Color(0xFFDBEAFE),
+        );
       default:
         return (
           icon: Icons.notifications_rounded,
@@ -180,6 +186,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return l10n.notifTypeComment;
       case 'post_liked':
         return l10n.notifTypeLiked;
+      case 'admin_push':
+        return l10n.notifTypeAdminPush;
       default:
         return l10n.notifTypeGeneral;
     }

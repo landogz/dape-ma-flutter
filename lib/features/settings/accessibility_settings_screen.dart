@@ -165,7 +165,7 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               subtitle: l10n.reduceMotionBody,
               icon: Icons.animation_rounded,
               iconBackground: const Color(0xFFFCE7F3),
-              iconColor: const Color(0xFFDB2777),
+              iconColor: AppColors.accentPurple,
               trailing: Switch.adaptive(
                 value: a11y.reduceMotion,
                 activeTrackColor: AppColors.primaryBlue,
@@ -191,7 +191,7 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               subtitle: l10n.readAloudBody,
               icon: Icons.record_voice_over_rounded,
               iconBackground: const Color(0xFFFCE7F3),
-              iconColor: const Color(0xFFDB2777),
+              iconColor: AppColors.accentPurple,
               trailing: Switch.adaptive(
                 value: a11y.readAloud,
                 activeTrackColor: AppColors.primaryBlue,

@@ -215,7 +215,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                       ? event.detailsText!
                                       : (event.aboutText ?? ''),
                                   style: const TextStyle(
-                                    color: Color(0xFF4B3B63),
+                                    color: HopeColors.bodyText,
                                     height: 1.5,
                                   ),
                                 ),
@@ -324,7 +324,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
       const SizedBox(height: 8),
       Text(
         event.aboutText ?? '',
-        style: const TextStyle(color: Color(0xFF4B3B63), height: 1.5),
+        style: const TextStyle(color: HopeColors.bodyText, height: 1.5),
       ),
       if (event.forYouItems.isNotEmpty) ...[
         const SizedBox(height: 20),

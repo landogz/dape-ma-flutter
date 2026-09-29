@@ -728,6 +728,12 @@ class AppStrings {
         '$earned/$total unlocked',
         '$earned/$total nakuha',
       );
+  String get badgesPhase2Subtitle =>
+      _t('Coming in Phase 2', 'Darating sa Phase 2');
+  String get badgesPhase2Body => _t(
+        'Badges are locked for now and will be available in Phase 2.',
+        'Naka-lock ang badges sa ngayon at available sa Phase 2.',
+      );
   String get badgeHealthyDecision =>
       _t('Healthy Decision Maker', 'Healthy Decision Maker');
   String get badgeEmpoweredPeer => _t('Empowered Peer', 'Empowered Peer');
@@ -941,6 +947,8 @@ class AppStrings {
   String get notifTypeReply => _t('New reply', 'May bagong reply');
   String get notifTypeComment => _t('New comment', 'May bagong komento');
   String get notifTypeLiked => _t('Post liked', 'May nag-like sa post');
+  String get notifTypeAdminPush =>
+      _t('Announcement', 'Anunsyo');
   String get notifTypeGeneral => _t('Notification', 'Notification');
   String get privacyIntro => _t(
         'Your privacy matters to us. Read our Privacy Policy to learn how we protect your information.',
@@ -1209,6 +1217,11 @@ class AppStrings {
   String get resetFailed =>
       _t('Unable to send reset link. Please try again.', 'Hindi maipadala ang reset link. Subukan muli.');
   String get backToLogin => _t('Back to Login', 'Bumalik sa Login');
+  String get authAgreePrefix => _t(
+        'By continuing, you agree to our ',
+        'Sa pagpapatuloy, sumasang-ayon ka sa aming ',
+      );
+  String get authAgreeAnd => _t(' and ', ' at ');
 
   // Bookmarks
   String get bookmarksTitle => _t('Bookmarks', 'Mga Bookmark');
@@ -1269,7 +1282,7 @@ class AppStrings {
   String get registrationFailed =>
       _t('Registration failed. Please check your details.', 'Hindi matagumpay ang pagrehistro. Suriin ang mga detalye.');
   String get passwordMinSix =>
-      _t('Password must be at least 6 characters', 'Ang password ay dapat hindi bababa sa 6 character');
+      _t('Password must be at least 8 characters', 'Ang password ay dapat hindi bababa sa 8 character');
 
   // Bookmarks extras
   String get bookmarkRemoveFailed =>

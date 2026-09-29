@@ -16,19 +16,27 @@ extension AppThemeColors on BuildContext {
   Color get textSecondary =>
       isDarkMode ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
+  Color get brandPrimary => AppColors.mediumElectricBlue;
+
+  Color get brandSecondary => AppColors.nileBlue;
+
+  Color get brandAccent => AppColors.brightGold;
+
+  Color get brandDanger => AppColors.fireEngineRed;
+
   Color get inputFill =>
-      isDarkMode ? const Color(0xFF1E293B) : Colors.white;
+      isDarkMode ? AppColors.cardDark : AppColors.cardLight;
 
   Color get chipBackground =>
-      isDarkMode ? const Color(0xFF334155) : Colors.white;
+      isDarkMode ? const Color(0xFF334155) : AppColors.cardLight;
 
   Color get borderSubtle =>
       isDarkMode ? const Color(0xFF475569) : const Color(0xFFE5E7EB);
 
   Color get mutedSurface =>
-      isDarkMode ? const Color(0xFF1E293B) : const Color(0xFFF3F4F6);
+      isDarkMode ? AppColors.cardDark : AppColors.lightBackground;
 
   Color get softBrandSurface => isDarkMode
-      ? AppColors.primaryBlue.withValues(alpha: 0.22)
-      : AppColors.primaryBlue.withValues(alpha: 0.08);
+      ? AppColors.mediumElectricBlue.withValues(alpha: 0.22)
+      : AppColors.mediumElectricBlue.withValues(alpha: 0.08);
 }

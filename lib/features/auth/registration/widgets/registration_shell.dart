@@ -1,75 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../widgets/auth_decor.dart';
+import '../../widgets/auth_scaffold.dart';
 
-/// Right-edge blue→red curve used by registration onboarding steps.
-class RegistrationCurveBackground extends StatelessWidget {
-  const RegistrationCurveBackground({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        const Positioned.fill(child: ColoredBox(color: Colors.white)),
-        Positioned(
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: MediaQuery.sizeOf(context).width * 0.42,
-          child: const CustomPaint(
-            painter: _RegistrationCurvePainter(),
-          ),
-        ),
-        Positioned.fill(child: child),
-      ],
-    );
-  }
-}
-
-class _RegistrationCurvePainter extends CustomPainter {
-  const _RegistrationCurvePainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(size.width * 0.55, 0)
-      ..quadraticBezierTo(
-        size.width * 0.05,
-        size.height * 0.28,
-        size.width * 0.35,
-        size.height * 0.52,
-      )
-      ..quadraticBezierTo(
-        size.width * 0.7,
-        size.height * 0.78,
-        size.width * 0.2,
-        size.height,
-      )
-      ..lineTo(size.width, size.height)
-      ..lineTo(size.width, 0)
-      ..close();
-
-    final paint = Paint()
-      ..shader = const LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          AppColors.primaryBlue,
-          AppColors.secondaryBlue,
-          AppColors.accentRed,
-        ],
-        stops: [0.0, 0.45, 1.0],
-      ).createShader(Offset.zero & size);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
+/// Shared chrome for registration steps — same light + navy blob system as Login.
 class RegistrationShell extends StatelessWidget {
   const RegistrationShell({
     super.key,
@@ -96,30 +31,25 @@ class RegistrationShell extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: true,
-      body: RegistrationCurveBackground(
+      body: AuthDecorBackground(
         child: SafeArea(
           child: Stack(
             children: [
               if (showBack)
                 Positioned(
-                  top: 4,
-                  left: 8,
-                  child: IconButton(
-                    onPressed: onBack ?? () => Navigator.of(context).maybePop(),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: AppColors.primaryBlue,
-                      size: 20,
-                    ),
-                    constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: AuthBackTitleBar(
+                    onBack: onBack ?? () => Navigator.of(context).maybePop(),
                   ),
                 ),
               Positioned.fill(
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(
-                    24,
-                    showBack ? 48 : 16,
-                    24,
+                    AuthTokens.horizontalPadding,
+                    showBack ? 52 : 16,
+                    AuthTokens.horizontalPadding,
                     showNextFab ? 88 + safeBottom : 24 + safeBottom,
                   ),
                   child: child,
@@ -132,29 +62,41 @@ class RegistrationShell extends StatelessWidget {
                   bottom: 16 + safeBottom + (bottomInset > 0 ? 0 : 0),
                   child: Center(
                     child: Material(
-                      color: AppColors.primaryBlue,
+                      color: AppColors.nileBlue,
                       shape: const CircleBorder(),
-                      elevation: 4,
-                      shadowColor: AppColors.primaryBlue.withValues(alpha: 0.4),
-                      child: InkWell(
-                        customBorder: const CircleBorder(),
-                        onTap: nextLoading ? null : onNext,
-                        child: SizedBox(
-                          width: 64,
-                          height: 64,
-                          child: nextLoading
-                              ? const Padding(
-                                  padding: EdgeInsets.all(18),
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2.4,
+                      elevation: 0,
+                      shadowColor: Colors.transparent,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.nileBlue.withValues(alpha: 0.12),
+                              blurRadius: 20,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: InkWell(
+                          customBorder: const CircleBorder(),
+                          onTap: nextLoading ? null : onNext,
+                          child: SizedBox(
+                            width: 64,
+                            height: 64,
+                            child: nextLoading
+                                ? const Padding(
+                                    padding: EdgeInsets.all(18),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2.4,
+                                      color: Colors.white,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.arrow_forward_rounded,
                                     color: Colors.white,
+                                    size: 28,
                                   ),
-                                )
-                              : const Icon(
-                                  Icons.arrow_forward_rounded,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
+                          ),
                         ),
                       ),
                     ),
@@ -172,7 +114,7 @@ class RegistrationIconBadge extends StatelessWidget {
   const RegistrationIconBadge({
     super.key,
     required this.child,
-    this.backgroundColor = const Color(0xFFE8F1FA),
+    this.backgroundColor = AppColors.softBlue,
   });
 
   final Widget child;

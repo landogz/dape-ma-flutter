@@ -17,6 +17,9 @@ import '../../core/utils/json_parsers.dart';
 import '../auth/login_screen.dart';
 import '../post_engagement/comment_tree_utils.dart';
 import '../post_engagement/post_engagement_service.dart';
+import '../post_engagement/post_reaction.dart';
+import '../post_engagement/reaction_picker.dart';
+import '../post_engagement/reactors_sheet.dart';
 import '../post_engagement/widgets/comment_bubble.dart';
 import '../post_engagement/widgets/edit_comment_sheet.dart';
 import '../reviews/widgets/review_sheet.dart';
@@ -212,6 +215,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Future<void> _onLikeTap() async {
+    await _applyReaction(PostReactionType.like);
+  }
+
+  Future<void> _onLikeLongPress(Offset anchor) async {
+    if (!_isLoggedIn) {
+      final loggedIn = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (loggedIn != true || !mounted) return;
+      setState(() => _isLoggedIn = true);
+      _loadCurrentUser();
+    }
+
+    final selected = await showReactionPicker(
+      context,
+      selected: _post.userReaction,
+      anchor: anchor,
+    );
+    if (selected == null || !mounted) return;
+    await _applyReaction(selected);
+  }
+
+  Future<void> _applyReaction(PostReactionType reaction) async {
     if (!_isLoggedIn) {
       final loggedIn = await Navigator.of(context).push<bool>(
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -221,12 +247,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       _loadCurrentUser();
     }
     try {
-      final result = await PostEngagementService.toggleLike(_post.id);
+      final result = await PostEngagementService.setReaction(
+        _post.id,
+        reaction: reaction,
+      );
       if (!mounted) return;
       setState(() {
         _post = _post.copyWith(
           isLiked: result.liked,
           likesCount: result.likesCount,
+          userReaction: result.userReaction,
+          clearUserReaction: result.userReaction == null,
+          reactionCounts: result.reactionCounts,
         );
       });
       if (result.liked) {
@@ -236,12 +268,21 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (!mounted) return;
       _showFloatingSnack(
         PostEngagementService.friendlyError(
-              e,
-              'like this post',
-              context.l10n,
-            ),
+          e,
+          'react to this post',
+          context.l10n,
+        ),
       );
     }
+  }
+
+  Future<void> _onReactionsTap() async {
+    if (_post.likesCount <= 0) return;
+    await showReactorsSheet(
+      context,
+      postId: _post.id,
+      reactionCounts: _post.reactionCounts,
+    );
   }
 
   Future<void> _submitComment(String value) async {
@@ -617,7 +658,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 likesCount: post.likesCount,
                                 commentsCount: post.commentsCount,
                                 isLiked: post.isLiked,
+                                userReaction: post.userReaction,
+                                reactionCounts: post.reactionCounts,
                                 onLike: _onLikeTap,
+                                onLikeLongPress: _onLikeLongPress,
+                                onReactionsTap: _onReactionsTap,
                                 onComment: post.commentsEnabled
                                     ? () {
                                         FocusScope.of(context)

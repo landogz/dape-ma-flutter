@@ -45,14 +45,34 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
   String? _dioMessage(DioException e) {
     final res = e.response?.data;
     if (res is Map) {
-      final message = res['message'] as String?;
+      final rawMessage = res['message'];
+      final message = rawMessage is String ? rawMessage.trim() : null;
       final errors = res['errors'];
       if (errors is Map && errors.isNotEmpty) {
         final first = errors.values.first;
-        if (first is List && first.isNotEmpty) return first.first.toString();
-        if (first != null) return first.toString();
+        if (first is List && first.isNotEmpty) {
+          final text = first.first.toString().trim();
+          if (text.isNotEmpty) return text;
+        } else if (first != null) {
+          final text = first.toString().trim();
+          if (text.isNotEmpty) return text;
+        }
       }
-      return message;
+      if (message != null && message.isNotEmpty) return message;
+
+      // 404 / empty framework messages (wrong API host, missing route)
+      final status = e.response?.statusCode;
+      if (status == 404) {
+        return 'Registration service unavailable. Check the API server.';
+      }
+      if (status == 422) {
+        return 'Please check your email and password and try again.';
+      }
+    }
+
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout) {
+      return 'Cannot reach the server. Make sure the API is running.';
     }
     return null;
   }
@@ -256,7 +276,11 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
             },
           ),
         ),
-      _ => SuccessStep(onFinish: _finish),
+      _ => RegistrationShell(
+          showBack: false,
+          showNextFab: false,
+          child: SuccessStep(onFinish: _finish),
+        ),
     };
   }
 }

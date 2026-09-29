@@ -7,6 +7,8 @@ import '../../core/models/post_comment.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/utils/json_parsers.dart';
+import 'post_reaction.dart';
+import 'post_reactor.dart';
 
 class PostEngagementService {
   PostEngagementService._();
@@ -43,9 +45,19 @@ class PostEngagementService {
     return Post.fromJson(data);
   }
 
-  static Future<({bool liked, int likesCount})> toggleLike(int postId) async {
+  static Future<
+      ({
+        bool liked,
+        int likesCount,
+        PostReactionType? userReaction,
+        Map<PostReactionType, int> reactionCounts,
+      })> setReaction(
+    int postId, {
+    PostReactionType reaction = PostReactionType.like,
+  }) async {
     final res = await AuthService.authedPost<Map<String, dynamic>>(
       Endpoints.postLike(postId),
+      data: <String, dynamic>{'reaction': reaction.apiValue},
     );
     final root = res.data ?? <String, dynamic>{};
     final data = root['data'] is Map<String, dynamic>
@@ -54,7 +66,57 @@ class PostEngagementService {
     return (
       liked: parseJsonBool(data['liked']),
       likesCount: parseJsonInt(data['likes_count']),
+      userReaction: postReactionFromApi(data['user_reaction'] as String?),
+      reactionCounts: parseReactionCounts(data['reaction_counts']),
     );
+  }
+
+  /// Backward-compatible alias: tap Like toggles the default `like` reaction.
+  static Future<
+      ({
+        bool liked,
+        int likesCount,
+        PostReactionType? userReaction,
+        Map<PostReactionType, int> reactionCounts,
+      })> toggleLike(int postId) {
+    return setReaction(postId, reaction: PostReactionType.like);
+  }
+
+  static Future<({List<PostReactor> reactors, bool hasMore})> fetchReactors(
+    int postId, {
+    PostReactionType? type,
+    int page = 1,
+  }) async {
+    final res = await ApiClient().get<Map<String, dynamic>>(
+      Endpoints.postReactions(postId),
+      query: <String, dynamic>{
+        'page': page,
+        if (type != null) 'type': type.apiValue,
+      },
+    );
+    final root = res.data ?? <String, dynamic>{};
+    final data = root['data'];
+    List<dynamic> raw = const [];
+    var hasMore = false;
+
+    if (data is Map<String, dynamic>) {
+      raw = data['data'] as List<dynamic>? ?? const [];
+      final currentPage = parseJsonInt(data['current_page'], 1);
+      final lastPage = parseJsonInt(data['last_page'], 1);
+      hasMore = currentPage < lastPage;
+    } else if (data is List<dynamic>) {
+      raw = data;
+    }
+
+    final reactors = <PostReactor>[];
+    for (final item in raw) {
+      if (item is! Map<String, dynamic>) continue;
+      try {
+        reactors.add(PostReactor.fromJson(item));
+      } catch (_) {}
+    }
+
+    return (reactors: reactors, hasMore: hasMore);
   }
 
   static Future<({List<PostComment> comments, bool hasMore})> fetchComments(

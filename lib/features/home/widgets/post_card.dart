@@ -6,12 +6,16 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../post_engagement/post_reaction.dart';
+import '../../post_engagement/reaction_picker.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
   final VoidCallback onTap;
   final VoidCallback onBookmarkTap;
   final VoidCallback onLikeTap;
+  final ValueChanged<Offset>? onLikeLongPress;
+  final VoidCallback? onReactionsTap;
   final VoidCallback onCommentTap;
   final bool isBookmarked;
 
@@ -21,6 +25,8 @@ class PostCard extends StatefulWidget {
     required this.onTap,
     required this.onBookmarkTap,
     required this.onLikeTap,
+    this.onLikeLongPress,
+    this.onReactionsTap,
     required this.onCommentTap,
     this.isBookmarked = false,
   });
@@ -265,12 +271,19 @@ class _PostCardState extends State<PostCard> {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
               child: Row(
                 children: [
-                  Text(
-                    l10n.likesCount(post.likesCount),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: context.textSecondary,
-                        ),
-                  ),
+                  if (post.likesCount > 0)
+                    ReactionSummaryRow(
+                      reactionCounts: post.reactionCounts,
+                      totalCount: post.likesCount,
+                      onTap: widget.onReactionsTap ?? widget.onTap,
+                    )
+                  else
+                    Text(
+                      l10n.likesCount(post.likesCount),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: context.textSecondary,
+                          ),
+                    ),
                   const SizedBox(width: 8),
                   Text(
                     l10n.commentsCount(post.commentsCount),
@@ -305,12 +318,23 @@ class _PostCardState extends State<PostCard> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _ActionButton(
-                    icon: post.isLiked
-                        ? Icons.thumb_up
-                        : Icons.thumb_up_outlined,
-                    label: l10n.like,
+                    icon: post.userReaction == null
+                        ? Icons.thumb_up_outlined
+                        : Icons.thumb_up,
+                    emoji: post.userReaction?.emoji,
+                    label: post.userReaction?.label ?? l10n.like,
                     isActive: post.isLiked,
                     onTap: widget.onLikeTap,
+                    onLongPress: widget.onLikeLongPress == null
+                        ? null
+                        : () {
+                            final box = context.findRenderObject() as RenderBox?;
+                            final offset = box?.localToGlobal(
+                                  box.size.center(Offset.zero),
+                                ) ??
+                                Offset.zero;
+                            widget.onLikeLongPress!(offset);
+                          },
                   ),
                   _ActionButton(
                     icon: Icons.chat_bubble_outline,
@@ -332,12 +356,16 @@ class _ActionButton extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.onLongPress,
+    this.emoji,
     this.isActive = false,
   });
 
   final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
+  final String? emoji;
   final bool isActive;
 
   @override
@@ -348,13 +376,17 @@ class _ActionButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(4),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 20, color: color),
+              if (emoji != null)
+                Text(emoji!, style: const TextStyle(fontSize: 18))
+              else
+                Icon(icon, size: 20, color: color),
               const SizedBox(width: 6),
               Text(
                 label,

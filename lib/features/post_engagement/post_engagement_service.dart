@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 
 import '../../core/auth/auth_service.dart';
@@ -158,13 +160,28 @@ class PostEngagementService {
     int postId,
     String body, {
     int? parentId,
+    File? image,
   }) async {
-    final res = await AuthService.authedPost<Map<String, dynamic>>(
-      Endpoints.postComments(postId),
-      data: <String, dynamic>{
+    final Object payload;
+    if (image != null) {
+      payload = FormData.fromMap({
         'body': body,
         if (parentId != null) 'parent_id': parentId,
-      },
+        'image': await MultipartFile.fromFile(
+          image.path,
+          filename: image.path.split('/').last,
+        ),
+      });
+    } else {
+      payload = <String, dynamic>{
+        'body': body,
+        if (parentId != null) 'parent_id': parentId,
+      };
+    }
+
+    final res = await AuthService.authedPost<Map<String, dynamic>>(
+      Endpoints.postComments(postId),
+      data: payload,
     );
     final root = res.data ?? <String, dynamic>{};
     final data = root['data'] is Map<String, dynamic>

@@ -6,6 +6,7 @@ class PostComment {
   final int? parentId;
   final int userId;
   final String body;
+  final String? imageUrl;
   final String authorName;
   final String? authorAvatarUrl;
   final DateTime? createdAt;
@@ -16,6 +17,7 @@ class PostComment {
     this.parentId,
     required this.userId,
     required this.body,
+    this.imageUrl,
     required this.authorName,
     this.authorAvatarUrl,
     required this.createdAt,
@@ -24,6 +26,7 @@ class PostComment {
 
   PostComment copyWith({
     String? body,
+    String? imageUrl,
     List<PostComment>? replies,
   }) {
     return PostComment(
@@ -31,6 +34,7 @@ class PostComment {
       parentId: parentId,
       userId: userId,
       body: body ?? this.body,
+      imageUrl: imageUrl ?? this.imageUrl,
       authorName: authorName,
       authorAvatarUrl: authorAvatarUrl,
       createdAt: createdAt,
@@ -54,6 +58,7 @@ class PostComment {
         parseJsonInt(userMap['id']),
       ),
       body: parseJsonString(json['body'] ?? json['content']),
+      imageUrl: ApiUrl.resolve(json['image_url'] as String?),
       authorName: parseJsonString(userMap['name'], 'User'),
       authorAvatarUrl: ApiUrl.resolve(rawAvatar),
       createdAt: json['created_at'] != null

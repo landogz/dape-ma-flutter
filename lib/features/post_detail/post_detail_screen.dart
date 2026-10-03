@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -13,14 +15,17 @@ import '../../core/models/post_comment.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../../core/theme/app_typography.dart';
 import '../../core/utils/json_parsers.dart';
 import '../auth/login_screen.dart';
+import '../diary/image/diary_image_picker.dart';
 import '../post_engagement/comment_tree_utils.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../post_engagement/post_reaction.dart';
 import '../post_engagement/reaction_picker.dart';
 import '../post_engagement/reactors_sheet.dart';
 import '../post_engagement/widgets/comment_bubble.dart';
+import '../post_engagement/widgets/comment_emoji_sheet.dart';
 import '../post_engagement/widgets/edit_comment_sheet.dart';
 import '../reviews/widgets/review_sheet.dart';
 import 'widgets/post_article_layout.dart';
@@ -57,6 +62,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   String? _commentsError;
   bool _submittingComment = false;
   PostComment? _replyingTo;
+  File? _commentImage;
 
   static String _formatTimeAgo(DateTime? published) {
     if (published == null) return 'Just now';
@@ -285,10 +291,46 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  bool get _canSubmitComment =>
+      _commentController.text.trim().isNotEmpty || _commentImage != null;
+
+  Future<void> _pickCommentImage() async {
+    if (!_post.commentsEnabled || _submittingComment) return;
+    final l10n = context.l10n;
+    final file = await DiaryImagePicker.pick(
+      context: context,
+      title: l10n.journalPhotoSourceTitle,
+      cameraLabel: l10n.journalPhotoCamera,
+      galleryLabel: l10n.journalPhotoGallery,
+      cancelLabel: l10n.cancel,
+    );
+    if (!mounted || file == null) return;
+    setState(() => _commentImage = file);
+  }
+
+  Future<void> _pickCommentEmoji() async {
+    if (!_post.commentsEnabled || _submittingComment) return;
+    final emoji = await showCommentEmojiSheet(context);
+    if (!mounted || emoji == null || emoji.isEmpty) return;
+
+    final text = _commentController.text;
+    final selection = _commentController.selection;
+    final start = selection.isValid ? selection.start : text.length;
+    final end = selection.isValid ? selection.end : text.length;
+    final next = text.replaceRange(start, end, emoji);
+    _commentController.value = TextEditingValue(
+      text: next,
+      selection: TextSelection.collapsed(offset: start + emoji.length),
+    );
+    setState(() {});
+    FocusScope.of(context).requestFocus(_commentFocus);
+  }
+
   Future<void> _submitComment(String value) async {
     if (!_post.commentsEnabled) return;
     final body = value.trim();
-    if (body.isEmpty || _submittingComment) return;
+    if ((!_canSubmitComment && body.isEmpty) || _submittingComment) return;
+    if (body.isEmpty && _commentImage == null) return;
 
     if (!_isLoggedIn) {
       final loggedIn = await Navigator.of(context).push<bool>(
@@ -300,18 +342,21 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
 
     final parentId = _replyingTo?.id;
+    final image = _commentImage;
     setState(() => _submittingComment = true);
     try {
       final comment = await PostEngagementService.postComment(
         _post.id,
         body,
         parentId: parentId,
+        image: image,
       );
       if (!mounted) return;
       setState(() {
         _comments = addCommentToTree(_comments, comment);
         _post = _post.copyWith(commentsCount: _post.commentsCount + 1);
         _commentController.clear();
+        _commentImage = null;
         _replyingTo = null;
       });
       _commentFocus.unfocus();
@@ -679,7 +724,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               ),
                               Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                                    const EdgeInsets.fromLTRB(16, 8, 16, 0),
                                 child: Divider(
                                   height: 1,
                                   color: context.borderSubtle,
@@ -688,35 +733,61 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(
                                   16,
-                                  12,
+                                  16,
                                   16,
                                   16,
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      l10n.commentsTitle,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w600,
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.softBlue,
+                                            borderRadius:
+                                                BorderRadius.circular(10),
                                           ),
+                                          child: const Icon(
+                                            Icons.forum_outlined,
+                                            size: 18,
+                                            color: AppColors.mediumElectricBlue,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                l10n.commentsTitle,
+                                                style: AppTypography.header(
+                                                  color: AppColors.nileBlue,
+                                                ).copyWith(fontSize: 18),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                post.commentsCount > 0
+                                                    ? l10n.commentsCount(
+                                                        post.commentsCount,
+                                                      )
+                                                    : l10n.noCommentsEmptyTitle,
+                                                style: AppTypography.body(
+                                                  color: context.textSecondary,
+                                                  fontSize: 12.5,
+                                                ).copyWith(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    if (post.commentsCount > 0) ...[
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        l10n.commentsCount(post.commentsCount),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodySmall
-                                            ?.copyWith(
-                                              color: context.textSecondary,
-                                            ),
-                                      ),
-                                    ],
-                                    const SizedBox(height: 12),
+                                    const SizedBox(height: 16),
                                     if (_hasMoreComments &&
                                         _comments.isNotEmpty)
                                       Padding(
@@ -823,7 +894,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                           onDelete: _deleteComment,
                                           onReply: post.commentsEnabled
                                               ? _startReply
-                                              : (_) {},
+                                              : null,
                                         ),
                                       ),
                                   ],
@@ -887,8 +958,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                       Container(
                         padding: EdgeInsets.only(
-                          left: 16,
-                          right: 16,
+                          left: 12,
+                          right: 12,
                           top: 8,
                           bottom: 12 + bottomInset,
                         ),
@@ -908,64 +979,135 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             ),
                           ],
                         ),
-                        child: Row(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            IconButton(
-                              icon: Icon(
-                                Icons.camera_alt_outlined,
-                                color: context.textSecondary,
-                              ),
-                              onPressed: () {},
-                            ),
-                            Expanded(
-                              child: TextField(
-                                controller: _commentController,
-                                focusNode: _commentFocus,
-                                enabled: !_submittingComment,
-                                textInputAction: TextInputAction.send,
-                                decoration: InputDecoration(
-                                  hintText: _replyingTo == null
-                                      ? l10n.writeComment
-                                      : l10n.writeReply,
-                                  hintStyle: TextStyle(
-                                    color: context.textSecondary,
-                                    fontSize: 15,
-                                  ),
-                                  filled: true,
-                                  fillColor: context.inputFill,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(24),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 10,
-                                  ),
-                                ),
-                                onSubmitted: _submitComment,
-                                onChanged: (_) => setState(() {}),
-                              ),
-                            ),
-                            if (_commentController.text.trim().isNotEmpty)
-                              IconButton(
-                                onPressed: _submittingComment
-                                    ? null
-                                    : () => _submitComment(
-                                          _commentController.text,
+                            if (_commentImage != null) ...[
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Stack(
+                                  clipBehavior: Clip.none,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(14),
+                                      child: Image.file(
+                                        _commentImage!,
+                                        width: 88,
+                                        height: 88,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: -6,
+                                      right: -6,
+                                      child: Material(
+                                        color: AppColors.nileBlue,
+                                        shape: const CircleBorder(),
+                                        child: InkWell(
+                                          customBorder: const CircleBorder(),
+                                          onTap: _submittingComment
+                                              ? null
+                                              : () => setState(
+                                                    () => _commentImage = null,
+                                                  ),
+                                          child: const SizedBox(
+                                            width: 28,
+                                            height: 28,
+                                            child: Icon(
+                                              Icons.close_rounded,
+                                              size: 16,
+                                              color: Colors.white,
+                                            ),
+                                          ),
                                         ),
-                                icon: const Icon(
-                                  Icons.send_rounded,
-                                  color: AppColors.primaryBlue,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              )
-                            else
-                              IconButton(
-                                icon: Icon(
-                                  Icons.emoji_emotions_outlined,
-                                  color: context.textSecondary,
-                                ),
-                                onPressed: () {},
                               ),
+                              const SizedBox(height: 8),
+                            ],
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                IconButton(
+                                  tooltip: l10n.journalPhotoAdd,
+                                  icon: Icon(
+                                    Icons.camera_alt_outlined,
+                                    color: context.textSecondary,
+                                  ),
+                                  onPressed: _submittingComment
+                                      ? null
+                                      : _pickCommentImage,
+                                ),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _commentController,
+                                    focusNode: _commentFocus,
+                                    enabled: !_submittingComment,
+                                    minLines: 1,
+                                    maxLines: 4,
+                                    textInputAction: TextInputAction.send,
+                                    decoration: InputDecoration(
+                                      hintText: _replyingTo == null
+                                          ? l10n.writeComment
+                                          : l10n.writeReply,
+                                      hintStyle: TextStyle(
+                                        color: context.textSecondary,
+                                        fontSize: 15,
+                                      ),
+                                      filled: true,
+                                      fillColor: context.inputFill,
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(24),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 10,
+                                      ),
+                                    ),
+                                    onSubmitted: _submitComment,
+                                    onChanged: (_) => setState(() {}),
+                                  ),
+                                ),
+                                if (_canSubmitComment)
+                                  IconButton(
+                                    tooltip: l10n.writeComment,
+                                    onPressed: _submittingComment
+                                        ? null
+                                        : () => _submitComment(
+                                              _commentController.text,
+                                            ),
+                                    icon: _submittingComment
+                                        ? const SizedBox(
+                                            width: 22,
+                                            height: 22,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: AppColors.primaryBlue,
+                                            ),
+                                          )
+                                        : const Icon(
+                                            Icons.send_rounded,
+                                            color: AppColors.primaryBlue,
+                                          ),
+                                  )
+                                else
+                                  IconButton(
+                                    tooltip: 'Emoji',
+                                    icon: Icon(
+                                      Icons.emoji_emotions_outlined,
+                                      color: context.textSecondary,
+                                    ),
+                                    onPressed: _submittingComment
+                                        ? null
+                                        : _pickCommentEmoji,
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                       ),

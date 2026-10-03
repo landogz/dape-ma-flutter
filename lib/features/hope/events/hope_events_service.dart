@@ -62,7 +62,15 @@ class HopeEventsService {
       whoCanJoin: event.whoCanJoin,
       highlights: event.highlights,
       detailsText: event.detailsText,
-      speakers: event.speakers,
+      speakers: event.speakers
+          .map(
+            (speaker) => HopeSpeaker(
+              name: speaker.name,
+              role: speaker.role,
+              photoUrl: ApiUrl.resolve(speaker.photoUrl),
+            ),
+          )
+          .toList(),
       faqs: event.faqs,
     );
   }

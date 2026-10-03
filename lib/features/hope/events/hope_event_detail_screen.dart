@@ -226,10 +226,20 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                     .map(
                                       (s) => ListTile(
                                         contentPadding: EdgeInsets.zero,
-                                        leading: const CircleAvatar(
+                                        leading: CircleAvatar(
+                                          radius: 26,
                                           backgroundColor: HopeColors.purpleSoft,
-                                          child: Icon(Icons.person,
-                                              color: HopeColors.purple),
+                                          backgroundImage: s.photoUrl != null &&
+                                                  s.photoUrl!.isNotEmpty
+                                              ? NetworkImage(s.photoUrl!)
+                                              : null,
+                                          child: s.photoUrl == null ||
+                                                  s.photoUrl!.isEmpty
+                                              ? const Icon(
+                                                  Icons.person,
+                                                  color: HopeColors.purple,
+                                                )
+                                              : null,
                                         ),
                                         title: Text(
                                           s.name,
@@ -238,7 +248,8 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                             color: HopeColors.purple,
                                           ),
                                         ),
-                                        subtitle: s.role != null
+                                        subtitle: s.role != null &&
+                                                s.role!.isNotEmpty
                                             ? Text(s.role!)
                                             : null,
                                       ),

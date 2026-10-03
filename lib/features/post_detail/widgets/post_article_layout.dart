@@ -586,43 +586,49 @@ class CommentsEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: Center(
-        child: Column(
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                color: AppColors.primaryBlue.withValues(alpha: 0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.chat_bubble_outline_rounded,
-                size: 26,
-                color: AppColors.primaryBlue.withValues(alpha: 0.75),
-              ),
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 22),
+      decoration: BoxDecoration(
+        color: AppColors.softBlue.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.softBlueBorder),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: 12),
-            Text(
-              l10n.noCommentsEmptyTitle,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: context.textPrimary,
-                  ),
+            child: const Icon(
+              Icons.chat_bubble_outline_rounded,
+              size: 24,
+              color: AppColors.mediumElectricBlue,
             ),
-            const SizedBox(height: 4),
-            Text(
-              l10n.noCommentsEmptyBody,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: context.textSecondary,
-                  ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            l10n.noCommentsEmptyTitle,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.nileBlue,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            l10n.noCommentsEmptyBody,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.textSecondary,
+                  height: 1.35,
+                ),
+          ),
+        ],
       ),
     );
   }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/models/post.dart';
 import '../account/account_screen.dart';
 import '../care/care_hub_screen.dart';
-import '../chat/botpress_chat_screen.dart';
+import '../chat/tawk_chat_screen.dart';
 import '../home/home_screen.dart';
 import '../hope/hope_hub_screen.dart';
 import 'widgets/main_bottom_nav.dart';
@@ -50,7 +50,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
             onSwitchTab: _onTabSelected,
           ),
           const HopeHubScreen(),
-          const BotpressChatScreen(embeddedInShell: true),
+          const TawkChatScreen(embeddedInShell: true),
           const CareHubScreen(),
           const AccountScreen(embeddedInShell: true),
         ],

@@ -94,15 +94,22 @@ class HopeEvent {
 class HopeSpeaker {
   final String name;
   final String? role;
+  final String? photoUrl;
 
-  const HopeSpeaker({required this.name, this.role});
+  const HopeSpeaker({
+    required this.name,
+    this.role,
+    this.photoUrl,
+  });
 
   factory HopeSpeaker.fromJson(Map<String, dynamic> json) {
     return HopeSpeaker(
       name: (json['name'] ?? '') as String,
       role: json['role'] as String?,
+      photoUrl: json['photo_url'] as String?,
     );
   }
+
 }
 
 class HopeFaq {

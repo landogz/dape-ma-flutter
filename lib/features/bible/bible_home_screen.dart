@@ -6,6 +6,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import 'bible_reader_screen.dart';
 import 'bible_service.dart';
+import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class BibleHomeScreen extends StatefulWidget {
   const BibleHomeScreen({super.key});
@@ -56,11 +57,7 @@ class _BibleHomeScreenState extends State<BibleHomeScreen> {
     final newTestament = filtered.where((b) => b.testament == 'NT').toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.bibleTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.bibleTitle),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : Column(

@@ -73,7 +73,7 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
             const Icon(
               Icons.hourglass_bottom_rounded,
               size: 72,
-              color: Color(0xFFF59E0B),
+              color: CareColors.accentGold,
             ),
             const SizedBox(height: 8),
             Text(
@@ -157,7 +157,7 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
                     offset: const Offset(0, 4),
                   ),
                 ],
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: CareColors.cardBorder),
               ),
               child: Row(
                 children: [

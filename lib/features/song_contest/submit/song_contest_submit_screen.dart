@@ -7,6 +7,7 @@ import '../../../core/models/song_contest.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class SongContestSubmitScreen extends StatefulWidget {
   final SongContest contest;
@@ -116,11 +117,7 @@ class _SongContestSubmitScreenState extends State<SongContestSubmitScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.submitContestEntry),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.submitContestEntry),
       body: SafeArea(
         child: Form(
           key: _formKey,

@@ -6,7 +6,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/video_contest.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_theme_colors.dart';
+import '../../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class VideoContestSubmitScreen extends StatefulWidget {
   final VideoContest contest;
@@ -83,11 +83,7 @@ class _VideoContestSubmitScreenState extends State<VideoContestSubmitScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.submitVideoEntry),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.submitVideoEntry),
       body: SafeArea(
         child: Form(
           key: _formKey,

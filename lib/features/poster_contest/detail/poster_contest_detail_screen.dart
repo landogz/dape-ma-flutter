@@ -10,6 +10,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../../auth/login_screen.dart';
 import '../submit/poster_contest_submit_screen.dart';
+import '../../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class PosterContestDetailScreen extends StatefulWidget {
   final int contestId;
@@ -128,11 +129,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.posterContestDetailTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.posterContestDetailTitle),
       bottomNavigationBar: _loading || _contest == null || !_showSubmitCta
           ? null
           : SafeArea(
@@ -266,27 +263,6 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                                   color: AppColors.nileBlue,
                                   fontWeight: FontWeight.w600,
                                 ),
-                          ),
-                        ),
-                      ] else ...[
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton.icon(
-                            onPressed: _onSubmitTap,
-                            icon: const Icon(Icons.upload_outlined),
-                            label: Text(l10n.submitPosterEntry),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.primaryBlue,
-                              side: const BorderSide(
-                                color: AppColors.primaryBlue,
-                              ),
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
                           ),
                         ),
                       ],

@@ -39,7 +39,7 @@ class CalmCornerScreen extends StatelessWidget {
               icon: Icons.air_rounded,
               background: AppColors.softBlue,
               foreground: AppColors.mediumElectricBlue,
-              iconBackground: const Color(0xFFD6E8F5),
+              iconBackground: AppColors.softBlue,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const GuidedBreathingScreen(),
@@ -50,7 +50,7 @@ class CalmCornerScreen extends StatelessWidget {
               title: l10n.careRelaxingAudio,
               subtitle: l10n.careRelaxingAudioBody,
               icon: Icons.music_note_rounded,
-              background: const Color(0xFFD6E8F5),
+              background: AppColors.softBlue,
               foreground: AppColors.nileBlue,
               iconBackground: AppColors.softBlue,
               onTap: () => Navigator.of(context).push(
@@ -65,7 +65,7 @@ class CalmCornerScreen extends StatelessWidget {
               icon: Icons.self_improvement_rounded,
               background: AppColors.softPurple,
               foreground: AppColors.accentPurple,
-              iconBackground: const Color(0xFFE9D5FF),
+              iconBackground: AppColors.softPurple,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const MeditationScreen(),
@@ -78,7 +78,7 @@ class CalmCornerScreen extends StatelessWidget {
               icon: Icons.auto_awesome_rounded,
               background: AppColors.softRed,
               foreground: AppColors.fireEngineRed,
-              iconBackground: const Color(0xFFFAD0D2),
+              iconBackground: AppColors.softRed,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const VisualizationScreen(),
@@ -91,7 +91,7 @@ class CalmCornerScreen extends StatelessWidget {
               icon: Icons.palette_rounded,
               background: AppColors.softGold,
               foreground: AppColors.nileBlue,
-              iconBackground: const Color(0xFFFDE68A),
+              iconBackground: AppColors.softGold,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => const ColorFunScreen(),
@@ -102,7 +102,7 @@ class CalmCornerScreen extends StatelessWidget {
               title: l10n.careStretchBreaks,
               subtitle: l10n.careStretchBreaksBody,
               icon: Icons.accessibility_new_rounded,
-              background: const Color(0xFFFFF4CC),
+              background: AppColors.softGold,
               foreground: AppColors.brightGoldBorder,
               iconBackground: AppColors.softGold,
               onTap: () => Navigator.of(context).push(

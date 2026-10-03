@@ -9,7 +9,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/poster_contest.dart';
 import '../../../core/network/endpoints.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_theme_colors.dart';
+import '../../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class PosterContestSubmitScreen extends StatefulWidget {
   final PosterContest contest;
@@ -115,11 +115,7 @@ class _PosterContestSubmitScreenState extends State<PosterContestSubmitScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.submitPosterEntry),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.submitPosterEntry),
       body: SafeArea(
         child: Form(
           key: _formKey,

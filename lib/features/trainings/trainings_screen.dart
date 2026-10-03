@@ -7,6 +7,7 @@ import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import 'widgets/training_card.dart';
+import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class TrainingsScreen extends StatefulWidget {
   const TrainingsScreen({super.key});
@@ -91,11 +92,7 @@ class _TrainingsScreenState extends State<TrainingsScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.trainingsTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.trainingsTitle),
       body: SafeArea(
         child: Column(
           children: [

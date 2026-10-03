@@ -257,7 +257,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                       child: Column(
                         children: [
                           _LegendRow(
-                            color: const Color(0xFFCE2028),
+                            color: AppColors.fireEngineRed,
                             label: l10n.careMoodVeryBad,
                             pct: total == 0
                                 ? 0
@@ -273,14 +273,14 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                                     .round(),
                           ),
                           _LegendRow(
-                            color: const Color(0xFFFBD116),
+                            color: AppColors.brightGold,
                             label: l10n.careMoodOkay,
                             pct: total == 0
                                 ? 0
                                 : ((counts['meh'] ?? 0) / total * 100).round(),
                           ),
                           _LegendRow(
-                            color: const Color(0xFF86EFAC),
+                            color: AppColors.mediumElectricBlue,
                             label: isTl
                                 ? CareConstants.moods
                                     .firstWhere((m) => m.key == 'good')
@@ -293,7 +293,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                                 : ((counts['good'] ?? 0) / total * 100).round(),
                           ),
                           _LegendRow(
-                            color: CareColors.tealDark,
+                            color: AppColors.nileBlue,
                             label: isTl
                                 ? CareConstants.moods
                                     .firstWhere((m) => m.key == 'great')
@@ -595,11 +595,11 @@ class _MoodDonutPainter extends CustomPainter {
   final Map<String, int> counts;
 
   static const _colors = {
-    'struggling': Color(0xFFCE2028),
+    'struggling': AppColors.fireEngineRed,
     'difficult': AppColors.fireEngineRed,
-    'meh': Color(0xFFFBD116),
-    'good': Color(0xFF86EFAC),
-    'great': Color(0xFF0F766E),
+    'meh': AppColors.brightGold,
+    'good': AppColors.mediumElectricBlue,
+    'great': AppColors.nileBlue,
   };
 
   @override

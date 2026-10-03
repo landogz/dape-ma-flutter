@@ -4,6 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/bible_models.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 import 'bible_service.dart';
 
 class BibleReaderScreen extends StatefulWidget {
@@ -73,10 +74,8 @@ class _BibleReaderScreenState extends State<BibleReaderScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('${widget.bookName} $_chapter'),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
+      appBar: BrandAppBar(
+        title: '${widget.bookName} $_chapter',
         actions: [
           IconButton(
             onPressed: _chapter > 1 ? () => _changeChapter(-1) : null,

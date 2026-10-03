@@ -35,20 +35,16 @@ class MeditationScreen extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF87CEEB), Color(0xFFB8E0C8)],
-                  ),
+                  gradient: CareColors.brandGradient,
                 ),
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.self_improvement_rounded,
-                        size: 96, color: CareColors.calmForest),
+                        size: 96, color: Colors.white),
                     SizedBox(height: 8),
                     Icon(Icons.wb_sunny_rounded,
-                        size: 36, color: Color(0xFFFBD116)),
+                        size: 36, color: CareColors.accentGold),
                   ],
                 ),
               ),

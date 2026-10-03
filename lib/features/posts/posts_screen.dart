@@ -7,6 +7,7 @@ import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 import '../auth/login_screen.dart';
 import '../home/widgets/category_tabs.dart';
 import '../home/widgets/post_card.dart';
@@ -301,23 +302,9 @@ class _PostsScreenState extends State<PostsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
-      appBar: AppBar(
+      appBar: BrandAppBar(
+        title: l10n.postsPageTitle,
         backgroundColor: AppColors.secondaryBlue,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-        titleTextStyle: const TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w800,
-        ),
-        title: Text(
-          l10n.postsPageTitle,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
       ),
       body: RefreshIndicator(
         color: AppColors.primaryBlue,

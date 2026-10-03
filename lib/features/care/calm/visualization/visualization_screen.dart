@@ -33,20 +33,16 @@ class VisualizationScreen extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(24),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Color(0xFF7EB6E8), Color(0xFFA8D5A2)],
-                  ),
+                  gradient: CareColors.brandGradient,
                 ),
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.landscape_rounded,
-                        size: 88, color: CareColors.calmForest),
+                        size: 88, color: Colors.white),
                     SizedBox(height: 8),
                     Icon(Icons.pets_rounded,
-                        size: 36, color: Color(0xFFE67E22)),
+                        size: 36, color: CareColors.accentGold),
                   ],
                 ),
               ),

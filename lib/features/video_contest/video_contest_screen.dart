@@ -4,9 +4,9 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/video_contest.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import 'widgets/video_contest_card.dart';
+import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class VideoContestScreen extends StatefulWidget {
   const VideoContestScreen({super.key});
@@ -70,11 +70,7 @@ class _VideoContestScreenState extends State<VideoContestScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.videoContestTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.videoContestTitle),
       body: SafeArea(
         child: Column(
           children: [

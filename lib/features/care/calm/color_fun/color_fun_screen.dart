@@ -130,7 +130,7 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                               side: BorderSide(
                                 color: _filter == i
                                     ? CareColors.calmForest
-                                    : const Color(0xFFD1D5DB),
+                                    : CareColors.cardBorder,
                               ),
                               backgroundColor: Colors.white,
                               showCheckmark: false,
@@ -211,7 +211,7 @@ class _WorksheetCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: CareColors.cardBorder),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -219,7 +219,7 @@ class _WorksheetCard extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
-              color: const Color(0xFFF8FAFC),
+              color: CareColors.calmBg,
               alignment: Alignment.center,
               child: Icon(
                 worksheet.icon,

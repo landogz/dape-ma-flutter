@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/care_support_item.dart';
 import '../../../core/utils/api_url.dart';
+import '../../../core/theme/app_colors.dart';
 import '../care_colors.dart';
 import '../care_launchers.dart';
 import '../care_support_service.dart';
@@ -461,7 +462,7 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
               children: [
                 if (emergency != null)
                   Material(
-                    color: const Color(0xFFFFE4E6),
+                    color: AppColors.softRed,
                     borderRadius: BorderRadius.circular(14),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
@@ -476,13 +477,13 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                         child: Row(
                           children: [
                             const Icon(Icons.warning_amber_rounded,
-                                color: Color(0xFFCE2028)),
+                                color: AppColors.fireEngineRed),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 emergency.title,
                                 style: const TextStyle(
-                                  color: Color(0xFFCE2028),
+                                  color: AppColors.fireEngineRed,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 13,
                                   height: 1.3,

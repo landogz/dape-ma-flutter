@@ -4,6 +4,7 @@ import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/care_toolkit_question.dart';
 import '../../auth/login_screen.dart';
+import '../../../core/theme/app_colors.dart';
 import '../care_colors.dart';
 import '../care_toolkit_service.dart';
 import '../mood_checkin_service.dart';
@@ -215,7 +216,7 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                                   vertical: 5,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEDE9FE),
+                                  color: AppColors.softBlue,
                                   borderRadius: BorderRadius.circular(999),
                                 ),
                                 child: Row(
@@ -224,7 +225,7 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                                     const Icon(
                                       Icons.swipe_rounded,
                                       size: 14,
-                                      color: Color(0xFF7C3AED),
+                                      color: AppColors.mediumElectricBlue,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -232,7 +233,7 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                                       style: const TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: Color(0xFF7C3AED),
+                                        color: AppColors.mediumElectricBlue,
                                       ),
                                     ),
                                   ],
@@ -477,7 +478,7 @@ class _QuestionCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [CareColors.mint, Color(0xFF99F6E4)],
+                  colors: [AppColors.softBlue, CareColors.calmMint],
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),

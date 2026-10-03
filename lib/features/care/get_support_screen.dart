@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_scope.dart';
+import '../../core/theme/app_colors.dart';
 import 'care_colors.dart';
 import 'support/support_pages.dart';
 
@@ -36,7 +37,7 @@ class GetSupportScreen extends StatelessWidget {
             child: Column(
               children: [
                 const Icon(Icons.favorite_rounded,
-                    size: 56, color: Color(0xFFCE2028)),
+                    size: 56, color: AppColors.fireEngineRed),
                 const SizedBox(height: 12),
                 Text(
                   l10n.careGetSupportHero1,
@@ -51,8 +52,8 @@ class GetSupportScreen extends StatelessWidget {
                 Text(
                   l10n.careGetSupportHero2,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey.shade700,
+                  style: const TextStyle(
+                    color: CareColors.mutedText,
                     height: 1.35,
                   ),
                 ),
@@ -63,8 +64,8 @@ class GetSupportScreen extends StatelessWidget {
           _SupportTile(
             title: l10n.careHotlines,
             subtitle: l10n.careHotlinesBody,
-            color: const Color(0xFFF3E8FF),
-            iconColor: const Color(0xFF7C3AED),
+            color: AppColors.softPurple,
+            iconColor: AppColors.accentPurple,
             icon: Icons.chat_bubble_outline,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const HotlinesScreen()),
@@ -73,8 +74,8 @@ class GetSupportScreen extends StatelessWidget {
           _SupportTile(
             title: l10n.careCounseling,
             subtitle: l10n.careCounselingBody,
-            color: const Color(0xFFE0E7FF),
-            iconColor: const Color(0xFF4338CA),
+            color: AppColors.softBlue,
+            iconColor: AppColors.mediumElectricBlue,
             icon: Icons.phone_in_talk_outlined,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const CounselingScreen()),
@@ -83,8 +84,8 @@ class GetSupportScreen extends StatelessWidget {
           _SupportTile(
             title: l10n.careCrisis,
             subtitle: l10n.careCrisisBody,
-            color: const Color(0xFFFFE4E6),
-            iconColor: const Color(0xFFBE123C),
+            color: AppColors.softRed,
+            iconColor: AppColors.fireEngineRed,
             icon: Icons.warning_amber_rounded,
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const CrisisSupportScreen()),

@@ -317,27 +317,6 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                             ),
                           ),
                         ),
-                      ] else ...[
-                        const SizedBox(height: 20),
-                        SizedBox(
-                          width: double.infinity,
-                          height: 48,
-                          child: OutlinedButton.icon(
-                            onPressed: _onSubmitTap,
-                            icon: const Icon(Icons.upload_outlined),
-                            label: Text(l10n.submitContestEntry),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: HopeColors.purple,
-                              side: const BorderSide(
-                                color: HopeColors.purple,
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                            ),
-                          ),
-                        ),
                       ],
                       const SizedBox(height: 24),
                       Text(

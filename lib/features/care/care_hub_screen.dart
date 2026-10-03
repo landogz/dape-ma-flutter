@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/diary_entry.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_typography.dart';
 import '../auth/login_screen.dart';
 import '../diary/diary_list_screen.dart';
 import '../diary/diary_service.dart';
@@ -139,22 +141,20 @@ class _CareHubScreenState extends State<CareHubScreen> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset(
-                      CareHubAssets.headerBanner,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              CareColors.tealMid,
-                              CareColors.teal,
-                              CareColors.tealDark,
-                            ],
-                            stops: [0.0, 0.55, 1.0],
-                          ),
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        gradient: CareColors.brandGradient,
+                      ),
+                      child: Opacity(
+                        opacity: 0.22,
+                        child: Image.asset(
+                          CareHubAssets.headerBanner,
+                          fit: BoxFit.cover,
+                          alignment: Alignment.center,
+                          color: AppColors.mediumElectricBlue,
+                          colorBlendMode: BlendMode.modulate,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const SizedBox.shrink(),
                         ),
                       ),
                     ),
@@ -163,12 +163,27 @@ class _CareHubScreenState extends State<CareHubScreen> {
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                           colors: [
-                            CareColors.tealDark.withValues(alpha: 0.28),
-                            CareColors.tealDark.withValues(alpha: 0.52),
+                            AppColors.mediumElectricBlue.withValues(alpha: 0.15),
+                            AppColors.nileBlue.withValues(alpha: 0.55),
                           ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Soft Bright Gold accent glow (brand highlight, not overlay badge)
+                  Positioned(
+                    top: -40,
+                    right: -30,
+                    child: IgnorePointer(
+                      child: Container(
+                        width: 160,
+                        height: 160,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColors.brightGold.withValues(alpha: 0.12),
                         ),
                       ),
                     ),
@@ -217,12 +232,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
                             Expanded(
                               child: Text(
                                 l10n.careTitle,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.1,
-                                ),
+                                style: AppTypography.title(color: Colors.white),
                               ),
                             ),
                           ],
@@ -230,25 +240,23 @@ class _CareHubScreenState extends State<CareHubScreen> {
                         const SizedBox(height: 8),
                         Text(
                           l10n.careSubtitle,
-                          style: TextStyle(
+                          style: AppTypography.body(
                             color: Colors.white.withValues(alpha: 0.92),
                             fontSize: 13,
-                            height: 1.35,
                           ),
                         ),
                         const SizedBox(height: 12),
                         TextField(
                           controller: _searchController,
                           onChanged: (v) => setState(() => _query = v),
-                          style: const TextStyle(
+                          style: AppTypography.body(
+                            color: CareColors.heading,
                             fontSize: 13,
-                            height: 1.2,
-                            color: CareColors.greenText,
-                          ),
+                          ).copyWith(height: 1.2),
                           decoration: InputDecoration(
                             isDense: true,
                             hintText: l10n.careSearchHint,
-                            hintStyle: const TextStyle(
+                            hintStyle: AppTypography.body(
                               color: CareColors.mutedText,
                               fontSize: 13,
                             ),
@@ -293,11 +301,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
                 ],
                 Text(
                   l10n.careSpeedDial,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: CareColors.heading,
-                  ),
+                  style: AppTypography.header(color: CareColors.heading),
                 ),
                 const SizedBox(height: 14),
                 if (speedCards.isNotEmpty)
@@ -402,12 +406,10 @@ class _SpeedCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13,
-                    height: 1.15,
+                  style: AppTypography.body(
                     color: CareColors.heading,
-                  ),
+                    fontSize: 13,
+                  ).copyWith(fontWeight: FontWeight.w700, height: 1.15),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -415,12 +417,10 @@ class _SpeedCard extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.3,
-                    fontWeight: FontWeight.w500,
+                  style: AppTypography.body(
                     color: CareColors.mutedText,
-                  ),
+                    fontSize: 12,
+                  ).copyWith(height: 1.3, fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -488,22 +488,16 @@ class _CalmCornerCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 17,
-                          height: 1.15,
-                          color: CareColors.heading,
-                        ),
+                        style: AppTypography.header(color: CareColors.heading)
+                            .copyWith(fontSize: 17, height: 1.15),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         body,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          height: 1.3,
-                          fontWeight: FontWeight.w500,
+                        style: AppTypography.body(
                           color: CareColors.mutedText,
-                        ),
+                          fontSize: 13,
+                        ).copyWith(height: 1.3, fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 14),
                       Align(

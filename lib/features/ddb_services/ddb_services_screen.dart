@@ -7,6 +7,7 @@ import '../contests/contests_screen.dart';
 import '../rehab_centers/rehab_centers_screen.dart';
 import '../trainings/trainings_screen.dart';
 import '../iec_materials/iec_materials_screen.dart';
+import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class DdbServicesScreen extends StatelessWidget {
   const DdbServicesScreen({super.key});
@@ -16,11 +17,7 @@ class DdbServicesScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.ddbServicesTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.ddbServicesTitle),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),

@@ -6,6 +6,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/training.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../../core/widgets/brand_app_bar/brand_app_bar.dart';
 
 class TrainingDetailScreen extends StatefulWidget {
   final Training training;
@@ -46,11 +47,7 @@ class _TrainingDetailScreenState extends State<TrainingDetailScreen> {
     final training = widget.training;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.trainingDetailTitle),
-        backgroundColor: AppColors.primaryBlue,
-        foregroundColor: Colors.white,
-      ),
+      appBar: BrandAppBar(title: l10n.trainingDetailTitle),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),

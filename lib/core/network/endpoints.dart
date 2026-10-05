@@ -3,8 +3,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 
 class Endpoints {
-  /// Flip to `false` when pointing back to production.
-  static const bool useLocalApi = true;
+  /// Set to `true` only when using local Laravel on port 8000 (simulator/emulator).
+  static const bool useLocalApi = false;
 
   static const String _productionBaseUrl =
       'https://dape-ma.alwaysdata.net/api/v1';

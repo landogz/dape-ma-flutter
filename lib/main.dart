@@ -13,13 +13,32 @@ import 'features/splash/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await LocaleController.instance.load();
-  await AuthService.restoreUserScope();
-  await AccessibilityController.instance.load();
+
+  // Never block the first frame forever on Android (secure storage / prefs /
+  // network hangs previously left users on a blank black launch window).
+  await _safeStartup();
+
+  runApp(const DapeMaApp());
+}
+
+Future<void> _safeStartup() async {
+  Future<void> withTimeout(Future<void> future, String label) async {
+    try {
+      await future.timeout(const Duration(seconds: 4));
+    } catch (error, stack) {
+      debugPrint('[Startup] $label failed/timed out: $error\n$stack');
+    }
+  }
+
+  await withTimeout(LocaleController.instance.load(), 'locale');
+  await withTimeout(AuthService.restoreUserScope(), 'auth scope');
+  await withTimeout(AccessibilityController.instance.load(), 'accessibility');
   // Refresh user-scoped prefs once we can reach /me (optional, non-blocking).
   AuthService.bindCurrentUser();
-  await PushNotificationService.instance.initialize();
-  runApp(const DapeMaApp());
+  await withTimeout(
+    PushNotificationService.instance.initialize(),
+    'push',
+  );
 }
 
 class DapeMaApp extends StatelessWidget {

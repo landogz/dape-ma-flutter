@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Medium Electric Blue — used for launch window so dark-mode devices
+         do not show a blank black screen before Flutter's first frame. -->
+    <color name="launch_background">#055498</color>
+</resources>

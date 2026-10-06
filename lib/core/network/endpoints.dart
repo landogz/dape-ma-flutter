@@ -7,7 +7,7 @@ class Endpoints {
   static const bool useLocalApi = false;
 
   static const String _productionBaseUrl =
-      'https://dape-ma.alwaysdata.net/api/v1';
+      'https://dapemade.ddb.gov.ph/api/v1';
 
   /// Your Mac LAN IP for a physical phone on the same Wi‑Fi.
   /// iOS Simulator / desktop can use 127.0.0.1; Android emulator uses 10.0.2.2.

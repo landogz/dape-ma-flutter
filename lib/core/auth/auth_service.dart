@@ -22,6 +22,32 @@ class AuthService {
     return token != null && token.isNotEmpty;
   }
 
+  /// Returns true only when a stored token is accepted by `/auth/me`.
+  /// Clears local auth on missing/invalid tokens so the login gate stays honest.
+  static Future<bool> ensureValidSession() async {
+    final token = await getToken();
+    if (token == null || token.isEmpty) {
+      await logout();
+      return false;
+    }
+
+    try {
+      final res = await authedGet<Map<String, dynamic>>(Endpoints.me);
+      final root = res.data ?? <String, dynamic>{};
+      final status = root['status'];
+      final ok = status == true || status == null;
+      if (!ok) {
+        await logout();
+        return false;
+      }
+      await bindCurrentUser();
+      return true;
+    } catch (_) {
+      await logout();
+      return false;
+    }
+  }
+
   static Future<void> _setToken(String token) async {
     _cachedToken = token;
     await AuthStorage.saveToken(token);

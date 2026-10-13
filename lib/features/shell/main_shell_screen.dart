@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/auth/auth_navigator.dart';
+import '../../core/auth/auth_service.dart';
 import '../../core/models/post.dart';
 import '../account/account_screen.dart';
 import '../care/care_hub_screen.dart';
@@ -26,11 +28,23 @@ class MainShellScreen extends StatefulWidget {
 
 class _MainShellScreenState extends State<MainShellScreen> {
   late int _currentIndex;
+  bool _authReady = false;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialTab.clamp(0, 4);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _guardAuth());
+  }
+
+  Future<void> _guardAuth() async {
+    final ok = await AuthService.ensureValidSession();
+    if (!mounted) return;
+    if (!ok) {
+      AuthNavigator.goToLogin(context);
+      return;
+    }
+    setState(() => _authReady = true);
   }
 
   void _onTabSelected(int index) {
@@ -40,6 +54,12 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_authReady) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       extendBody: true,
       body: IndexedStack(

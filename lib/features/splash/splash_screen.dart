@@ -49,11 +49,12 @@ class _SplashScreenState extends State<SplashScreen>
   Future<void> _loadInitialData() async {
     final start = DateTime.now();
     List<Post> posts = [];
-    var loggedIn = false;
+
+    // Require a live session — stale AlwaysData/local tokens must not skip login.
+    final loggedIn = await AuthService.ensureValidSession();
 
     try {
-      loggedIn = await AuthService.isLoggedIn();
-      final token = await AuthService.getToken();
+      final token = loggedIn ? await AuthService.getToken() : null;
       final api = ApiClient(token: token);
       final res = await api.get<Map<String, dynamic>>(Endpoints.posts);
       final root = res.data ?? <String, dynamic>{};

@@ -1216,6 +1216,27 @@ class AppStrings {
       );
   String get resetFailed =>
       _t('Unable to send reset link. Please try again.', 'Hindi maipadala ang reset link. Subukan muli.');
+  String get resetPasswordSubtitle => _t(
+        'Enter a new password for your account.',
+        'Maglagay ng bagong password para sa iyong account.',
+      );
+  String get newPasswordHint => _t('New password', 'Bagong password');
+  String get confirmPasswordHint =>
+      _t('Confirm new password', 'Kumpirmahin ang bagong password');
+  String get passwordMinEight => _t(
+        'Password must be at least 8 characters',
+        'Ang password ay dapat hindi bababa sa 8 character',
+      );
+  String get saveNewPassword =>
+      _t('Save new password', 'I-save ang bagong password');
+  String get passwordResetSuccess => _t(
+        'Password has been reset. You can sign in now.',
+        'Na-reset na ang password. Maaari ka nang mag-sign in.',
+      );
+  String get passwordResetFailed => _t(
+        'Unable to reset password. The link may have expired.',
+        'Hindi ma-reset ang password. Maaaring expired na ang link.',
+      );
   String get backToLogin => _t('Back to Login', 'Bumalik sa Login');
   String get authAgreePrefix => _t(
         'By continuing, you agree to our ',

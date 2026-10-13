@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_scope.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import 'reset_password_screen.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
 
@@ -29,16 +31,56 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _success = null;
     });
 
+    final email = _emailController.text.trim();
+
     try {
       final api = ApiClient();
-      await api.post<Map<String, dynamic>>(
+      final res = await api.post<Map<String, dynamic>>(
         Endpoints.forgotPassword,
         data: <String, dynamic>{
-          'email': _emailController.text.trim(),
+          'email': email,
         },
       );
       if (!mounted) return;
-      setState(() => _success = context.l10n.resetSuccess);
+
+      final root = res.data ?? <String, dynamic>{};
+      final message = (root['message'] as String?)?.trim();
+      final data = root['data'] is Map<String, dynamic>
+          ? root['data'] as Map<String, dynamic>
+          : <String, dynamic>{};
+      final token = (data['token'] as String?)?.trim();
+
+      setState(() {
+        _success = (message != null && message.isNotEmpty)
+            ? message
+            : context.l10n.resetSuccess;
+      });
+
+      // DEV / log-mailer: API returns token so the app can continue without SMTP.
+      if (token != null && token.isNotEmpty) {
+        await Future<void>.delayed(const Duration(milliseconds: 400));
+        if (!mounted) return;
+        await Navigator.of(context).push<void>(
+          MaterialPageRoute<void>(
+            builder: (_) => ResetPasswordScreen(
+              email: (data['email'] as String?)?.trim().isNotEmpty == true
+                  ? (data['email'] as String).trim()
+                  : email,
+              token: token,
+            ),
+          ),
+        );
+      }
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final apiMessage = e.response?.data is Map
+          ? (e.response?.data['message'] as String?)
+          : null;
+      setState(() {
+        _error = (apiMessage != null && apiMessage.isNotEmpty)
+            ? apiMessage
+            : context.l10n.resetFailed;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = context.l10n.resetFailed);

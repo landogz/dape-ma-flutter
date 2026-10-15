@@ -16,6 +16,7 @@ import '../post_engagement/post_engagement_service.dart';
 import '../post_engagement/post_reaction.dart';
 import '../post_engagement/reaction_picker.dart';
 import '../post_engagement/reactors_sheet.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 /// Dedicated posts listing — formerly embedded on Home.
 class PostsScreen extends StatefulWidget {
@@ -301,7 +302,7 @@ class _PostsScreenState extends State<PostsScreen> {
     final feed = _posts;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FB),
+      backgroundColor: context.pageBackground,
       appBar: BrandAppBar(
         title: l10n.postsPageTitle,
         backgroundColor: AppColors.secondaryBlue,
@@ -328,7 +329,7 @@ class _PostsScreenState extends State<PostsScreen> {
                     hintText: l10n.homeSearchTopicsHint,
                     prefixIcon: const Icon(Icons.search_rounded),
                     filled: true,
-                    fillColor: Colors.white,
+                    fillColor: context.inputFill,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 12,
@@ -347,11 +348,11 @@ class _PostsScreenState extends State<PostsScreen> {
                 delegate: SliverChildListDelegate([
                   Text(
                     l10n.homeMoreForYou,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
                       height: 1.4,
-                      color: AppColors.secondaryBlue,
+                      color: context.heading,
                     ),
                   ),
                   const SizedBox(height: 10),

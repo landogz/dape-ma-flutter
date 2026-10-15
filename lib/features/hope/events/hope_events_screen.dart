@@ -7,6 +7,7 @@ import '../hope_colors.dart';
 import 'hope_event.dart';
 import 'hope_event_detail_screen.dart';
 import 'hope_events_service.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class HopeEventsScreen extends StatefulWidget {
   const HopeEventsScreen({super.key});
@@ -87,16 +88,16 @@ class _HopeEventsScreenState extends State<HopeEventsScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: HopeColors.purple,
+        backgroundColor: context.pageBackground,
+        foregroundColor: HopeColors.headingOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
           l10n.hopeEventsTitle,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -120,12 +121,12 @@ class _HopeEventsScreenState extends State<HopeEventsScreen> {
                     },
                     selectedColor: HopeColors.purple,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : HopeColors.muted,
+                      color: selected ? Colors.white : HopeColors.mutedOf(context),
                       fontWeight: FontWeight.w700,
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.pageBackground,
                     side: BorderSide(
-                      color: selected ? HopeColors.purple : HopeColors.cardBorder,
+                      color: selected ? HopeColors.purple : HopeColors.cardBorderOf(context),
                     ),
                     showCheckmark: false,
                   ),
@@ -143,14 +144,14 @@ class _HopeEventsScreenState extends State<HopeEventsScreen> {
               },
               decoration: InputDecoration(
                 hintText: l10n.hopeEventsSearchHint,
-                prefixIcon: const Icon(Icons.search, color: HopeColors.purple),
+                prefixIcon: Icon(Icons.search, color: HopeColors.headingOf(context)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
               ),
             ),
@@ -163,7 +164,7 @@ class _HopeEventsScreenState extends State<HopeEventsScreen> {
                 : _items.isEmpty
                     ? Center(child: Text(l10n.hopeEventsEmpty))
                     : RefreshIndicator(
-                        color: HopeColors.purple,
+                        color: HopeColors.headingOf(context),
                         onRefresh: _load,
                         child: ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -215,7 +216,7 @@ class _EventCard extends StatelessWidget {
         : (event.venue ?? '');
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -224,7 +225,7 @@ class _EventCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: HopeColors.cardBorder),
+            border: Border.all(color: HopeColors.cardBorderOf(context)),
             boxShadow: [
               BoxShadow(
                 color: HopeColors.purple.withValues(alpha: 0.05),
@@ -258,8 +259,8 @@ class _EventCard extends StatelessWidget {
                       event.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: HopeColors.purple,
+                      style: TextStyle(
+                        color: HopeColors.headingOf(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -267,14 +268,14 @@ class _EventCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today_outlined,
-                            size: 13, color: HopeColors.purple),
+                        Icon(Icons.calendar_today_outlined,
+                            size: 13, color: HopeColors.headingOf(context)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             dateLabel,
-                            style: const TextStyle(
-                              color: HopeColors.muted,
+                            style: TextStyle(
+                              color: HopeColors.mutedOf(context),
                               fontSize: 12,
                             ),
                           ),
@@ -289,7 +290,7 @@ class _EventCard extends StatelessWidget {
                               ? Icons.play_circle_outline
                               : Icons.place_outlined,
                           size: 14,
-                          color: HopeColors.purple,
+                          color: HopeColors.headingOf(context),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -297,8 +298,8 @@ class _EventCard extends StatelessWidget {
                             place,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: HopeColors.muted,
+                            style: TextStyle(
+                              color: HopeColors.mutedOf(context),
                               fontSize: 12,
                             ),
                           ),

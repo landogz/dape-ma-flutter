@@ -86,8 +86,11 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
   final bg = highContrast ? Colors.black : AppColors.darkBackground;
   final card = highContrast ? const Color(0xFF111111) : AppColors.cardDark;
   final text = highContrast ? Colors.white : AppColors.textPrimaryDark;
+  // Filled buttons keep official Medium Electric Blue; scheme/text-button
+  // primary is a lighter blue so default ink stays readable on dark cards.
+  final filledPrimary = AppColors.mediumElectricBlue;
   final primary =
-      highContrast ? const Color(0xFF66B2FF) : AppColors.mediumElectricBlue;
+      highContrast ? const Color(0xFF66B2FF) : const Color(0xFF7DD3FC);
   final secondary = AppColors.nileBlue;
   final textTheme = AppTypography.textTheme(base.textTheme).apply(
     bodyColor: text,
@@ -120,7 +123,7 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: primary,
+        backgroundColor: filledPrimary,
         foregroundColor: Colors.white,
         textStyle: AppTypography.body(fontSize: 14).copyWith(
           fontWeight: FontWeight.w600,
@@ -139,10 +142,14 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
       ),
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
-      backgroundColor: primary,
+      backgroundColor: filledPrimary,
       foregroundColor: Colors.white,
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(color: primary),
+    listTileTheme: ListTileThemeData(
+      iconColor: text,
+      textColor: text,
+    ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: card,
@@ -150,6 +157,16 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
         color: text.withValues(alpha: 0.55),
         fontFamily: AppTypography.fontFamily,
       ),
+      labelStyle: TextStyle(
+        color: AppColors.textSecondaryDark,
+        fontFamily: AppTypography.fontFamily,
+      ),
+      floatingLabelStyle: TextStyle(
+        color: AppColors.textSecondaryDark,
+        fontFamily: AppTypography.fontFamily,
+      ),
+      prefixIconColor: AppColors.textSecondaryDark,
+      suffixIconColor: AppColors.textSecondaryDark,
     ),
     chipTheme: base.chipTheme.copyWith(
       backgroundColor: const Color(0xFF334155),
@@ -173,6 +190,7 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
       error: AppColors.fireEngineRed,
       surface: card,
       onSurface: text,
+      onSurfaceVariant: AppColors.textSecondaryDark,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onError: Colors.white,

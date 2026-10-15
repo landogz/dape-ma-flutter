@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import 'widgets/auth_decor.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class VerificationSuccessScreen extends StatelessWidget {
   const VerificationSuccessScreen({super.key});
@@ -70,8 +71,8 @@ class VerificationSuccessScreen extends StatelessWidget {
                       Text(
                         l10n.verificationSuccessful,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AppColors.secondaryBlue,
+                        style: TextStyle(
+                          color: context.heading,
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
                         ),

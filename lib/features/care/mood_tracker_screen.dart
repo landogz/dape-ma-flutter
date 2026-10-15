@@ -12,6 +12,7 @@ import '../diary/widgets/journal_wizard/journal_wizard_sheet.dart';
 import 'care_colors.dart';
 import 'care_constants.dart';
 import 'mood_checkin_service.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class MoodTrackerScreen extends StatefulWidget {
   const MoodTrackerScreen({super.key});
@@ -122,9 +123,9 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
               children: [
                 Text(
                   ctx.l10n.careHowFeeling,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: CareColors.greenText,
+                    color: CareColors.textOf(context),
                     fontSize: 16,
                   ),
                 ),
@@ -196,10 +197,10 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     final total = counts.values.fold<int>(0, (a, b) => a + b);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: context.pageBackground,
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -225,10 +226,10 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                   children: [
                     Text(
                       l10n.careMoodOverview,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 16,
-                        color: CareColors.greenText,
+                        color: CareColors.textOf(context),
                       ),
                     ),
                     const Spacer(),
@@ -293,7 +294,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                                 : ((counts['good'] ?? 0) / total * 100).round(),
                           ),
                           _LegendRow(
-                            color: AppColors.nileBlue,
+                            color: context.heading,
                             label: isTl
                                 ? CareConstants.moods
                                     .firstWhere((m) => m.key == 'great')
@@ -314,13 +315,13 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: CareColors.mintSoft,
+                    color: CareColors.mintSoftOf(context),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: CareColors.mint),
+                    border: Border.all(color: CareColors.mintOf(context)),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.eco_rounded, color: CareColors.teal, size: 28),
+                      Icon(Icons.eco_rounded, color: CareColors.headingOf(context), size: 28),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
@@ -328,7 +329,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
                           style: TextStyle(
                             fontSize: 13,
                             height: 1.35,
-                            color: Colors.grey.shade800,
+                            color: context.textSecondary,
                           ),
                         ),
                       ),
@@ -400,9 +401,9 @@ class _CalendarCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: CareColors.mint),
+        border: Border.all(color: CareColors.mintOf(context)),
       ),
       child: Column(
         children: [
@@ -411,7 +412,7 @@ class _CalendarCard extends StatelessWidget {
               IconButton(
                 onPressed: onPrev,
                 icon: const Icon(Icons.chevron_left_rounded),
-                color: CareColors.greenText,
+                color: CareColors.textOf(context),
               ),
               Expanded(
                 child: Row(
@@ -426,7 +427,7 @@ class _CalendarCard extends StatelessWidget {
               IconButton(
                 onPressed: onNext,
                 icon: const Icon(Icons.chevron_right_rounded),
-                color: CareColors.greenText,
+                color: CareColors.textOf(context),
               ),
             ],
           ),
@@ -441,7 +442,7 @@ class _CalendarCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w700,
-                          color: CareColors.greenText,
+                          color: CareColors.textOf(context),
                         ),
                       ),
                     ),
@@ -487,7 +488,7 @@ class _CalendarCard extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 12,
-                            color: selected ? Colors.white : CareColors.greenText,
+                            color: selected ? Colors.white : CareColors.textOf(context),
                           ),
                         ),
                       ),
@@ -527,15 +528,15 @@ class _Chip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: CareColors.mintSoft,
+        color: CareColors.mintSoftOf(context),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: CareColors.mint),
+        border: Border.all(color: CareColors.mintOf(context)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w800,
-          color: CareColors.greenText,
+          color: CareColors.textOf(context),
         ),
       ),
     );
@@ -568,10 +569,10 @@ class _LegendRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: CareColors.greenText,
+                color: CareColors.textOf(context),
               ),
             ),
           ),
@@ -580,7 +581,7 @@ class _LegendRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Colors.grey.shade700,
+              color: CareColors.mutedOf(context),
             ),
           ),
         ],

@@ -5,6 +5,7 @@ import '../../../core/l10n/app_strings.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../auth/registration/registration_constants.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Multi-select interests editor with optional custom "Other" value.
 class InterestsPickerSheet extends StatefulWidget {
@@ -147,8 +148,8 @@ class _InterestsPickerSheetState extends State<InterestsPickerSheet> {
               const SizedBox(height: 14),
               Text(
                 l10n.interestsLabel,
-                style: const TextStyle(
-                  color: AppColors.secondaryBlue,
+                style: TextStyle(
+                  color: context.heading,
                   fontWeight: FontWeight.w800,
                   fontSize: 20,
                 ),
@@ -157,7 +158,7 @@ class _InterestsPickerSheetState extends State<InterestsPickerSheet> {
               Text(
                 l10n.interestsPickerHint,
                 style: TextStyle(
-                  color: AppColors.primaryBlue.withValues(alpha: 0.75),
+                  color: context.textSecondary,
                   fontSize: 13,
                   height: 1.35,
                 ),
@@ -200,8 +201,8 @@ class _InterestsPickerSheetState extends State<InterestsPickerSheet> {
                       const SizedBox(height: 16),
                       Text(
                         l10n.interestsOtherHint,
-                        style: const TextStyle(
-                          color: AppColors.secondaryBlue,
+                        style: TextStyle(
+                          color: context.heading,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
@@ -267,7 +268,9 @@ class _InterestChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? tint : Colors.white,
+      color: selected
+          ? (context.isDarkMode ? accent.withValues(alpha: 0.22) : tint)
+          : context.cardBackground,
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
@@ -278,7 +281,7 @@ class _InterestChip extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
             border: Border.all(
-              color: selected ? accent : const Color(0xFFD1D5DB),
+              color: selected ? accent : context.borderSubtle,
               width: selected ? 1.5 : 1,
             ),
           ),
@@ -292,7 +295,7 @@ class _InterestChip extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: selected ? accent : AppColors.secondaryBlue,
+                  color: selected ? accent : context.heading,
                   fontWeight: FontWeight.w700,
                   fontSize: 13,
                 ),

@@ -268,7 +268,7 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                             l10n.submissionsClosed,
                             style:
                                 Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: AppColors.nileBlue,
+                                      color: context.heading,
                                       fontWeight: FontWeight.w600,
                                     ),
                           ),

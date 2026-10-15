@@ -267,15 +267,15 @@ class AppStrings {
         'Tingnan ang mga featured stories at iba pa mula sa DAPE-MA.',
       );
   String get homeTaraExplore =>
-      _t('Tara, #BeTheBIDA!', 'Tara, #BeTheBIDA!');
+      _t('Tara, #BeTheDAPE!', 'Tara, #BeTheDAPE!');
   String get homeDapeProgress =>
       _t('Your DAPE Progress', 'Iyong DAPE Progress');
   String get homeProgressCourses => _t('Courses', 'Mga Kurso');
   String get homeProgressLessons => _t('Lessons', 'Mga Aralin');
   String get homeProgressStreak => _t('Streak', 'Streak');
-  String get bidaLearnTitle => _t('BIDA Learn', 'BIDA Learn');
-  String get bidaHopeTitle => _t('BIDA Hope', 'BIDA Hope');
-  String get bidaCareTitle => _t('BIDA Care', 'BIDA Care');
+  String get bidaLearnTitle => _t('DAPE Learn', 'DAPE Learn');
+  String get bidaHopeTitle => _t('DAPE Hope', 'DAPE Hope');
+  String get bidaCareTitle => _t('DAPE Care', 'DAPE Care');
   String get homeExploreLearnDesc =>
       _t('Lessons & modules', 'Mga aralin at modules');
   String get homeExploreHopeDesc =>
@@ -321,7 +321,7 @@ class AppStrings {
   String get navHope => _t('Hope', 'Hope');
   String get navFaq => _t('FAQ', 'FAQ');
 
-  // Bottom nav Care tab (matches BIDA Care)
+  // Bottom nav Care tab (matches DAPE Care)
   String get navCare => _t('Care', 'Care');
   String get careTitle => _t('DAPE Care', 'DAPE Care');
   String get careSubtitle =>
@@ -661,8 +661,12 @@ class AppStrings {
   String resendIn(String time) => _t('Resend in $time', 'Mag-resend sa $time');
   String get resendCode => _t('Resend', 'Mag-resend');
   String get verificationPreviewNote => _t(
-        'Verification is for preview only and is not required yet.',
-        'Preview lang ang verification at hindi pa required.',
+        'Open your email, then enter the 6-digit code to finish signing in.',
+        'Buksan ang email, tapos ilagay ang 6-digit na code para tapusin ang pag-sign in.',
+      );
+  String get loginCodeInvalid => _t(
+        'That code does not match. Check your email and try again.',
+        'Hindi tumugma ang code. Tingnan ang email at subukan muli.',
       );
   String get verificationSuccessful =>
       _t('Verification Successful!', 'Matagumpay ang Verification!');
@@ -785,7 +789,9 @@ class AppStrings {
   String get profileCompleteLabel =>
       _t('Profile complete', 'Kumpleto ang profile');
   String profilePercentComplete(int percent) =>
-      _t('Profile $percent% complete', 'Profile $percent% kumpleto');
+      _t('$percent% complete', '$percent% kumpleto');
+  String get profileFinishSetup =>
+      _t('Finish setup', 'Tapusin ang setup');
   String get learnerStatus => _t('Learner', 'Learner');
   String get streakCalendarHint => _t(
         'Keep journaling to grow your streak.',
@@ -1205,15 +1211,21 @@ class AppStrings {
         'Hindi ma-save ang iyong preferences. Subukan muli.',
       );
   String get resetPassword => _t('Reset password', 'I-reset ang password');
-  String get sendResetLink => _t('Send reset link', 'Ipadala ang reset link');
+  String get sendResetLink => _t('Send reset code', 'Ipadala ang reset code');
   String get resetInstructions => _t(
-        'Enter your email and we will send password reset instructions.',
-        'Ilagay ang email at padadalhan ka namin ng mga tagubilin sa pag-reset ng password.',
+        'Enter your email. We will send a 6-digit code — check that inbox before you can set a new password.',
+        'Ilagay ang email. Magpapadala kami ng 6-digit na code — tingnan muna ang inbox bago magtakda ng bagong password.',
       );
   String get resetSuccess => _t(
-        'Password reset instructions have been sent to your email.',
-        'Naipadala na ang mga tagubilin sa pag-reset ng password sa iyong email.',
+        'Check your email for a 6-digit code, then continue here.',
+        'Tingnan ang email para sa 6-digit na code, tapos magpatuloy dito.',
       );
+  String get resetCodeInvalid => _t(
+        'That code does not match. Check your email and try again.',
+        'Hindi tumugma ang code. Tingnan ang email at subukan muli.',
+      );
+  String get checkEmailTitle =>
+      _t('Check your email', 'Tingnan ang iyong email');
   String get resetFailed =>
       _t('Unable to send reset link. Please try again.', 'Hindi maipadala ang reset link. Subukan muli.');
   String get resetPasswordSubtitle => _t(
@@ -1520,6 +1532,7 @@ class AppStrings {
   String get journalSummaryFeelings => _t('Feelings', 'Damdamin');
   String get journalSummaryImpact => _t('Impact', 'Epekto');
   String get journalSummaryEmpty => _t('Not set', 'Walang napili');
+  String get journalNotesShort => _t('Notes', 'Tala');
   String get journalPhotoLabel =>
       _t('Add a photo (optional)', 'Magdagdag ng larawan (opsyonal)');
   String get journalPhotoHint => _t(
@@ -1581,8 +1594,8 @@ class AppStrings {
         'Hanapin ang treatment at rehab facilities.',
       );
   String get hopeLearnPhase2 => _t(
-        'BIDA Learn is coming in Phase 2.',
-        'Darating ang BIDA Learn sa Phase 2.',
+        'DAPE Learn is coming in Phase 2.',
+        'Darating ang DAPE Learn sa Phase 2.',
       );
   String get hopeDirectoryTitle => _t('Directory', 'Directory');
   String get hopeDirectorySearchHint => _t(

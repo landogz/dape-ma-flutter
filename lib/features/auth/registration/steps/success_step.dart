@@ -4,6 +4,7 @@ import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../widgets/auth_decor.dart';
 import '../../widgets/auth_scaffold.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 /// Final onboarding step — same light + navy auth chrome as Login/Register.
 class SuccessStep extends StatelessWidget {
@@ -40,10 +41,10 @@ class SuccessStep extends StatelessWidget {
         const SizedBox(height: 16),
         Text.rich(
           TextSpan(
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: AuthTokens.headlineSize,
               fontWeight: AuthTokens.headlineWeight,
-              color: AppColors.nileBlue,
+              color: context.heading,
               height: 1.3,
             ),
             children: [
@@ -80,7 +81,7 @@ class SuccessStep extends StatelessWidget {
         _FeatureCard(
           title: l10n.regFeatureCareTitle,
           subtitle: l10n.regFeatureCareBody,
-          color: AppColors.nileBlue,
+          color: context.heading,
           iconBackground: AppColors.softBlue,
           icon: Icons.favorite_rounded,
         ),
@@ -89,10 +90,10 @@ class SuccessStep extends StatelessWidget {
         const SizedBox(height: 6),
         Text.rich(
           TextSpan(
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: AuthTokens.muted,
+              color: AuthTokens.mutedOf(context),
             ),
             children: [
               TextSpan(
@@ -107,7 +108,7 @@ class SuccessStep extends StatelessWidget {
               TextSpan(text: l10n.regSuccessCtaAnd),
               TextSpan(
                 text: l10n.regSuccessCtaCare,
-                style: const TextStyle(color: AppColors.nileBlue),
+                style: TextStyle(color: context.heading),
               ),
               TextSpan(text: l10n.regSuccessCtaEnd),
             ],
@@ -186,9 +187,9 @@ class _FeatureCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AuthTokens.muted,
+                    color: AuthTokens.mutedOf(context),
                     height: 1.35,
                   ),
                 ),

@@ -125,8 +125,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               Text(
                 context.l10n.fullNameLabel,
-                style: const TextStyle(
-                  color: AppColors.secondaryBlue,
+                style: TextStyle(
+                  color: context.heading,
                   fontWeight: FontWeight.w800,
                   fontSize: 18,
                 ),
@@ -191,8 +191,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             children: [
               Text(
                 context.l10n.aboutMeLabel,
-                style: const TextStyle(
-                  color: AppColors.secondaryBlue,
+                style: TextStyle(
+                  color: context.heading,
                   fontWeight: FontWeight.w800,
                   fontSize: 18,
                 ),
@@ -338,7 +338,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(
         title: Text(l10n.editProfile),
         backgroundColor: context.pageBackground,
-        foregroundColor: AppColors.secondaryBlue,
+        foregroundColor: context.heading,
         elevation: 0,
         centerTitle: true,
       ),
@@ -377,12 +377,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             child: InkWell(
                               customBorder: const CircleBorder(),
                               onTap: _saving ? null : _pickImage,
-                              child: const Padding(
+                              child: Padding(
                                 padding: EdgeInsets.all(8),
                                 child: Icon(
                                   Icons.photo_camera_rounded,
                                   size: 18,
-                                  color: AppColors.secondaryBlue,
+                                  color: context.heading,
                                 ),
                               ),
                             ),
@@ -397,8 +397,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         children: [
                           Text(
                             firstName.isEmpty ? l10n.youAreSignedIn : firstName,
-                            style: const TextStyle(
-                              color: AppColors.secondaryBlue,
+                            style: TextStyle(
+                              color: context.heading,
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
                             ),
@@ -408,7 +408,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             Text(
                               '${l10n.memberSince} $_memberSince',
                               style: TextStyle(
-                                color: AppColors.primaryBlue.withValues(alpha: 0.75),
+                                color: context.textSecondary,
                                 fontSize: 13,
                               ),
                             ),
@@ -497,7 +497,7 @@ class _ProfileFieldCard extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, color: AppColors.secondaryBlue),
+              Icon(icon, color: context.heading),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -505,8 +505,8 @@ class _ProfileFieldCard extends StatelessWidget {
                   children: [
                     Text(
                       value,
-                      style: const TextStyle(
-                        color: AppColors.secondaryBlue,
+                      style: TextStyle(
+                        color: context.heading,
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
@@ -515,7 +515,7 @@ class _ProfileFieldCard extends StatelessWidget {
                     Text(
                       label,
                       style: TextStyle(
-                        color: AppColors.primaryBlue.withValues(alpha: 0.75),
+                        color: context.textSecondary,
                         fontSize: 12.5,
                       ),
                     ),
@@ -525,7 +525,7 @@ class _ProfileFieldCard extends StatelessWidget {
               if (onTap != null)
                 Icon(
                   Icons.chevron_right_rounded,
-                  color: AppColors.primaryBlue.withValues(alpha: 0.55),
+                  color: context.textSecondary,
                 ),
             ],
           ),

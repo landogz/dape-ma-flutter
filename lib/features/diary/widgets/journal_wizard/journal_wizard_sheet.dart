@@ -15,6 +15,7 @@ import '../../diary_service.dart';
 import '../../image/diary_image_picker.dart';
 import '../diary_rich_text_toolbar.dart';
 import 'journal_constants.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 Future<bool?> showJournalWizard(
   BuildContext context, {
@@ -299,9 +300,9 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
         alignment: Alignment.bottomCenter,
         child: Container(
           height: height,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          decoration: BoxDecoration(
+            color: context.pageBackground,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
           ),
           child: Column(
             children: [
@@ -345,7 +346,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
                               decoration: BoxDecoration(
                                 color: active
                                     ? AppColors.accentYellow
-                                    : const Color(0xFFE5E7EB),
+                                    : context.borderSubtle,
                                 borderRadius: BorderRadius.circular(999),
                               ),
                             );
@@ -477,7 +478,7 @@ class _CircleIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF3F4F6),
+      color: context.chipBackground,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -485,7 +486,7 @@ class _CircleIconButton extends StatelessWidget {
         child: SizedBox(
           width: 44,
           height: 44,
-          child: Icon(icon, size: 18, color: AppColors.secondaryBlue),
+          child: Icon(icon, size: 18, color: AppColors.primaryBlue),
         ),
       ),
     );
@@ -515,10 +516,10 @@ class _SkyStep extends StatelessWidget {
       children: [
         Text(
           l10n.journalSkyTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.secondaryBlue,
+            color: context.textPrimary,
             height: 1.2,
           ),
         ),
@@ -527,7 +528,7 @@ class _SkyStep extends StatelessWidget {
           l10n.journalSkySubtitle,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: context.textSecondary,
             height: 1.4,
           ),
         ),
@@ -538,8 +539,8 @@ class _SkyStep extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: Material(
               color: isSelected
-                  ? AppColors.secondaryBlue.withValues(alpha: 0.08)
-                  : const Color(0xFFF9FAFB),
+                  ? context.softBrandSurface
+                  : context.optionFill,
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
@@ -552,7 +553,7 @@ class _SkyStep extends StatelessWidget {
                     border: Border.all(
                       color: isSelected
                           ? AppColors.secondaryBlue
-                          : const Color(0xFFE5E7EB),
+                          : context.borderSubtle,
                       width: isSelected ? 1.6 : 1,
                     ),
                   ),
@@ -565,7 +566,7 @@ class _SkyStep extends StatelessWidget {
                           color: opt.accent.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(opt.icon, color: AppColors.secondaryBlue),
+                        child: Icon(opt.icon, color: AppColors.primaryBlue),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -575,8 +576,8 @@ class _SkyStep extends StatelessWidget {
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             color: isSelected
-                                ? AppColors.secondaryBlue
-                                : AppColors.textPrimaryLight,
+                                ? context.brandPrimary
+                                : context.textPrimary,
                           ),
                         ),
                       ),
@@ -600,7 +601,7 @@ class _SkyStep extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontStyle: FontStyle.italic,
-              color: Colors.grey.shade600,
+              color: context.textSecondary,
             ),
           ),
         ],
@@ -636,10 +637,10 @@ class _FeelingsStep extends StatelessWidget {
       children: [
         Text(
           l10n.journalFeelingsTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.secondaryBlue,
+            color: context.textPrimary,
             height: 1.2,
           ),
         ),
@@ -648,7 +649,7 @@ class _FeelingsStep extends StatelessWidget {
           l10n.journalFeelingsSubtitle,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: context.textSecondary,
             height: 1.4,
           ),
         ),
@@ -665,17 +666,17 @@ class _FeelingsStep extends StatelessWidget {
                 onSelected: (_) => onToggle(opt.key),
                 showCheckmark: false,
                 selectedColor: AppColors.accentYellow,
-                backgroundColor: const Color(0xFFF3F4F6),
+                backgroundColor: context.chipBackground,
                 labelStyle: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: isOn
-                      ? AppColors.secondaryBlue
-                      : AppColors.textSecondaryLight,
+                      ? AppColors.nileBlue
+                      : context.textPrimary,
                 ),
                 side: BorderSide(
                   color: isOn
                       ? AppColors.accentYellow
-                      : const Color(0xFFE5E7EB),
+                      : context.borderSubtle,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
               );
@@ -687,9 +688,9 @@ class _FeelingsStep extends StatelessWidget {
                 onSelected: (_) => onToggle(feeling),
                 showCheckmark: false,
                 selectedColor: AppColors.accentYellow,
-                labelStyle: const TextStyle(
+                labelStyle: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.secondaryBlue,
+                  color: context.textPrimary,
                 ),
                 side: const BorderSide(color: AppColors.accentYellow),
               );
@@ -707,7 +708,7 @@ class _FeelingsStep extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: l10n.journalAddYourOwn,
                   filled: true,
-                  fillColor: const Color(0xFFF9FAFB),
+                  fillColor: context.optionFill,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
                     borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -763,10 +764,10 @@ class _ImpactStep extends StatelessWidget {
       children: [
         Text(
           l10n.journalImpactTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.secondaryBlue,
+            color: context.textPrimary,
             height: 1.2,
           ),
         ),
@@ -775,7 +776,7 @@ class _ImpactStep extends StatelessWidget {
           l10n.journalImpactSubtitle,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: context.textSecondary,
             height: 1.4,
           ),
         ),
@@ -786,8 +787,8 @@ class _ImpactStep extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: Material(
               color: isSelected
-                  ? AppColors.secondaryBlue.withValues(alpha: 0.08)
-                  : const Color(0xFFF9FAFB),
+                  ? context.softBrandSurface
+                  : context.optionFill,
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
@@ -800,7 +801,7 @@ class _ImpactStep extends StatelessWidget {
                     border: Border.all(
                       color: isSelected
                           ? AppColors.secondaryBlue
-                          : const Color(0xFFE5E7EB),
+                          : context.borderSubtle,
                       width: isSelected ? 1.6 : 1,
                     ),
                   ),
@@ -808,9 +809,7 @@ class _ImpactStep extends StatelessWidget {
                     children: [
                       Icon(
                         opt.icon,
-                        color: isSelected
-                            ? AppColors.primaryBlue
-                            : AppColors.secondaryBlue,
+                        color: AppColors.primaryBlue,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -820,8 +819,8 @@ class _ImpactStep extends StatelessWidget {
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                             color: isSelected
-                                ? AppColors.secondaryBlue
-                                : AppColors.textPrimaryLight,
+                                ? context.brandPrimary
+                                : context.textPrimary,
                           ),
                         ),
                       ),
@@ -889,10 +888,10 @@ class _NotesStep extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           l10n.journalNotesTitle,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.secondaryBlue,
+            color: context.textPrimary,
             height: 1.2,
           ),
         ),
@@ -901,7 +900,7 @@ class _NotesStep extends StatelessWidget {
           l10n.journalNotesSubtitle,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey.shade600,
+            color: context.textSecondary,
             height: 1.4,
           ),
         ),
@@ -913,7 +912,7 @@ class _NotesStep extends StatelessWidget {
           decoration: InputDecoration(
             hintText: l10n.diaryBodyHint,
             filled: true,
-            fillColor: const Color(0xFFF9FAFB),
+            fillColor: context.optionFill,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
@@ -928,10 +927,10 @@ class _NotesStep extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           l10n.journalGratitudeLabel,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.secondaryBlue,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -961,10 +960,10 @@ class _NotesStep extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           l10n.journalPhotoLabel,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            color: AppColors.secondaryBlue,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -972,7 +971,7 @@ class _NotesStep extends StatelessWidget {
           l10n.journalPhotoHint,
           style: TextStyle(
             fontSize: 13,
-            color: Colors.grey.shade600,
+            color: context.textSecondary,
             height: 1.35,
           ),
         ),
@@ -992,7 +991,7 @@ class _NotesStep extends StatelessWidget {
                       existingImageUrl!,
                       fit: BoxFit.cover,
                       errorBuilder: (_, _, _) => Container(
-                        color: const Color(0xFFF3F4F6),
+                        color: context.chipBackground,
                         alignment: Alignment.center,
                         child: const Icon(Icons.broken_image_outlined),
                       ),
@@ -1024,7 +1023,7 @@ class _NotesStep extends StatelessWidget {
           )
         else
           Material(
-            color: const Color(0xFFF9FAFB),
+            color: context.optionFill,
             borderRadius: BorderRadius.circular(16),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
@@ -1035,7 +1034,7 @@ class _NotesStep extends StatelessWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFFE5E7EB),
+                    color: context.borderSubtle,
                     style: BorderStyle.solid,
                   ),
                 ),
@@ -1058,9 +1057,9 @@ class _NotesStep extends StatelessWidget {
                           const SizedBox(height: 8),
                           Text(
                             l10n.journalPhotoAdd,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: AppColors.secondaryBlue,
+                              color: context.textPrimary,
                             ),
                           ),
                         ],
@@ -1118,10 +1117,10 @@ class _ReflectionSummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.secondaryBlue.withValues(alpha: 0.05),
+        color: context.softBrandSurface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppColors.secondaryBlue.withValues(alpha: 0.12),
+          color: context.borderSubtle,
         ),
       ),
       child: Column(
@@ -1129,10 +1128,10 @@ class _ReflectionSummaryCard extends StatelessWidget {
         children: [
           Text(
             l10n.journalSummaryTitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w800,
-              color: AppColors.secondaryBlue,
+              color: context.textPrimary,
             ),
           ),
           const SizedBox(height: 12),
@@ -1176,17 +1175,17 @@ class _SummaryRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Colors.grey.shade600,
+              color: context.textSecondary,
             ),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: AppColors.textPrimaryLight,
+              color: context.textPrimary,
               height: 1.35,
             ),
           ),

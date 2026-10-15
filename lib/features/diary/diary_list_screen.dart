@@ -142,6 +142,20 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
     return context.l10n.isTagalog ? opt.labelTl : opt.labelEn;
   }
 
+  Future<void> _showEntrySummary(DiaryEntry entry) {
+    return showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _JournalEntrySummarySheet(
+        entry: entry,
+        dateLabel: _formatEntryDate(entry.entryDate),
+        skyLabel: _skyDisplayLabel(entry.sky),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -151,7 +165,7 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
     final prompt = JournalPrompts.forDate(now, isTagalog: l10n.isTagalog);
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: context.pageBackground,
       floatingActionButton: _isLoggedIn
           ? Padding(
               padding: const EdgeInsets.only(bottom: 4),
@@ -256,10 +270,10 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
                               const SizedBox(height: 22),
                               Text(
                                 l10n.journalYourEntries,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.secondaryBlue,
+                                  color: context.heading,
                                 ),
                               ),
                               const SizedBox(height: 12),
@@ -292,7 +306,7 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
                                       entry: entry,
                                       dateLabel: _formatEntryDate(entry.entryDate),
                                       skyLabel: _skyDisplayLabel(entry.sky),
-                                      onTap: () => _openWizard(entry: entry),
+                                      onTap: () => _showEntrySummary(entry),
                                     ),
                                   ),
                                 ),
@@ -361,11 +375,11 @@ class _DailyReflectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.secondaryBlue.withValues(alpha: 0.08),
+            color: context.heading.withValues(alpha: 0.08),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -384,11 +398,11 @@ class _DailyReflectionCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 l10n.journalDailyReflection.toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.1,
-                  color: AppColors.secondaryBlue,
+                  color: context.heading,
                 ),
               ),
             ],
@@ -396,10 +410,10 @@ class _DailyReflectionCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             prompt,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimaryLight,
+              color: context.textPrimary,
               height: 1.35,
             ),
           ),
@@ -450,7 +464,7 @@ class _EntryCard extends StatelessWidget {
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -480,12 +494,12 @@ class _EntryCard extends StatelessWidget {
                         imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, error, stackTrace) => Container(
-                          color: const Color(0xFFF3F4F6),
+                          color: context.chipBackground,
                           alignment: Alignment.center,
                           child: Icon(
                             Icons.broken_image_outlined,
                             size: 22,
-                            color: AppColors.textSecondaryLight
+                            color: context.textSecondary
                                 .withValues(alpha: 0.7),
                           ),
                         ),
@@ -509,10 +523,10 @@ class _EntryCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               dateLabel,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.secondaryBlue,
+                                color: context.heading,
                               ),
                             ),
                           ),
@@ -531,8 +545,7 @@ class _EntryCard extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.secondaryBlue
-                                      .withValues(alpha: 0.9),
+                                  color: context.heading,
                                 ),
                               ),
                             ),
@@ -549,8 +562,8 @@ class _EntryCard extends StatelessWidget {
                           fontStyle:
                               entry.hasNotes ? FontStyle.normal : FontStyle.italic,
                           color: entry.hasNotes
-                              ? AppColors.textPrimaryLight
-                              : AppColors.textSecondaryLight,
+                              ? context.textPrimary
+                              : context.textSecondary,
                         ),
                       ),
                       if (feelings.isNotEmpty) ...[
@@ -565,15 +578,15 @@ class _EntryCard extends StatelessWidget {
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF3F4F6),
+                                color: context.chipBackground,
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Text(
                                 feeling,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w600,
-                                  color: AppColors.textSecondaryLight,
+                                  color: context.textSecondary,
                                 ),
                               ),
                             );
@@ -588,6 +601,262 @@ class _EntryCard extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _JournalEntrySummarySheet extends StatelessWidget {
+  const _JournalEntrySummarySheet({
+    required this.entry,
+    required this.dateLabel,
+    required this.skyLabel,
+  });
+
+  final DiaryEntry entry;
+  final String dateLabel;
+  final String skyLabel;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final empty = l10n.journalSummaryEmpty;
+    final accent = JournalConstants.accentForSky(entry.sky);
+    final imageUrl = ApiUrl.resolve(entry.imageUrl);
+    final notes = entry.hasNotes ? entry.notesPreview : empty;
+    final gratitude = entry.gratitude?.trim() ?? '';
+    final impact = JournalConstants.impactLabel(
+      entry.impact,
+      isTagalog: l10n.isTagalog,
+    );
+    final feelings = entry.feelings
+        .map(
+          (feeling) => JournalConstants.feelingLabel(
+            feeling,
+            isTagalog: l10n.isTagalog,
+          ),
+        )
+        .toList();
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom +
+        MediaQuery.paddingOf(context).bottom;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: bottomInset),
+      child: Container(
+        height: MediaQuery.sizeOf(context).height * 0.78,
+        decoration: BoxDecoration(
+          color: context.cardBackground,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: context.borderSubtle,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      dateLabel,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: context.heading,
+                      ),
+                    ),
+                    if (skyLabel.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: accent.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          skyLabel,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: context.heading,
+                          ),
+                        ),
+                      ),
+                    ],
+                    if (imageUrl != null) ...[
+                      const SizedBox(height: 16),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: AspectRatio(
+                          aspectRatio: 16 / 10,
+                          child: Image.network(
+                            imageUrl,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            errorBuilder: (_, error, stackTrace) => Container(
+                              color: context.chipBackground,
+                              alignment: Alignment.center,
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                color: context.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                    _SummaryBlock(
+                      label: l10n.journalSummaryFeelings,
+                      child: feelings.isEmpty
+                          ? Text(
+                              empty,
+                              style: TextStyle(
+                                color: context.textSecondary,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            )
+                          : Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: feelings
+                                  .map(
+                                    (feeling) => Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 8,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: context.chipBackground,
+                                        borderRadius: BorderRadius.circular(999),
+                                      ),
+                                      child: Text(
+                                        feeling,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          color: context.textPrimary,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SummaryBlock(
+                      label: l10n.journalSummaryImpact,
+                      child: Text(
+                        impact.isEmpty ? empty : impact,
+                        style: TextStyle(
+                          fontSize: 15,
+                          height: 1.4,
+                          fontWeight: FontWeight.w600,
+                          color: impact.isEmpty
+                              ? context.textSecondary
+                              : context.textPrimary,
+                          fontStyle: impact.isEmpty
+                              ? FontStyle.italic
+                              : FontStyle.normal,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _SummaryBlock(
+                      label: l10n.journalNotesShort,
+                      child: Text(
+                        notes,
+                        style: TextStyle(
+                          fontSize: 15,
+                          height: 1.45,
+                          color: entry.hasNotes
+                              ? context.textPrimary
+                              : context.textSecondary,
+                          fontStyle: entry.hasNotes
+                              ? FontStyle.normal
+                              : FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                    if (gratitude.isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      _SummaryBlock(
+                        label: l10n.journalGratitudeLabel,
+                        child: Text(
+                          gratitude,
+                          style: TextStyle(
+                            fontSize: 15,
+                            height: 1.45,
+                            color: context.textPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: FilledButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryBlue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.close,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryBlock extends StatelessWidget {
+  const _SummaryBlock({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.4,
+            color: context.textSecondary,
+          ),
+        ),
+        const SizedBox(height: 8),
+        child,
+      ],
     );
   }
 }

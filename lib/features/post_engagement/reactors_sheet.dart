@@ -110,7 +110,7 @@ class _ReactorsSheetState extends State<_ReactorsSheet>
                       'Reactions',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w800,
-                            color: AppColors.nileBlue,
+                            color: context.heading,
                           ),
                     ),
                     const Spacer(),

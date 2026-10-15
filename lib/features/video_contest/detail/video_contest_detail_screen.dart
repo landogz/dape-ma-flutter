@@ -262,7 +262,7 @@ class _VideoContestDetailScreenState extends State<VideoContestDetailScreen> {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: AppColors.nileBlue,
+                                  color: context.heading,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),

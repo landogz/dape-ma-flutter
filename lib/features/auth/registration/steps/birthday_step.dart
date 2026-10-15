@@ -5,6 +5,7 @@ import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../widgets/auth_decor.dart';
 import '../widgets/registration_shell.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class BirthdayStep extends StatelessWidget {
   const BirthdayStep({
@@ -61,10 +62,10 @@ class BirthdayStep extends StatelessWidget {
         Text(
           l10n.regBirthdayTitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimaryLight,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -94,7 +95,7 @@ class BirthdayStep extends StatelessWidget {
                 fontSize: 15,
                 color: display == null
                     ? AppColors.primaryBlue.withValues(alpha: 0.45)
-                    : AppColors.textPrimaryLight,
+                    : context.textPrimary,
               ),
             ),
           ),

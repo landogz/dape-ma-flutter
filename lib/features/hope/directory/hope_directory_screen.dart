@@ -5,6 +5,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../hope_colors.dart';
 import 'hope_directory_org.dart';
 import 'hope_directory_service.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class HopeDirectoryScreen extends StatefulWidget {
   const HopeDirectoryScreen({super.key});
@@ -76,15 +77,15 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: HopeColors.purple,
+        backgroundColor: context.pageBackground,
+        foregroundColor: HopeColors.headingOf(context),
         elevation: 0,
         title: Text(
           l10n.hopeDirectoryTitle,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -109,12 +110,12 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
                     },
                     selectedColor: HopeColors.purple,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : HopeColors.muted,
+                      color: selected ? Colors.white : HopeColors.mutedOf(context),
                       fontWeight: FontWeight.w700,
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.pageBackground,
                     side: BorderSide(
-                      color: selected ? HopeColors.purple : HopeColors.cardBorder,
+                      color: selected ? HopeColors.purple : HopeColors.cardBorderOf(context),
                     ),
                     showCheckmark: false,
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -139,17 +140,17 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
               },
               decoration: InputDecoration(
                 hintText: l10n.hopeDirectorySearchHint,
-                prefixIcon: const Icon(Icons.search, color: HopeColors.purple),
+                prefixIcon: Icon(Icons.search, color: HopeColors.headingOf(context)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.inputFill,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
               ),
             ),
@@ -160,7 +161,7 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
                 : _items.isEmpty
                     ? Center(child: Text(_error ?? l10n.hopeDirectoryEmpty))
                     : RefreshIndicator(
-                        color: HopeColors.purple,
+                        color: HopeColors.headingOf(context),
                         onRefresh: _load,
                         child: ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -195,9 +196,9 @@ class _DirectoryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: HopeColors.cardBorder),
+        border: Border.all(color: HopeColors.cardBorderOf(context)),
         boxShadow: [
           BoxShadow(
             color: HopeColors.purple.withValues(alpha: 0.06),
@@ -211,14 +212,14 @@ class _DirectoryCard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 28,
-            backgroundColor: HopeColors.purpleSoft,
+            backgroundColor: HopeColors.softOf(context),
             backgroundImage:
                 org.logoUrl != null ? NetworkImage(org.logoUrl!) : null,
             child: org.logoUrl == null
                 ? Text(
                     initial,
-                    style: const TextStyle(
-                      color: HopeColors.purple,
+                    style: TextStyle(
+                      color: HopeColors.headingOf(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 20,
                     ),
@@ -232,8 +233,8 @@ class _DirectoryCard extends StatelessWidget {
               children: [
                 Text(
                   org.name,
-                  style: const TextStyle(
-                    color: HopeColors.purple,
+                  style: TextStyle(
+                    color: HopeColors.headingOf(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 15,
                   ),
@@ -242,7 +243,7 @@ class _DirectoryCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     org.description!,
-                    style: const TextStyle(color: HopeColors.muted, fontSize: 12),
+                    style: TextStyle(color: HopeColors.mutedOf(context), fontSize: 12),
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -257,15 +258,15 @@ class _DirectoryCard extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Material(
-            color: HopeColors.chipInactive,
+            color: HopeColors.chipInactiveOf(context),
             shape: const CircleBorder(),
             child: InkWell(
               customBorder: const CircleBorder(),
               onTap: onCall,
-              child: const SizedBox(
+              child: SizedBox(
                 width: 44,
                 height: 44,
-                child: Icon(Icons.phone, color: HopeColors.purple, size: 20),
+                child: Icon(Icons.phone, color: HopeColors.headingOf(context), size: 20),
               ),
             ),
           ),
@@ -287,12 +288,12 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: HopeColors.purple),
+          Icon(icon, size: 14, color: HopeColors.headingOf(context)),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 12, color: HopeColors.purple),
+              style: TextStyle(fontSize: 12, color: HopeColors.headingOf(context)),
             ),
           ),
         ],

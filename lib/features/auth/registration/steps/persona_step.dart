@@ -4,6 +4,7 @@ import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../registration_constants.dart';
 import '../widgets/registration_shell.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class PersonaStep extends StatelessWidget {
   const PersonaStep({
@@ -35,10 +36,10 @@ class PersonaStep extends StatelessWidget {
         Text(
           l10n.regPersonaTitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimaryLight,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: 8),
@@ -72,15 +73,15 @@ class PersonaStep extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(persona.icon, color: AppColors.secondaryBlue),
+                      Icon(persona.icon, color: context.heading),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           l10n.regPersonaLabel(persona.key),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimaryLight,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),

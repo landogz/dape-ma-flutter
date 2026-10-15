@@ -22,7 +22,7 @@ class CalmAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       surfaceTintColor: Colors.transparent,
-      foregroundColor: CareColors.calmForest,
+      foregroundColor: CareColors.headingOf(context),
       centerTitle: true,
       leading: IconButton(
         onPressed: () => Navigator.of(context).maybePop(),
@@ -31,9 +31,9 @@ class CalmAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w800,
-          color: CareColors.calmForest,
+          color: CareColors.headingOf(context),
           fontSize: 20,
         ),
       ),
@@ -63,14 +63,14 @@ Future<void> showCalmInfoDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       title: Text(
         title,
-        style: const TextStyle(
-          color: CareColors.calmForest,
+        style: TextStyle(
+          color: CareColors.headingOf(context),
           fontWeight: FontWeight.w800,
         ),
       ),
       content: Text(
         body,
-        style: const TextStyle(color: CareColors.calmMuted, height: 1.4),
+        style: TextStyle(color: CareColors.mutedOf(context), height: 1.4),
       ),
       actions: [
         TextButton(

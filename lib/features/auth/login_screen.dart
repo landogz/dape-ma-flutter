@@ -10,6 +10,7 @@ import 'register_screen.dart';
 import 'verification_code_screen.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -58,7 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (!mounted) return;
 
-      await Navigator.of(context).push<bool>(
+      final verified = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
           builder: (_) => VerificationCodeScreen(
             destination: _emailController.text.trim(),
@@ -66,7 +67,11 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
       if (!mounted) return;
-      _enterAppOrPop();
+      if (verified == true) {
+        _enterAppOrPop();
+        return;
+      }
+      await AuthService.logout();
     } catch (_) {
       if (!mounted) return;
       setState(() => _error = context.l10n.loginFailed);
@@ -228,8 +233,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     l10n.noAccount,
-                    style: const TextStyle(
-                      color: AuthTokens.muted,
+                    style: TextStyle(
+                      color: AuthTokens.mutedOf(context),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -255,8 +260,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     child: Text(
                       l10n.register,
-                      style: const TextStyle(
-                        color: AppColors.nileBlue,
+                      style: TextStyle(
+                        color: context.heading,
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
                       ),

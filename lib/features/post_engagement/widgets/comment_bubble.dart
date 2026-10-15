@@ -96,7 +96,7 @@ class CommentBubble extends StatelessWidget {
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppTypography.body(
-                                          color: AppColors.nileBlue,
+                                          color: context.heading,
                                           fontSize: 14,
                                         ).copyWith(
                                           fontWeight: FontWeight.w700,

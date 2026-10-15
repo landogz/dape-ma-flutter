@@ -260,7 +260,7 @@ class _PosterContestDetailScreenState extends State<PosterContestDetailScreen> {
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: AppColors.nileBlue,
+                                  color: context.heading,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),

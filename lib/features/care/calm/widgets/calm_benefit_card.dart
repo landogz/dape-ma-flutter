@@ -18,7 +18,7 @@ class CalmBenefitCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
-        color: CareColors.calmMintCard,
+        color: CareColors.calmCardOf(context),
         borderRadius: BorderRadius.circular(18),
       ),
       child: Column(
@@ -39,17 +39,17 @@ class CalmBenefitCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle_outline_rounded,
                     size: 18,
-                    color: CareColors.calmForest,
+                    color: CareColors.headingOf(context),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       item,
-                      style: const TextStyle(
-                        color: CareColors.calmForest,
+                      style: TextStyle(
+                        color: CareColors.headingOf(context),
                         fontSize: 14,
                         height: 1.3,
                         fontWeight: FontWeight.w500,

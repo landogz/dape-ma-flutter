@@ -111,7 +111,7 @@ class _GuidedBreathingScreenState extends State<GuidedBreathingScreen> {
         (_totalCycles * 3);
 
     return Scaffold(
-      backgroundColor: CareColors.calmBg,
+      backgroundColor: CareColors.pageBgOf(context),
       appBar: CalmAppBar(
         title: l10n.careGuidedBreathing,
         onInfo: () => showCalmInfoDialog(
@@ -128,10 +128,10 @@ class _GuidedBreathingScreenState extends State<GuidedBreathingScreen> {
               const Spacer(flex: 1),
               Text(
                 phaseLabel,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: CareColors.calmForest,
+                  color: CareColors.headingOf(context),
                 ),
               ),
               const SizedBox(height: 16),
@@ -151,8 +151,8 @@ class _GuidedBreathingScreenState extends State<GuidedBreathingScreen> {
               Text(
                 l10n.careStayCalmBreath,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: CareColors.calmForest,
+                style: TextStyle(
+                  color: CareColors.headingOf(context),
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
@@ -163,7 +163,7 @@ class _GuidedBreathingScreenState extends State<GuidedBreathingScreen> {
               Row(
                 children: [
                   Material(
-                    color: CareColors.calmForest,
+                    color: CareColors.headingOf(context),
                     shape: const CircleBorder(),
                     child: InkWell(
                       customBorder: const CircleBorder(),

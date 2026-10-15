@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../widgets/auth_decor.dart';
 import '../registration_constants.dart';
 import '../widgets/registration_shell.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class NicknameStep extends StatelessWidget {
   const NicknameStep({
@@ -33,10 +34,10 @@ class NicknameStep extends StatelessWidget {
         const SizedBox(height: 18),
         Text.rich(
           TextSpan(
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimaryLight,
+              color: context.textPrimary,
               height: 1.25,
             ),
             children: [
@@ -94,10 +95,10 @@ class NicknameStep extends StatelessWidget {
         Text(
           l10n.regPronounsTitle,
           textAlign: TextAlign.center,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimaryLight,
+            color: context.textPrimary,
           ),
         ),
         const SizedBox(height: 6),
@@ -120,7 +121,7 @@ class NicknameStep extends StatelessWidget {
               onSelected: (_) =>
                   onPronounsChanged(selected ? null : key),
               selectedColor: AppColors.primaryBlue.withValues(alpha: 0.12),
-              backgroundColor: Colors.white,
+              backgroundColor: context.chipBackground,
               labelStyle: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: selected

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import 'home_header.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class WhatsNewItem {
   const WhatsNewItem({
@@ -36,7 +37,7 @@ class WhatsNewCard extends StatelessWidget {
     final rows = items.take(2).toList();
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(28),
       elevation: 4,
       shadowColor: Colors.black.withValues(alpha: 0.1),
@@ -64,10 +65,10 @@ class WhatsNewCard extends StatelessWidget {
                     if (rows.isEmpty)
                       Text(
                         l10n.homeWhatsNewEmpty,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           height: 1.35,
-                          color: Color(0xFF64748B),
+                          color: context.textSecondary,
                         ),
                       )
                     else
@@ -156,20 +157,20 @@ class _WhatsNewRow extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: '${item.prefix} ',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         height: 1.25,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF64748B),
+                        color: context.textSecondary,
                       ),
                     ),
                     TextSpan(
                       text: item.highlight,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         height: 1.25,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.secondaryBlue,
+                        color: context.textPrimary,
                       ),
                     ),
                   ],

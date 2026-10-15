@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import 'home_header.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Thought of the Day banner (carousel slide) — text from Kid Listo API.
 class ThoughtOfDayBanner extends StatelessWidget {
@@ -23,7 +24,7 @@ class ThoughtOfDayBanner extends StatelessWidget {
     final l10n = context.l10n;
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(28),
       elevation: 4,
       shadowColor: Colors.black.withValues(alpha: 0.1),
@@ -73,11 +74,11 @@ class ThoughtOfDayBanner extends StatelessWidget {
                                 message,
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 17,
                                   fontWeight: FontWeight.w800,
                                   height: 1.3,
-                                  color: AppColors.secondaryBlue,
+                                  color: context.textPrimary,
                                 ),
                               ),
                       ),

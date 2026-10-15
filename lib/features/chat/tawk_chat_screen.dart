@@ -6,6 +6,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 import 'tawk_config.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class TawkChatScreen extends StatefulWidget {
   const TawkChatScreen({super.key, this.embeddedInShell = false});
@@ -77,7 +78,7 @@ class _TawkChatScreenState extends State<TawkChatScreen> {
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: BrandAppBar(
         title: title,
         automaticallyImplyLeading: !widget.embeddedInShell,

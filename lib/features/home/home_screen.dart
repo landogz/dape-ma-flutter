@@ -24,6 +24,7 @@ import 'widgets/featured_post_card.dart';
 import 'widgets/home_banner_carousel.dart';
 import 'widgets/home_header.dart';
 import 'widgets/recent_activity_list.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<Post> initialPosts;
@@ -379,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: AppColors.lightBackground,
+      backgroundColor: context.pageBackground,
       body: RefreshIndicator(
         color: AppColors.primaryBlue,
         onRefresh: _refreshHome,
@@ -421,10 +422,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           l10n.homeFeaturedForYou,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.secondaryBlue,
+                            color: context.heading,
                           ),
                         ),
                       ),
@@ -455,10 +456,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 24),
                   Text(
                     l10n.homeTaraExplore,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.secondaryBlue,
+                      color: context.heading,
                     ),
                   ),
                   const SizedBox(height: 12),

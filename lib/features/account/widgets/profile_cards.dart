@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -8,42 +10,131 @@ class ProfileCompletenessAvatar extends StatelessWidget {
     super.key,
     required this.progress,
     required this.child,
-    this.radius = 42,
+    this.radius = 46,
+    this.strokeWidth = 4.5,
+    this.gap = 4,
   });
 
   /// 0.0 – 1.0
   final double progress;
   final Widget child;
   final double radius;
+  final double strokeWidth;
+  final double gap;
+
+  double get ringSize => (radius + gap + strokeWidth / 2) * 2;
 
   @override
   Widget build(BuildContext context) {
     final clamped = progress.clamp(0.0, 1.0);
-    final ringSize = radius * 2 + 10;
+    final size = ringSize;
 
     return SizedBox(
-      width: ringSize,
-      height: ringSize,
+      width: size,
+      height: size,
       child: Stack(
         alignment: Alignment.center,
         children: [
           SizedBox(
-            width: ringSize,
-            height: ringSize,
+            width: size,
+            height: size,
             child: CircularProgressIndicator(
               value: clamped <= 0 ? 0.02 : clamped,
-              strokeWidth: 3.5,
-              backgroundColor: Colors.white.withValues(alpha: 0.28),
+              strokeWidth: strokeWidth,
+              backgroundColor: Colors.white.withValues(alpha: 0.32),
               valueColor: AlwaysStoppedAnimation<Color>(
-                clamped >= 1
-                    ? const Color(0xFF4ADE80)
-                    : Colors.white,
+                clamped >= 1 ? const Color(0xFF4ADE80) : AppColors.brightGold,
               ),
               strokeCap: StrokeCap.round,
             ),
           ),
           child,
         ],
+      ),
+    );
+  }
+}
+
+class ProfileSetupCta extends StatelessWidget {
+  const ProfileSetupCta({
+    super.key,
+    required this.percent,
+    required this.completeLabel,
+    required this.percentLabel,
+    required this.finishLabel,
+    required this.onTap,
+  });
+
+  final int percent;
+  final String completeLabel;
+  final String percentLabel;
+  final String finishLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final complete = percent >= 100;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(999),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(999),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 44),
+              padding: const EdgeInsets.fromLTRB(12, 8, 10, 8),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.38),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    complete
+                        ? Icons.check_circle_rounded
+                        : Icons.circle,
+                    size: complete ? 16 : 10,
+                    color: complete
+                        ? const Color(0xFF4ADE80)
+                        : AppColors.brightGold,
+                  ),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      complete
+                          ? completeLabel
+                          : '$percentLabel · $finishLabel',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                  if (!complete) ...[
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      size: 20,
+                      color: Colors.white,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

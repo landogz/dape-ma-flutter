@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import 'home_header.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Continue Learning banner (carousel slide).
 class ContinueLearningCard extends StatelessWidget {
@@ -28,7 +29,7 @@ class ContinueLearningCard extends StatelessWidget {
     final hasProgress = lessonsCompleted > 0;
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(28),
       elevation: 4,
       shadowColor: Colors.black.withValues(alpha: 0.1),
@@ -63,10 +64,10 @@ class ContinueLearningCard extends StatelessWidget {
                         l10n.homeContinueLearningTitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
-                          color: AppColors.secondaryBlue,
+                          color: context.textPrimary,
                           height: 1.25,
                         ),
                       ),
@@ -91,7 +92,7 @@ class ContinueLearningCard extends StatelessWidget {
                                 value: progress,
                                 minHeight: 8,
                                 backgroundColor: const Color(0xFFE5E7EB),
-                                color: AppColors.secondaryBlue,
+                                color: context.heading,
                               ),
                             ),
                           ),
@@ -99,10 +100,10 @@ class ContinueLearningCard extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               '$percent%',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.w700,
-                                color: AppColors.secondaryBlue,
+                                color: context.heading,
                               ),
                             ),
                           ],

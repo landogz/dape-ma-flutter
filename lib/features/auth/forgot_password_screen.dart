@@ -5,7 +5,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
-import 'reset_password_screen.dart';
+import 'reset_code_screen.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
 
@@ -45,10 +45,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
       final root = res.data ?? <String, dynamic>{};
       final message = (root['message'] as String?)?.trim();
-      final data = root['data'] is Map<String, dynamic>
-          ? root['data'] as Map<String, dynamic>
-          : <String, dynamic>{};
-      final token = (data['token'] as String?)?.trim();
 
       setState(() {
         _success = (message != null && message.isNotEmpty)
@@ -56,21 +52,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             : context.l10n.resetSuccess;
       });
 
-      // DEV / log-mailer: API returns token so the app can continue without SMTP.
-      if (token != null && token.isNotEmpty) {
-        await Future<void>.delayed(const Duration(milliseconds: 400));
-        if (!mounted) return;
-        await Navigator.of(context).push<void>(
-          MaterialPageRoute<void>(
-            builder: (_) => ResetPasswordScreen(
-              email: (data['email'] as String?)?.trim().isNotEmpty == true
-                  ? (data['email'] as String).trim()
-                  : email,
-              token: token,
-            ),
-          ),
-        );
-      }
+      await Navigator.of(context).push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => ResetCodeScreen(email: email),
+        ),
+      );
     } on DioException catch (e) {
       if (!mounted) return;
       final apiMessage = e.response?.data is Map

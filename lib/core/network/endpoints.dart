@@ -55,6 +55,8 @@ class Endpoints {
   static const search = '/search';
   static const analyticsEvents = '/analytics/events';
   static const login = '/auth/login';
+  static const sendLoginCode = '/auth/login-code';
+  static const verifyLoginCode = '/auth/verify-login-code';
   static const register = '/auth/register';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
@@ -63,6 +65,7 @@ class Endpoints {
   static const onboardingUpdate = '/auth/onboarding';
   static const changePassword = '/auth/password';
   static const forgotPassword = '/auth/forgot-password';
+  static const verifyResetCode = '/auth/verify-reset-code';
   static const resetPassword = '/auth/reset-password';
   static const bookmarks = '/bookmarks';
   static const reviews = '/reviews';

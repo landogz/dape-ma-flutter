@@ -8,6 +8,7 @@ import '../care_colors.dart';
 import '../care_launchers.dart';
 import '../care_support_service.dart';
 import '../calm_corner_screen.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Shared loader + empty/error states for Get Support subpages.
 mixin CareSupportListMixin<T extends StatefulWidget> on State<T> {
@@ -56,10 +57,10 @@ class _HotlinesScreenState extends State<HotlinesScreen>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: context.pageBackground,
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         centerTitle: true,
         title: Column(
@@ -73,7 +74,7 @@ class _HotlinesScreenState extends State<HotlinesScreen>
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
           ],
@@ -82,7 +83,7 @@ class _HotlinesScreenState extends State<HotlinesScreen>
       body: loading
           ? const Center(child: CircularProgressIndicator(color: CareColors.teal))
           : RefreshIndicator(
-              color: CareColors.teal,
+              color: CareColors.headingOf(context),
               onRefresh: loadSupportItems,
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -109,7 +110,7 @@ class _HotlineCard extends StatelessWidget {
     final primaryPhone = phone.split('|').first.trim();
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       elevation: 1,
       shadowColor: Colors.black12,
       borderRadius: BorderRadius.circular(16),
@@ -127,9 +128,9 @@ class _HotlineCard extends StatelessWidget {
                     item.role == null || item.role!.isEmpty
                         ? item.title
                         : '${item.title} | ${item.role}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: CareColors.greenText,
+                      color: CareColors.textOf(context),
                       fontSize: 14,
                     ),
                   ),
@@ -137,15 +138,15 @@ class _HotlineCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.info_outline,
-                            size: 14, color: CareColors.teal),
+                        Icon(Icons.info_outline,
+                            size: 14, color: CareColors.headingOf(context)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             item.meta!,
                             style: TextStyle(
                               fontSize: 11,
-                              color: Colors.grey.shade600,
+                              color: context.textSecondary,
                             ),
                           ),
                         ),
@@ -156,9 +157,9 @@ class _HotlineCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       phone,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: CareColors.greenText,
+                        color: CareColors.textOf(context),
                         fontSize: 13,
                       ),
                     ),
@@ -170,8 +171,8 @@ class _HotlineCard extends StatelessWidget {
               IconButton(
                 tooltip: 'Call',
                 onPressed: () => launchCareTel(primaryPhone),
-                icon: const Icon(Icons.phone_in_talk_rounded,
-                    color: CareColors.teal),
+                icon: Icon(Icons.phone_in_talk_rounded,
+                    color: CareColors.headingOf(context)),
               ),
           ],
         ),
@@ -202,10 +203,10 @@ class _CounselingScreenState extends State<CounselingScreen>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: context.pageBackground,
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         centerTitle: true,
         title: Column(
@@ -219,7 +220,7 @@ class _CounselingScreenState extends State<CounselingScreen>
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
           ],
@@ -228,7 +229,7 @@ class _CounselingScreenState extends State<CounselingScreen>
       body: loading
           ? const Center(child: CircularProgressIndicator(color: CareColors.teal))
           : RefreshIndicator(
-              color: CareColors.teal,
+              color: CareColors.headingOf(context),
               onRefresh: loadSupportItems,
               child: ListView.separated(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -252,7 +253,7 @@ class _CounselingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       elevation: 1,
       shadowColor: Colors.black12,
       borderRadius: BorderRadius.circular(16),
@@ -269,9 +270,9 @@ class _CounselingCard extends StatelessWidget {
                 children: [
                   Text(
                     item.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: CareColors.greenText,
+                      color: CareColors.textOf(context),
                       fontSize: 14,
                     ),
                   ),
@@ -280,10 +281,10 @@ class _CounselingCard extends StatelessWidget {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(top: 1),
                           child: Icon(Icons.info_outline,
-                              size: 14, color: CareColors.teal),
+                              size: 14, color: CareColors.headingOf(context)),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -292,7 +293,7 @@ class _CounselingCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               height: 1.35,
-                              color: Colors.grey.shade600,
+                              color: context.textSecondary,
                             ),
                           ),
                         ),
@@ -306,7 +307,7 @@ class _CounselingCard extends StatelessWidget {
               IconButton(
                 tooltip: 'Open website',
                 onPressed: () => launchCareWeb(item.webUrl!),
-                icon: const Icon(Icons.link_rounded, color: CareColors.teal),
+                icon: Icon(Icons.link_rounded, color: CareColors.headingOf(context)),
               ),
           ],
         ),
@@ -377,20 +378,20 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                   alignment: Alignment.topRight,
                   child: IconButton(
                     onPressed: () => Navigator.pop(ctx),
-                    icon: const Icon(Icons.close_rounded,
-                        color: CareColors.teal),
+                    icon: Icon(Icons.close_rounded,
+                        color: CareColors.headingOf(context)),
                   ),
                 ),
-                const Icon(Icons.info_rounded,
-                    size: 56, color: CareColors.teal),
+                Icon(Icons.info_rounded,
+                    size: 56, color: CareColors.headingOf(context)),
                 const SizedBox(height: 12),
                 Text(
                   item.title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
-                    color: CareColors.greenText,
+                    color: CareColors.textOf(context),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -403,7 +404,7 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                       style: TextStyle(
                         fontSize: 14,
                         height: 1.4,
-                        color: CareColors.greenText.withValues(alpha: 0.85),
+                        color: CareColors.textOf(context).withValues(alpha: 0.85),
                       ),
                     ),
                   ),
@@ -431,10 +432,10 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
     final emergency = _emergency.isNotEmpty ? _emergency.first : null;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: context.pageBackground,
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         centerTitle: true,
         title: Column(
@@ -449,7 +450,7 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
           ],
@@ -500,9 +501,9 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                 const SizedBox(height: 18),
                 Text(
                   l10n.careCrisisUnsure,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: CareColors.greenText,
+                    color: CareColors.textOf(context),
                     fontSize: 15,
                   ),
                 ),
@@ -511,24 +512,24 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Material(
-                      color: Colors.white,
+                      color: context.cardBackground,
                       elevation: 1,
                       shadowColor: Colors.black12,
                       borderRadius: BorderRadius.circular(14),
                       child: ListTile(
                         onTap: () => _showResourceModal(item),
                         leading: CircleAvatar(
-                          backgroundColor: CareColors.mint,
+                          backgroundColor: CareColors.mintOf(context),
                           child: Icon(
                             _iconFor(item.iconKey),
-                            color: CareColors.teal,
+                            color: CareColors.headingOf(context),
                           ),
                         ),
                         title: Text(
                           item.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: CareColors.greenText,
+                            color: CareColors.textOf(context),
                           ),
                         ),
                         subtitle: Text(item.description ?? ''),
@@ -598,14 +599,14 @@ class _LogoAvatar extends StatelessWidget {
 
     return CircleAvatar(
       radius: 26,
-      backgroundColor: CareColors.mint,
+      backgroundColor: CareColors.mintOf(context),
       backgroundImage: (url != null && url.isNotEmpty) ? NetworkImage(url) : null,
       child: (url == null || url.isEmpty)
           ? Text(
               initial,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: CareColors.tealDark,
+                color: CareColors.headingOf(context),
               ),
             )
           : null,

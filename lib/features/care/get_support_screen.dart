@@ -4,6 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import 'care_colors.dart';
 import 'support/support_pages.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class GetSupportScreen extends StatelessWidget {
   const GetSupportScreen({super.key});
@@ -13,10 +14,10 @@ class GetSupportScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: CareColors.mintSoft,
+      backgroundColor: CareColors.mintSoftOf(context),
       appBar: AppBar(
-        backgroundColor: CareColors.mintSoft,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: CareColors.mintSoftOf(context),
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -30,9 +31,9 @@ class GetSupportScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.cardBackground,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: CareColors.mint),
+              border: Border.all(color: CareColors.mintOf(context)),
             ),
             child: Column(
               children: [
@@ -42,9 +43,9 @@ class GetSupportScreen extends StatelessWidget {
                 Text(
                   l10n.careGetSupportHero1,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: CareColors.greenText,
+                    color: CareColors.textOf(context),
                     fontSize: 16,
                   ),
                 ),
@@ -52,8 +53,8 @@ class GetSupportScreen extends StatelessWidget {
                 Text(
                   l10n.careGetSupportHero2,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: CareColors.mutedText,
+                  style: TextStyle(
+                    color: CareColors.mutedOf(context),
                     height: 1.35,
                   ),
                 ),
@@ -64,7 +65,7 @@ class GetSupportScreen extends StatelessWidget {
           _SupportTile(
             title: l10n.careHotlines,
             subtitle: l10n.careHotlinesBody,
-            color: AppColors.softPurple,
+            color: context.pastelPanel(AppColors.softPurple),
             iconColor: AppColors.accentPurple,
             icon: Icons.chat_bubble_outline,
             onTap: () => Navigator.of(context).push(
@@ -74,7 +75,7 @@ class GetSupportScreen extends StatelessWidget {
           _SupportTile(
             title: l10n.careCounseling,
             subtitle: l10n.careCounselingBody,
-            color: AppColors.softBlue,
+            color: context.pastelPanel(AppColors.softBlue),
             iconColor: AppColors.mediumElectricBlue,
             icon: Icons.phone_in_talk_outlined,
             onTap: () => Navigator.of(context).push(
@@ -84,7 +85,7 @@ class GetSupportScreen extends StatelessWidget {
           _SupportTile(
             title: l10n.careCrisis,
             subtitle: l10n.careCrisisBody,
-            color: AppColors.softRed,
+            color: context.pastelPanel(AppColors.softRed),
             iconColor: AppColors.fireEngineRed,
             icon: Icons.warning_amber_rounded,
             onTap: () => Navigator.of(context).push(
@@ -95,18 +96,18 @@ class GetSupportScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: CareColors.mint,
+              color: CareColors.mintOf(context),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               children: [
-                const Icon(Icons.eco_rounded, color: CareColors.teal),
+                Icon(Icons.eco_rounded, color: CareColors.headingOf(context)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     l10n.careSupportFooter,
-                    style: const TextStyle(
-                      color: CareColors.greenText,
+                    style: TextStyle(
+                      color: CareColors.textOf(context),
                       fontSize: 13,
                       height: 1.35,
                       fontWeight: FontWeight.w600,
@@ -157,7 +158,9 @@ class _SupportTile extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.7),
+                    color: context.isDarkMode
+                        ? context.cardBackground
+                        : Colors.white.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: iconColor),
@@ -169,9 +172,9 @@ class _SupportTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: CareColors.greenText,
+                          color: CareColors.textOf(context),
                           fontSize: 15,
                         ),
                       ),
@@ -180,14 +183,14 @@ class _SupportTile extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade700,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right_rounded,
-                    color: CareColors.greenText),
+                Icon(Icons.chevron_right_rounded,
+                    color: CareColors.textOf(context)),
               ],
             ),
           ),

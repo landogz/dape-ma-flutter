@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class ColorFunScreen extends StatefulWidget {
   const ColorFunScreen({super.key});
@@ -68,7 +69,7 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
         : _worksheets.where((w) => w.category == _filter).toList();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: '',
         onInfo: () => showCalmInfoDialog(
@@ -85,28 +86,28 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                 child: Column(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.palette_rounded,
                       size: 72,
-                      color: CareColors.calmForest,
+                      color: CareColors.headingOf(context),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.careColorFun,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.w800,
-                        color: CareColors.calmForest,
+                        color: CareColors.headingOf(context),
                       ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       l10n.careColorFunIntro,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         height: 1.4,
-                        color: CareColors.calmMuted,
+                        color: CareColors.mutedOf(context),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -124,15 +125,15 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                               labelStyle: TextStyle(
                                 color: _filter == i
                                     ? Colors.white
-                                    : CareColors.calmMuted,
+                                    : CareColors.mutedOf(context),
                                 fontWeight: FontWeight.w700,
                               ),
                               side: BorderSide(
                                 color: _filter == i
                                     ? CareColors.calmForest
-                                    : CareColors.cardBorder,
+                                    : CareColors.cardBorderOf(context),
                               ),
-                              backgroundColor: Colors.white,
+                              backgroundColor: context.pageBackground,
                               showCheckmark: false,
                             ),
                           ],
@@ -209,9 +210,9 @@ class _WorksheetCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: CareColors.cardBorder),
+        border: Border.all(color: CareColors.cardBorderOf(context)),
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -219,7 +220,7 @@ class _WorksheetCard extends StatelessWidget {
         children: [
           Expanded(
             child: Container(
-              color: CareColors.calmBg,
+              color: CareColors.pageBgOf(context),
               alignment: Alignment.center,
               child: Icon(
                 worksheet.icon,
@@ -237,9 +238,9 @@ class _WorksheetCard extends StatelessWidget {
                     worksheet.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: CareColors.calmForest,
+                      color: CareColors.headingOf(context),
                       fontSize: 13,
                     ),
                   ),
@@ -248,9 +249,9 @@ class _WorksheetCard extends StatelessWidget {
                   onPressed: onDownload,
                   constraints:
                       const BoxConstraints(minWidth: 44, minHeight: 44),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.download_rounded,
-                    color: CareColors.calmForest,
+                    color: CareColors.headingOf(context),
                     size: 22,
                   ),
                   tooltip: 'Download',

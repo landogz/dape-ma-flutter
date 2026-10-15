@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/models/rehab_center.dart';
 import '../../hope/hope_colors.dart';
 import '../detail/rehab_center_detail_screen.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class RehabCenterCard extends StatelessWidget {
   final RehabCenter center;
@@ -36,7 +37,7 @@ class RehabCenterCard extends StatelessWidget {
     ].join(' · ');
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -45,7 +46,7 @@ class RehabCenterCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: HopeColors.cardBorder),
+            border: Border.all(color: HopeColors.cardBorderOf(context)),
             boxShadow: [
               BoxShadow(
                 color: HopeColors.purple.withValues(alpha: 0.06),
@@ -59,11 +60,11 @@ class RehabCenterCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: HopeColors.purpleSoft,
+                backgroundColor: HopeColors.softOf(context),
                 child: Text(
                   initial,
-                  style: const TextStyle(
-                    color: HopeColors.purple,
+                  style: TextStyle(
+                    color: HopeColors.headingOf(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 20,
                   ),
@@ -76,8 +77,8 @@ class RehabCenterCard extends StatelessWidget {
                   children: [
                     Text(
                       center.name,
-                      style: const TextStyle(
-                        color: HopeColors.purple,
+                      style: TextStyle(
+                        color: HopeColors.headingOf(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                       ),
@@ -86,8 +87,8 @@ class RehabCenterCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         regionLine,
-                        style: const TextStyle(
-                          color: HopeColors.muted,
+                        style: TextStyle(
+                          color: HopeColors.mutedOf(context),
                           fontSize: 12,
                         ),
                       ),
@@ -105,19 +106,19 @@ class RehabCenterCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Material(
-                color: HopeColors.chipInactive,
+                color: HopeColors.chipInactiveOf(context),
                 shape: const CircleBorder(),
                 child: InkWell(
                   customBorder: const CircleBorder(),
                   onTap: center.contact.isEmpty
                       ? null
                       : () => _launchPhone(center.contact),
-                  child: const SizedBox(
+                  child: SizedBox(
                     width: 44,
                     height: 44,
                     child: Icon(
                       Icons.phone,
-                      color: HopeColors.purple,
+                      color: HopeColors.headingOf(context),
                       size: 20,
                     ),
                   ),
@@ -143,14 +144,14 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(icon, size: 14, color: HopeColors.purple),
+          Icon(icon, size: 14, color: HopeColors.headingOf(context)),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 12, color: HopeColors.purple),
+              style: TextStyle(fontSize: 12, color: HopeColors.headingOf(context)),
             ),
           ),
         ],

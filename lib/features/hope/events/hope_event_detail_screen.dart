@@ -5,6 +5,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../hope_colors.dart';
 import 'hope_event.dart';
 import 'hope_events_service.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class HopeEventDetailScreen extends StatefulWidget {
   const HopeEventDetailScreen({super.key, required this.eventId});
@@ -75,7 +76,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       body: Column(
         children: [
           Expanded(
@@ -113,7 +114,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                           child: InkWell(
                             customBorder: const CircleBorder(),
                             onTap: () => Navigator.of(context).maybePop(),
-                            child: const SizedBox(
+                              child: const SizedBox(
                               width: 44,
                               height: 44,
                               child: Icon(Icons.arrow_back_ios_new_rounded,
@@ -167,10 +168,10 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                   child: Transform.translate(
                     offset: const Offset(0, -18),
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: context.cardBackground,
                         borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(24)),
+                            const BorderRadius.vertical(top: Radius.circular(24)),
                       ),
                       padding: const EdgeInsets.fromLTRB(16, 18, 16, 24),
                       child: Column(
@@ -191,14 +192,14 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                     labelStyle: TextStyle(
                                       color: selected
                                           ? Colors.white
-                                          : HopeColors.muted,
+                                          : HopeColors.mutedOf(context),
                                       fontWeight: FontWeight.w700,
                                     ),
-                                    backgroundColor: Colors.white,
+                                    backgroundColor: context.pageBackground,
                                     side: BorderSide(
                                       color: selected
                                           ? HopeColors.purple
-                                          : HopeColors.cardBorder,
+                                          : HopeColors.cardBorderOf(context),
                                     ),
                                     showCheckmark: false,
                                   ),
@@ -214,8 +215,8 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                   event.detailsText?.isNotEmpty == true
                                       ? event.detailsText!
                                       : (event.aboutText ?? ''),
-                                  style: const TextStyle(
-                                    color: HopeColors.bodyText,
+                                  style: TextStyle(
+                                    color: HopeColors.bodyOf(context),
                                     height: 1.5,
                                   ),
                                 ),
@@ -228,29 +229,34 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                         contentPadding: EdgeInsets.zero,
                                         leading: CircleAvatar(
                                           radius: 26,
-                                          backgroundColor: HopeColors.purpleSoft,
+                                          backgroundColor: HopeColors.softOf(context),
                                           backgroundImage: s.photoUrl != null &&
                                                   s.photoUrl!.isNotEmpty
                                               ? NetworkImage(s.photoUrl!)
                                               : null,
                                           child: s.photoUrl == null ||
                                                   s.photoUrl!.isEmpty
-                                              ? const Icon(
+                                              ? Icon(
                                                   Icons.person,
-                                                  color: HopeColors.purple,
+                                                  color: HopeColors.headingOf(context),
                                                 )
                                               : null,
                                         ),
                                         title: Text(
                                           s.name,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.w700,
-                                            color: HopeColors.purple,
+                                            color: context.textPrimary,
                                           ),
                                         ),
                                         subtitle: s.role != null &&
                                                 s.role!.isNotEmpty
-                                            ? Text(s.role!)
+                                            ? Text(
+                                                s.role!,
+                                                style: TextStyle(
+                                                  color: context.textSecondary,
+                                                ),
+                                              )
                                             : null,
                                       ),
                                     )
@@ -263,9 +269,9 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                         tilePadding: EdgeInsets.zero,
                                         title: Text(
                                           f.question,
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             fontWeight: FontWeight.w700,
-                                            color: HopeColors.purple,
+                                            color: context.textPrimary,
                                           ),
                                         ),
                                         children: [
@@ -274,7 +280,13 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                                             child: Padding(
                                               padding: const EdgeInsets.only(
                                                   bottom: 12),
-                                              child: Text(f.answer),
+                                              child: Text(
+                                                f.answer,
+                                                style: TextStyle(
+                                                  color: context.textSecondary,
+                                                  height: 1.4,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -326,8 +338,8 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
     return [
       Text(
         l10n.hopeEventAboutHeading,
-        style: const TextStyle(
-          color: HopeColors.purple,
+        style: TextStyle(
+          color: HopeColors.headingOf(context),
           fontWeight: FontWeight.w800,
           fontSize: 18,
         ),
@@ -335,14 +347,14 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
       const SizedBox(height: 8),
       Text(
         event.aboutText ?? '',
-        style: const TextStyle(color: HopeColors.bodyText, height: 1.5),
+        style: TextStyle(color: HopeColors.bodyOf(context), height: 1.5),
       ),
       if (event.forYouItems.isNotEmpty) ...[
         const SizedBox(height: 20),
         Text(
           l10n.hopeEventForYouHeading,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -353,9 +365,17 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
             padding: const EdgeInsets.only(bottom: 8),
             child: Row(
               children: [
-                const Icon(Icons.check_circle, color: HopeColors.purple, size: 18),
+                Icon(Icons.check_circle, color: HopeColors.headingOf(context), size: 18),
                 const SizedBox(width: 8),
-                Expanded(child: Text(item)),
+                Expanded(
+                  child: Text(
+                    item,
+                    style: TextStyle(
+                      color: context.textPrimary,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -367,7 +387,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: HopeColors.purpleSoft,
+            color: HopeColors.softOf(context),
             borderRadius: BorderRadius.circular(14),
           ),
           child: Column(
@@ -375,13 +395,19 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
             children: [
               Text(
                 l10n.hopeEventWhoCanJoin,
-                style: const TextStyle(
-                  color: HopeColors.purple,
+                style: TextStyle(
+                  color: HopeColors.headingOf(context),
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 6),
-              Text(event.whoCanJoin!),
+              Text(
+                event.whoCanJoin!,
+                style: TextStyle(
+                  color: context.textPrimary,
+                  height: 1.4,
+                ),
+              ),
             ],
           ),
         ),
@@ -390,8 +416,8 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
         const SizedBox(height: 20),
         Text(
           l10n.hopeEventHighlights,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
             fontSize: 16,
           ),
@@ -405,15 +431,20 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: const BoxDecoration(
-                    color: HopeColors.purpleSoft,
+                  decoration: BoxDecoration(
+                    color: HopeColors.softOf(context),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.edit_outlined,
-                      color: HopeColors.purple, size: 18),
+                  child: Icon(Icons.edit_outlined,
+                      color: HopeColors.headingOf(context), size: 18),
                 ),
                 const SizedBox(width: 10),
-                Expanded(child: Text(h)),
+                Expanded(
+                  child: Text(
+                    h,
+                    style: TextStyle(color: context.textPrimary, height: 1.35),
+                  ),
+                ),
               ],
             ),
           ),

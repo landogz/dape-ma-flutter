@@ -7,6 +7,7 @@ import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({
@@ -109,8 +110,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
             Text(
               widget.email,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.nileBlue,
+              style: TextStyle(
+                color: context.heading,
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
               ),

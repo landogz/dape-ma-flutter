@@ -60,7 +60,7 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
         (_position.inMilliseconds / _duration.inMilliseconds).clamp(0.0, 1.0);
 
     return Scaffold(
-      backgroundColor: CareColors.calmBg,
+      backgroundColor: CareColors.pageBgOf(context),
       appBar: CalmAppBar(
         title: l10n.careRelaxingAudio,
         onInfo: () => showCalmInfoDialog(
@@ -76,10 +76,10 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
             children: [
               Text(
                 l10n.careListen,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
-                  color: CareColors.calmForest,
+                  color: CareColors.headingOf(context),
                 ),
               ),
               const Spacer(),
@@ -95,8 +95,8 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
               Text(
                 l10n.careStayCalmMusic,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: CareColors.calmForest,
+                style: TextStyle(
+                  color: CareColors.headingOf(context),
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),

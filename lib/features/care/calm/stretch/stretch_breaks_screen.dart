@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class StretchBreaksScreen extends StatefulWidget {
   const StretchBreaksScreen({super.key});
@@ -57,7 +58,7 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: '',
         onInfo: () => showCalmInfoDialog(
@@ -79,19 +80,19 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
             Text(
               l10n.careStretchBreaks,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 26,
                 fontWeight: FontWeight.w800,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
             ),
             const SizedBox(height: 22),
             Text(
               l10n.careChooseYourBreak,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -138,17 +139,17 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
             const SizedBox(height: 16),
             Text(
               l10n.careSetTodaysReminder,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
             ),
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.fromLTRB(14, 12, 8, 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.cardBackground,
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: [
                   BoxShadow(
@@ -157,20 +158,20 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
                     offset: const Offset(0, 4),
                   ),
                 ],
-                border: Border.all(color: CareColors.cardBorder),
+                border: Border.all(color: CareColors.cardBorderOf(context)),
               ),
               child: Row(
                 children: [
                   Container(
                     width: 44,
                     height: 44,
-                    decoration: const BoxDecoration(
-                      color: CareColors.calmMintCard,
+                    decoration: BoxDecoration(
+                      color: CareColors.calmCardOf(context),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.alarm_rounded,
-                      color: CareColors.calmForest,
+                      color: CareColors.headingOf(context),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -180,17 +181,17 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
                       children: [
                         Text(
                           l10n.careStretchReminderTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w800,
-                            color: CareColors.calmForest,
+                            color: CareColors.headingOf(context),
                             fontSize: 14,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           l10n.careStretchReminderBody,
-                          style: const TextStyle(
-                            color: CareColors.calmMuted,
+                          style: TextStyle(
+                            color: CareColors.mutedOf(context),
                             fontSize: 12,
                             height: 1.3,
                           ),
@@ -231,7 +232,7 @@ class _StretchCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: CareColors.calmMintCard,
+        color: CareColors.calmCardOf(context),
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           onTap: onTap,
@@ -247,7 +248,7 @@ class _StretchCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.7),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(icon, color: CareColors.calmForest),
+                  child: Icon(icon, color: CareColors.headingOf(context)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -256,26 +257,26 @@ class _StretchCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: CareColors.calmForest,
+                          color: CareColors.headingOf(context),
                           fontSize: 15,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style: const TextStyle(
-                          color: CareColors.calmMuted,
+                        style: TextStyle(
+                          color: CareColors.mutedOf(context),
                           fontSize: 12,
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(
+                Icon(
                   Icons.chevron_right_rounded,
-                  color: CareColors.calmForest,
+                  color: CareColors.headingOf(context),
                 ),
               ],
             ),
@@ -301,7 +302,7 @@ class _StretchSessionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: CareColors.calmBg,
+      backgroundColor: CareColors.pageBgOf(context),
       appBar: CalmAppBar(title: title),
       body: SafeArea(
         child: Padding(
@@ -312,28 +313,28 @@ class _StretchSessionScreen extends StatelessWidget {
               Container(
                 width: 120,
                 height: 120,
-                decoration: const BoxDecoration(
-                  color: CareColors.calmMintCard,
+                decoration: BoxDecoration(
+                  color: CareColors.calmCardOf(context),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 56, color: CareColors.calmForest),
+                child: Icon(icon, size: 56, color: CareColors.headingOf(context)),
               ),
               const SizedBox(height: 20),
               Text(
                 body,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
-                  color: CareColors.calmForest,
+                  color: CareColors.headingOf(context),
                 ),
               ),
               const SizedBox(height: 10),
               Text(
                 l10n.careStretchSessionHint,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: CareColors.calmMuted,
+                style: TextStyle(
+                  color: CareColors.mutedOf(context),
                   height: 1.4,
                 ),
               ),

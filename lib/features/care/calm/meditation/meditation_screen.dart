@@ -8,6 +8,7 @@ import '../../../../core/l10n/locale_scope.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
 import '../widgets/calm_benefit_card.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class MeditationScreen extends StatelessWidget {
   const MeditationScreen({super.key});
@@ -17,7 +18,7 @@ class MeditationScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: l10n.careMeditationTitle,
         onInfo: () => showCalmInfoDialog(
@@ -53,20 +54,20 @@ class MeditationScreen extends StatelessWidget {
             Text(
               l10n.careCalmMind,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.careCalmMindBody,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
-                color: CareColors.calmMuted,
+                color: CareColors.mutedOf(context),
               ),
             ),
             const SizedBox(height: 18),
@@ -174,7 +175,7 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
     final progress = (_seconds / _totalSeconds).clamp(0.0, 1.0);
 
     return Scaffold(
-      backgroundColor: CareColors.calmBg,
+      backgroundColor: CareColors.pageBgOf(context),
       appBar: CalmAppBar(title: title),
       body: SafeArea(
         child: Padding(
@@ -187,14 +188,14 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
                     ? Icons.self_improvement_rounded
                     : Icons.spa_rounded,
                 size: 96,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
               const SizedBox(height: 24),
               Text(
                 l10n.careStayCalmBreath,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: CareColors.calmForest,
+                style: TextStyle(
+                  color: CareColors.headingOf(context),
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
                 ),
@@ -205,13 +206,13 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(999),
                 backgroundColor: CareColors.calmRing,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
               const Spacer(),
               Row(
                 children: [
                   Material(
-                    color: CareColors.calmForest,
+                    color: CareColors.headingOf(context),
                     shape: const CircleBorder(),
                     child: InkWell(
                       customBorder: const CircleBorder(),

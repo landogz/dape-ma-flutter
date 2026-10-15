@@ -6,6 +6,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../hope/hope_colors.dart';
 import 'widgets/rehab_center_card.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class RehabCentersScreen extends StatefulWidget {
   const RehabCentersScreen({super.key});
@@ -79,16 +80,16 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: HopeColors.purple,
+        backgroundColor: context.pageBackground,
+        foregroundColor: HopeColors.headingOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
           l10n.rehabCentersTitle,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -114,13 +115,13 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                     },
                     selectedColor: HopeColors.purple,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : HopeColors.muted,
+                      color: selected ? Colors.white : HopeColors.mutedOf(context),
                       fontWeight: FontWeight.w700,
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.pageBackground,
                     side: BorderSide(
                       color:
-                          selected ? HopeColors.purple : HopeColors.cardBorder,
+                          selected ? HopeColors.purple : HopeColors.cardBorderOf(context),
                     ),
                     showCheckmark: false,
                     padding: const EdgeInsets.symmetric(
@@ -148,20 +149,20 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
               },
               decoration: InputDecoration(
                 hintText: l10n.searchRehabByHint,
-                hintStyle: const TextStyle(color: HopeColors.muted),
+                hintStyle: TextStyle(color: HopeColors.mutedOf(context)),
                 prefixIcon:
-                    const Icon(Icons.search, color: HopeColors.purple),
+                    Icon(Icons.search, color: HopeColors.headingOf(context)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.inputFill,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -183,17 +184,17 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.local_hospital_outlined,
                                 size: 56,
-                                color: HopeColors.muted,
+                                color: HopeColors.mutedOf(context),
                               ),
                               const SizedBox(height: 12),
                               Text(
                                 l10n.noRehabFound,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: HopeColors.purple,
+                                style: TextStyle(
+                                  color: HopeColors.headingOf(context),
                                   fontWeight: FontWeight.w700,
                                   fontSize: 16,
                                 ),
@@ -204,8 +205,8 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                                     ? l10n.tryDifferentSearch
                                     : l10n.checkBackLater,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: HopeColors.muted,
+                                style: TextStyle(
+                                  color: HopeColors.mutedOf(context),
                                   fontSize: 13,
                                 ),
                               ),
@@ -214,7 +215,7 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                         ),
                       )
                     : RefreshIndicator(
-                        color: HopeColors.purple,
+                        color: HopeColors.headingOf(context),
                         onRefresh: _loadCenters,
                         child: ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),

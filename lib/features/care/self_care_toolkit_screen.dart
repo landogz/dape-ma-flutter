@@ -4,6 +4,7 @@ import '../../core/l10n/locale_scope.dart';
 import 'care_colors.dart';
 import 'checks/stress_check_screen.dart';
 import 'mood_tracker_screen.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class SelfCareToolkitScreen extends StatelessWidget {
   const SelfCareToolkitScreen({super.key});
@@ -13,10 +14,10 @@ class SelfCareToolkitScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: CareColors.mintSoft,
+      backgroundColor: CareColors.mintSoftOf(context),
       appBar: AppBar(
-        backgroundColor: CareColors.mintSoft,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: CareColors.mintSoftOf(context),
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         title: Text(
           l10n.careToolkitTitle,
@@ -30,7 +31,7 @@ class SelfCareToolkitScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: CareColors.mint,
+              color: CareColors.mintOf(context),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Row(
@@ -38,8 +39,8 @@ class SelfCareToolkitScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.careToolkitHero,
-                    style: const TextStyle(
-                      color: CareColors.greenText,
+                    style: TextStyle(
+                      color: CareColors.textOf(context),
                       fontWeight: FontWeight.w600,
                       height: 1.4,
                       fontSize: 14,
@@ -47,10 +48,10 @@ class SelfCareToolkitScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Icon(
+                Icon(
                   Icons.volunteer_activism_rounded,
                   size: 48,
-                  color: CareColors.teal,
+                  color: CareColors.headingOf(context),
                 ),
               ],
             ),
@@ -92,19 +93,19 @@ class SelfCareToolkitScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: CareColors.mint,
+              color: CareColors.mintOf(context),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.eco_rounded, color: CareColors.teal),
+                Icon(Icons.eco_rounded, color: CareColors.headingOf(context)),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     l10n.careToolkitDisclaimer,
-                    style: const TextStyle(
-                      color: CareColors.greenText,
+                    style: TextStyle(
+                      color: CareColors.textOf(context),
                       fontSize: 13,
                       height: 1.35,
                     ),
@@ -137,7 +138,7 @@ class _ToolkitTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Material(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           onTap: onTap,
@@ -150,10 +151,10 @@ class _ToolkitTile extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: CareColors.mint,
+                    color: CareColors.mintOf(context),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(icon, color: CareColors.tealDark),
+                  child: Icon(icon, color: CareColors.headingOf(context)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -162,9 +163,9 @@ class _ToolkitTile extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          color: CareColors.greenText,
+                          color: CareColors.textOf(context),
                           fontSize: 15,
                         ),
                       ),
@@ -173,13 +174,13 @@ class _ToolkitTile extends StatelessWidget {
                         subtitle,
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade700,
+                          color: context.textSecondary,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
+                Icon(Icons.chevron_right_rounded, color: context.textSecondary),
               ],
             ),
           ),

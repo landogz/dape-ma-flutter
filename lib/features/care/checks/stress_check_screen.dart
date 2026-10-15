@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../care_colors.dart';
 import '../care_toolkit_service.dart';
 import '../mood_checkin_service.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Mockup-aligned toolkit check: intro + swipeable Care Bits question cards.
 class CareBitsCheckScreen extends StatefulWidget {
@@ -167,10 +168,10 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: CareColors.greenText,
+        backgroundColor: context.pageBackground,
+        foregroundColor: CareColors.textOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
@@ -187,7 +188,7 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                     child: Text(
                       l10n.careNoToolkitQuestions,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey.shade700),
+                      style: TextStyle(color: context.textSecondary),
                     ),
                   ),
                 )
@@ -203,10 +204,10 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                             children: [
                               Text(
                                 l10n.careBitsTitle,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.w800,
                                   fontSize: 18,
-                                  color: CareColors.greenText,
+                                  color: CareColors.textOf(context),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -216,7 +217,7 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                                   vertical: 5,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.softBlue,
+                                  color: context.pastelPanel(AppColors.softBlue),
                                   borderRadius: BorderRadius.circular(999),
                                 ),
                                 child: Row(
@@ -280,7 +281,7 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                                 decoration: BoxDecoration(
                                   color: active
                                       ? CareColors.teal
-                                      : CareColors.mint,
+                                      : CareColors.mintOf(context),
                                   borderRadius: BorderRadius.circular(99),
                                 ),
                               );
@@ -336,9 +337,9 @@ class _IntroCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: CareColors.mintSoft,
+        color: CareColors.mintSoftOf(context),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: CareColors.mint),
+        border: Border.all(color: CareColors.mintOf(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -352,15 +353,15 @@ class _IntroCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     height: 1.35,
-                    color: Colors.grey.shade800,
+                    color: context.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   l10n.careRemember,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: CareColors.greenText,
+                    color: CareColors.textOf(context),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -370,10 +371,10 @@ class _IntroCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          const Icon(
+          Icon(
             Icons.emoji_emotions_rounded,
             size: 64,
-            color: CareColors.teal,
+            color: CareColors.headingOf(context),
           ),
         ],
       ),
@@ -392,12 +393,12 @@ class _RememberRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          const Icon(Icons.check_circle, size: 16, color: CareColors.teal),
+          Icon(Icons.check_circle, size: 16, color: CareColors.headingOf(context)),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade800),
+              style: TextStyle(fontSize: 12, color: context.textSecondary),
             ),
           ),
         ],
@@ -433,7 +434,7 @@ class _QuestionCard extends StatelessWidget {
     final progress = (index + 1) / total;
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       elevation: 2,
       shadowColor: Colors.black12,
       borderRadius: BorderRadius.circular(20),
@@ -447,7 +448,7 @@ class _QuestionCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: context.textSecondary,
               ),
             ),
             const SizedBox(height: 6),
@@ -456,8 +457,8 @@ class _QuestionCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
-                backgroundColor: CareColors.mint,
-                color: CareColors.tealDark,
+                backgroundColor: CareColors.mintOf(context),
+                color: CareColors.headingOf(context),
               ),
             ),
             const SizedBox(height: 14),
@@ -465,9 +466,9 @@ class _QuestionCard extends StatelessWidget {
               Text(
                 promptPrefix!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: CareColors.greenText,
+                  color: CareColors.textOf(context),
                   fontSize: 13,
                 ),
               ),
@@ -477,17 +478,15 @@ class _QuestionCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.softBlue, CareColors.calmMint],
-                ),
+                color: context.softBrandSurface,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Text(
                 question.question,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: CareColors.greenText,
+                  color: context.textPrimary,
                   fontSize: 15,
                   height: 1.3,
                 ),
@@ -555,7 +554,7 @@ class _LikertList extends StatelessWidget {
                 fontWeight: selected == i ? FontWeight.w800 : FontWeight.w600,
                 color: selected == i
                     ? CareColors.tealDark
-                    : CareColors.greenText.withValues(alpha: 0.75),
+                    : CareColors.textOf(context).withValues(alpha: 0.75),
               ),
             ),
           ),
@@ -574,13 +573,13 @@ class _LikertList extends StatelessWidget {
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: active ? CareColors.teal : CareColors.mint,
+                  color: active ? CareColors.teal : CareColors.mintOf(context),
                 ),
                 child: Text(
                   '${i + 1}',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
-                    color: active ? Colors.white : CareColors.greenText,
+                    color: active ? Colors.white : CareColors.textOf(context),
                   ),
                 ),
               ),
@@ -669,14 +668,14 @@ class _TimeAnswer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _TimeBox(text: hour.toString().padLeft(2, '0')),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 6),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(
                   ':',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: CareColors.greenText,
+                    color: CareColors.textOf(context),
                   ),
                 ),
               ),
@@ -684,10 +683,10 @@ class _TimeAnswer extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 period,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
-                  color: CareColors.tealDark,
+                  color: CareColors.headingOf(context),
                 ),
               ),
             ],
@@ -696,7 +695,7 @@ class _TimeAnswer extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           l10n.careInputTimeHint,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+          style: TextStyle(fontSize: 12, color: context.textSecondary),
         ),
       ],
     );
@@ -715,16 +714,16 @@ class _TimeBox extends StatelessWidget {
       height: 52,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: CareColors.teal, width: 1.5),
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 22,
           fontWeight: FontWeight.w800,
-          color: CareColors.greenText,
+          color: CareColors.textOf(context),
         ),
       ),
     );

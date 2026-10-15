@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 import '../../widgets/auth_decor.dart';
 import '../../widgets/auth_scaffold.dart';
 
@@ -29,7 +30,7 @@ class RegistrationShell extends StatelessWidget {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       resizeToAvoidBottomInset: true,
       body: AuthDecorBackground(
         child: SafeArea(
@@ -62,7 +63,7 @@ class RegistrationShell extends StatelessWidget {
                   bottom: 16 + safeBottom + (bottomInset > 0 ? 0 : 0),
                   child: Center(
                     child: Material(
-                      color: AppColors.nileBlue,
+                      color: context.heading,
                       shape: const CircleBorder(),
                       elevation: 0,
                       shadowColor: Colors.transparent,

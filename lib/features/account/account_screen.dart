@@ -95,7 +95,7 @@ class _AccountScreenState extends State<AccountScreen> {
       if (summary.memberSinceRaw != null) {
         final parsed = DateTime.tryParse(summary.memberSinceRaw!);
         if (parsed != null) {
-          memberSince = DateFormat.yMMMM().format(parsed);
+          memberSince = DateFormat.yMMM().format(parsed);
         }
       }
 
@@ -366,50 +366,124 @@ class _AccountScreenState extends State<AccountScreen> {
     return Color(int.parse('FF$cleaned', radix: 16));
   }
 
+  static const double _avatarRadius = 46;
+
   Widget _avatarWidget(BuildContext context) {
     final avatar = CircleAvatar(
-      radius: 42,
-      backgroundColor: context.pageBackground,
+      radius: _avatarRadius,
+      backgroundColor: Colors.white.withValues(alpha: 0.18),
       backgroundImage: _pickedFile != null
           ? FileImage(_pickedFile!)
           : (_photoUrl != null ? NetworkImage(_photoUrl!) as ImageProvider : null),
       child: _pickedFile == null && _photoUrl == null
-          ? Icon(Icons.person_rounded, size: 44, color: Colors.grey.shade400)
+          ? const Icon(Icons.person_rounded, size: 48, color: Colors.white70)
           : null,
     );
 
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        if (_loggedIn)
-          ProfileCompletenessAvatar(
+    final ring = _loggedIn
+        ? ProfileCompletenessAvatar(
             progress: _profileCompleteness,
+            radius: _avatarRadius,
             child: avatar,
           )
-        else
-          avatar,
+        : avatar;
+    final ringPad = _loggedIn ? 6.0 : 0.0;
+
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        ring,
         Positioned(
-          right: 0,
-          bottom: 0,
-          child: Material(
-            color: Colors.white,
-            shape: const CircleBorder(),
-            elevation: 2,
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: _pickPhoto,
-              child: const Padding(
-                padding: EdgeInsets.all(7),
-                child: Icon(
-                  Icons.photo_camera_rounded,
-                  size: 16,
-                  color: AppColors.secondaryBlue,
+          right: ringPad - 8,
+          bottom: ringPad - 8,
+          child: SizedBox(
+            width: 44,
+            height: 44,
+            child: Center(
+              child: Material(
+                color: Colors.white,
+                shape: const CircleBorder(),
+                elevation: 3,
+                shadowColor: Colors.black.withValues(alpha: 0.28),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: _pickPhoto,
+                  child: Container(
+                    width: 28,
+                    height: 28,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColors.nileBlue.withValues(alpha: 0.18),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.photo_camera_rounded,
+                      size: 14,
+                      color: AppColors.nileBlue,
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _profileNavBar(BuildContext context) {
+    final l10n = context.l10n;
+    final canPop = Navigator.of(context).canPop() && !widget.embeddedInShell;
+
+    return SizedBox(
+      height: 48,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: canPop
+                ? IconButton(
+                    tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  )
+                : null,
+          ),
+          Expanded(
+            child: Text(
+              l10n.myProfileTitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                height: 1.2,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: 48,
+            height: 48,
+            child: IconButton(
+              tooltip: l10n.settingsTitle,
+              onPressed: () => _open(const SettingsHubScreen()),
+              icon: const Icon(
+                Icons.settings_outlined,
+                color: Colors.white,
+                size: 22,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -437,7 +511,6 @@ class _AccountScreenState extends State<AccountScreen> {
                       children: [
                         Container(
                           width: double.infinity,
-                          padding: EdgeInsets.fromLTRB(8, topPad + 4, 8, 28),
                           decoration: const BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
@@ -445,282 +518,217 @@ class _AccountScreenState extends State<AccountScreen> {
                               colors: [
                                 AppColors.nileBlue,
                                 AppColors.mediumElectricBlue,
-                                AppColors.accentPurple,
+                                Color(0xFF2E7AB8),
                               ],
+                              stops: [0.0, 0.55, 1.0],
                             ),
                           ),
-                          child: Column(
+                          child: Stack(
                             children: [
-                              Row(
-                                children: [
-                                  if (!widget.embeddedInShell)
-                                    IconButton(
-                                      onPressed: () =>
-                                          Navigator.of(context).maybePop(),
-                                      icon: const Icon(
-                                        Icons.arrow_back_ios_new_rounded,
-                                        color: Colors.white,
-                                        size: 20,
-                                      ),
-                                    )
-                                  else
-                                    const SizedBox(width: 48),
-                                  Expanded(
-                                    child: Text(
-                                      l10n.myProfileTitle,
-                                      textAlign: TextAlign.center,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w800,
+                              Positioned(
+                                right: -48,
+                                top: topPad + 8,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: 160,
+                                    height: 160,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.07,
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 48),
-                                ],
+                                ),
                               ),
-                              const SizedBox(height: 12),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 16),
-                                child: Row(
-                                  children: [
-                                    _avatarWidget(context),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: _loggedIn
-                                          ? Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                GestureDetector(
-                                                  onTap: () => _open(
-                                                    const EditProfileScreen(),
-                                                  ),
-                                                  child: FittedBox(
-                                                    fit: BoxFit.scaleDown,
-                                                    alignment:
-                                                        Alignment.centerLeft,
-                                                    child: Text(
-                                                      _name.trim().isNotEmpty
-                                                          ? _name.trim()
-                                                          : _firstName,
-                                                      maxLines: 1,
-                                                      softWrap: false,
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 21,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                        height: 1.15,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  '$_handle · ${l10n.learnerStatus}',
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                  style: TextStyle(
-                                                    color: Colors.white
-                                                        .withValues(alpha: 0.88),
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                                if (_memberSince != null) ...[
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    '${l10n.memberSince} $_memberSince',
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                    style: TextStyle(
-                                                      color: Colors.white
-                                                          .withValues(
-                                                              alpha: 0.85),
-                                                      fontSize: 12.5,
-                                                    ),
-                                                  ),
-                                                ],
-                                                const SizedBox(height: 8),
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 5,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: completenessPct >= 100
-                                                        ? const Color(
-                                                            0xFF059669)
-                                                        : Colors.white
-                                                            .withValues(
-                                                                alpha: 0.92),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Icon(
-                                                        completenessPct >= 100
-                                                            ? Icons
-                                                                .check_circle_rounded
-                                                            : Icons
-                                                                .radio_button_checked_rounded,
-                                                        size: 14,
-                                                        color: completenessPct >=
-                                                                100
-                                                            ? Colors.white
-                                                            : const Color(
-                                                                0xFF047857),
-                                                      ),
-                                                      const SizedBox(width: 6),
-                                                      Text(
-                                                        completenessPct >= 100
-                                                            ? l10n
-                                                                .profileCompleteLabel
-                                                            : l10n
-                                                                .profilePercentComplete(
-                                                                completenessPct,
-                                                              ),
-                                                        style: TextStyle(
-                                                          color: completenessPct >=
-                                                                  100
-                                                              ? Colors.white
-                                                              : const Color(
-                                                                  0xFF065F46),
-                                                          fontSize: 11.5,
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                if (_isChampion) ...[
-                                                  const SizedBox(height: 10),
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 6,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.white
-                                                          .withValues(
-                                                              alpha: 0.22),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              20),
-                                                    ),
-                                                    child: Row(
-                                                      mainAxisSize:
-                                                          MainAxisSize.min,
-                                                      children: [
-                                                        const Icon(
-                                                          Icons
-                                                              .emoji_events_rounded,
-                                                          color: AppColors
-                                                              .accentYellow,
-                                                          size: 16,
-                                                        ),
-                                                        const SizedBox(
-                                                            width: 6),
-                                                        Text(
-                                                          l10n.championBadge,
-                                                          style:
-                                                              const TextStyle(
-                                                            color: Colors.white,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                            fontSize: 12,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              ],
-                                            )
-                                          : Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  l10n.welcomeTitle,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.w800,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 6),
-                                                Text(
-                                                  l10n.guestProfileHint,
-                                                  style: TextStyle(
-                                                    color: Colors.white
-                                                        .withValues(alpha: 0.9),
-                                                    fontSize: 13,
-                                                    height: 1.3,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 10),
-                                                Wrap(
-                                                  spacing: 8,
-                                                  children: [
-                                                    TextButton(
-                                                      onPressed: () => _open(
-                                                        const LoginScreen(),
-                                                      ),
-                                                      style: TextButton
-                                                          .styleFrom(
-                                                        backgroundColor:
-                                                            Colors.white,
-                                                        foregroundColor:
-                                                            AppColors
-                                                                .primaryBlue,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          horizontal: 14,
-                                                          vertical: 8,
-                                                        ),
-                                                      ),
-                                                      child: Text(l10n.login),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () => _open(
-                                                        const RegisterScreen(),
-                                                      ),
-                                                      style: TextButton
-                                                          .styleFrom(
-                                                        foregroundColor:
-                                                            Colors.white,
-                                                        side:
-                                                            const BorderSide(
-                                                          color: Colors.white,
-                                                        ),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                          horizontal: 14,
-                                                          vertical: 8,
-                                                        ),
-                                                      ),
-                                                      child:
-                                                          Text(l10n.register),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
+                              Positioned(
+                                left: -36,
+                                bottom: 12,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: AppColors.brightGold.withValues(
+                                        alpha: 0.10,
+                                      ),
                                     ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  12,
+                                  topPad + 4,
+                                  12,
+                                  36,
+                                ),
+                                child: Column(
+                                  children: [
+                                    _profileNavBar(context),
+                                    const SizedBox(height: 18),
+                                    _avatarWidget(context),
+                                    const SizedBox(height: 16),
+                                    if (_loggedIn) ...[
+                                      GestureDetector(
+                                        onTap: () => _open(
+                                          const EditProfileScreen(),
+                                        ),
+                                        child: Text(
+                                          _name.trim().isNotEmpty
+                                              ? _name.trim()
+                                              : _firstName,
+                                          textAlign: TextAlign.center,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w800,
+                                            height: 1.2,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        [
+                                          _handle,
+                                          l10n.learnerStatus,
+                                          if (_memberSince != null)
+                                            _memberSince,
+                                        ].join(' · '),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.92,
+                                          ),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                      if (_isChampion) ...[
+                                        const SizedBox(height: 10),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                            vertical: 6,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withValues(
+                                              alpha: 0.18,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            border: Border.all(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.28,
+                                              ),
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Icon(
+                                                Icons.emoji_events_rounded,
+                                                color: AppColors.accentYellow,
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                l10n.championBadge,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                      const SizedBox(height: 16),
+                                      ProfileSetupCta(
+                                        percent: completenessPct,
+                                        completeLabel:
+                                            l10n.profileCompleteLabel,
+                                        percentLabel:
+                                            l10n.profilePercentComplete(
+                                          completenessPct,
+                                        ),
+                                        finishLabel: l10n.profileFinishSetup,
+                                        onTap: () => _open(
+                                          const EditProfileScreen(),
+                                        ),
+                                      ),
+                                    ] else ...[
+                                      Text(
+                                        l10n.welcomeTitle,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w800,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        l10n.guestProfileHint,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.92,
+                                          ),
+                                          fontSize: 13,
+                                          height: 1.35,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 14),
+                                      Wrap(
+                                        alignment: WrapAlignment.center,
+                                        spacing: 8,
+                                        children: [
+                                          TextButton(
+                                            onPressed: () => _open(
+                                              const LoginScreen(),
+                                            ),
+                                            style: TextButton.styleFrom(
+                                              minimumSize: const Size(88, 44),
+                                              backgroundColor: Colors.white,
+                                              foregroundColor:
+                                                  AppColors.primaryBlue,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 10,
+                                              ),
+                                            ),
+                                            child: Text(l10n.login),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => _open(
+                                              const RegisterScreen(),
+                                            ),
+                                            style: TextButton.styleFrom(
+                                              minimumSize: const Size(88, 44),
+                                              foregroundColor: Colors.white,
+                                              side: const BorderSide(
+                                                color: Colors.white,
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 16,
+                                                vertical: 10,
+                                              ),
+                                            ),
+                                            child: Text(l10n.register),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
@@ -728,20 +736,27 @@ class _AccountScreenState extends State<AccountScreen> {
                           ),
                         ),
                         Transform.translate(
-                          offset: const Offset(0, -22),
+                          offset: const Offset(0, -24),
                           child: Container(
                             width: double.infinity,
                             padding: EdgeInsets.fromLTRB(
                               16,
-                              18,
+                              22,
                               16,
                               (widget.embeddedInShell ? 96 : 64) + bottomSafe,
                             ),
                             decoration: BoxDecoration(
                               color: context.pageBackground,
                               borderRadius: const BorderRadius.vertical(
-                                top: Radius.circular(28),
+                                top: Radius.circular(32),
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.12),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, -4),
+                                ),
+                              ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

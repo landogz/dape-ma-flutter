@@ -6,6 +6,7 @@ import '../../care_colors.dart';
 import '../meditation/meditation_screen.dart' show GuidedSessionLauncher;
 import '../widgets/calm_app_bar.dart';
 import '../widgets/calm_benefit_card.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 
 class VisualizationScreen extends StatelessWidget {
   const VisualizationScreen({super.key});
@@ -15,7 +16,7 @@ class VisualizationScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: l10n.careVisualizationTitle,
         onInfo: () => showCalmInfoDialog(
@@ -51,20 +52,20 @@ class VisualizationScreen extends StatelessWidget {
             Text(
               l10n.carePeacefulPlace,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
-                color: CareColors.calmForest,
+                color: CareColors.headingOf(context),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.carePeacefulPlaceBody,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
-                color: CareColors.calmMuted,
+                color: CareColors.mutedOf(context),
               ),
             ),
             const SizedBox(height: 18),

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'diary_image_optimizer.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Picks a journal photo from camera or gallery, then optimizes it.
 class DiaryImagePicker {
@@ -20,7 +21,7 @@ class DiaryImagePicker {
   }) async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

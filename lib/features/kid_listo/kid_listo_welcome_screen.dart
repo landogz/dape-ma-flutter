@@ -148,8 +148,8 @@ class _KidListoWelcomeScreenState extends State<KidListoWelcomeScreen> {
                     ),
                     child: Text(
                       l10n.kidListoMotivationalBadge,
-                      style: const TextStyle(
-                        color: AppColors.secondaryBlue,
+                      style: TextStyle(
+                        color: context.heading,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),

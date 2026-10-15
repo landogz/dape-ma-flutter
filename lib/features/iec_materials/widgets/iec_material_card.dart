@@ -4,6 +4,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/iec_material.dart';
 import '../../hope/hope_colors.dart';
 import '../detail/iec_material_detail_screen.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class IecMaterialCard extends StatelessWidget {
   final IecMaterial material;
@@ -26,7 +27,7 @@ class IecMaterialCard extends StatelessWidget {
     final l10n = context.l10n;
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -42,7 +43,7 @@ class IecMaterialCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: HopeColors.cardBorder),
+            border: Border.all(color: HopeColors.cardBorderOf(context)),
             boxShadow: [
               BoxShadow(
                 color: HopeColors.purple.withValues(alpha: 0.05),
@@ -66,10 +67,10 @@ class IecMaterialCard extends StatelessWidget {
                         material.previewUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (_, _, _) => ColoredBox(
-                          color: HopeColors.purpleSoft,
+                          color: HopeColors.softOf(context),
                           child: Icon(
                             _mediaIcon,
-                            color: HopeColors.purple,
+                            color: HopeColors.headingOf(context),
                             size: 32,
                           ),
                         ),
@@ -109,8 +110,8 @@ class IecMaterialCard extends StatelessWidget {
                       material.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: HopeColors.purple,
+                      style: TextStyle(
+                        color: HopeColors.headingOf(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -124,13 +125,13 @@ class IecMaterialCard extends StatelessWidget {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: HopeColors.purpleSoft,
+                          color: HopeColors.softOf(context),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Text(
                           material.topic!,
-                          style: const TextStyle(
-                            color: HopeColors.purple,
+                          style: TextStyle(
+                            color: HopeColors.headingOf(context),
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                           ),
@@ -140,8 +141,8 @@ class IecMaterialCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Text(
                       l10n.tapToViewIec,
-                      style: const TextStyle(
-                        color: HopeColors.muted,
+                      style: TextStyle(
+                        color: HopeColors.mutedOf(context),
                         fontSize: 12,
                       ),
                     ),

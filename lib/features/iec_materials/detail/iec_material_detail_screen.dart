@@ -9,6 +9,7 @@ import '../../../core/models/iec_material.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
 import '../../hope/hope_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class IecMaterialDetailScreen extends StatefulWidget {
   final int materialId;
@@ -94,16 +95,16 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
     final material = _material;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: HopeColors.purple,
+        backgroundColor: context.pageBackground,
+        foregroundColor: HopeColors.headingOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
           l10n.iecMaterialDetailTitle,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -116,7 +117,7 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
               ? Center(
                   child: Text(
                     l10n.noIecMaterialsFound,
-                    style: const TextStyle(color: HopeColors.muted),
+                    style: TextStyle(color: HopeColors.mutedOf(context)),
                   ),
                 )
               : ListView(
@@ -124,8 +125,8 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                   children: [
                     Text(
                       material.title,
-                      style: const TextStyle(
-                        color: HopeColors.purple,
+                      style: TextStyle(
+                        color: HopeColors.headingOf(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 22,
                         height: 1.25,
@@ -146,7 +147,7 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: HopeColors.cardBorder),
+                        border: Border.all(color: HopeColors.cardBorderOf(context)),
                         boxShadow: [
                           BoxShadow(
                             color: HopeColors.purple.withValues(alpha: 0.06),
@@ -167,17 +168,17 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, _, _) => Container(
                                     height: 220,
-                                    color: HopeColors.purpleSoft,
+                                    color: HopeColors.softOf(context),
                                     alignment: Alignment.center,
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.broken_image_outlined,
-                                      color: HopeColors.purple,
+                                      color: HopeColors.headingOf(context),
                                     ),
                                   ),
                                 )
                               : Container(
                                   height: 180,
-                                  color: HopeColors.purpleSoft,
+                                  color: HopeColors.softOf(context),
                                   alignment: Alignment.center,
                                   child: TextButton.icon(
                                     onPressed: _openExternal,
@@ -194,8 +195,8 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                       const SizedBox(height: 20),
                       Text(
                         l10n.aboutIecMaterial,
-                        style: const TextStyle(
-                          color: HopeColors.purple,
+                        style: TextStyle(
+                          color: HopeColors.headingOf(context),
                           fontWeight: FontWeight.w800,
                           fontSize: 17,
                         ),
@@ -203,8 +204,8 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                       const SizedBox(height: 8),
                       Text(
                         material.description!,
-                        style: const TextStyle(
-                          color: HopeColors.muted,
+                        style: TextStyle(
+                          color: HopeColors.mutedOf(context),
                           height: 1.5,
                           fontSize: 14,
                         ),
@@ -245,14 +246,14 @@ class _HopePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: HopeColors.purpleSoft,
+        color: HopeColors.softOf(context),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: HopeColors.cardBorder),
+        border: Border.all(color: HopeColors.cardBorderOf(context)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: HopeColors.purple,
+        style: TextStyle(
+          color: HopeColors.headingOf(context),
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),

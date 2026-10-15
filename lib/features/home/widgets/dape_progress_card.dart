@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import 'home_header.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class DapeProgressCard extends StatelessWidget {
   const DapeProgressCard({
@@ -23,7 +24,7 @@ class DapeProgressCard extends StatelessWidget {
     final l10n = context.l10n;
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       elevation: 8,
       shadowColor: Colors.black.withValues(alpha: 0.12),
       borderRadius: BorderRadius.circular(24),
@@ -40,10 +41,10 @@ class DapeProgressCard extends StatelessWidget {
                   children: [
                     Text(
                       l10n.homeDapeProgress,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.primaryBlue,
+                        color: context.brandPrimary,
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -108,10 +109,10 @@ class _Stat extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: context.textSecondary,
             ),
           ),
           const SizedBox(height: 4),
@@ -119,10 +120,10 @@ class _Stat extends StatelessWidget {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
-                  color: AppColors.secondaryBlue,
+                  color: context.textPrimary,
                   height: 1,
                 ),
               ),

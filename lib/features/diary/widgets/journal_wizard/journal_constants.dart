@@ -153,6 +153,21 @@ class JournalConstants {
     return null;
   }
 
+  static String feelingLabel(String key, {required bool isTagalog}) {
+    for (final o in feelingOptions) {
+      if (o.key.toLowerCase() == key.toLowerCase()) {
+        return isTagalog ? o.labelTl : o.labelEn;
+      }
+    }
+    return key;
+  }
+
+  static String impactLabel(String? key, {required bool isTagalog}) {
+    final opt = impactByKey(key);
+    if (opt == null) return key ?? '';
+    return isTagalog ? opt.labelTl : opt.labelEn;
+  }
+
   static Color accentForSky(String? sky) {
     return skyByKey(sky)?.accent ?? AppColors.primaryBlue;
   }

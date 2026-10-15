@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class HomeActivityRow {
   const HomeActivityRow({
@@ -38,10 +39,10 @@ class RecentActivityList extends StatelessWidget {
       children: [
         Text(
           l10n.homeRecentActivity,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w800,
-            color: AppColors.secondaryBlue,
+            color: context.heading,
           ),
         ),
         const SizedBox(height: 12),
@@ -106,10 +107,10 @@ class RecentActivityList extends StatelessWidget {
                                 item.title,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.secondaryBlue,
+                                  color: context.textPrimary,
                                 ),
                               ),
                               if (item.subtitle.isNotEmpty) ...[
@@ -118,9 +119,9 @@ class RecentActivityList extends StatelessWidget {
                                   item.subtitle,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 11,
-                                    color: Color(0xFF64748B),
+                                    color: context.textSecondary,
                                   ),
                                 ),
                               ],

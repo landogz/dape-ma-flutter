@@ -4,6 +4,7 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/contest.dart';
 import '../../hope/hope_colors.dart';
 import '../detail/contest_detail_screen.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class ContestCard extends StatelessWidget {
   final Contest contest;
@@ -49,7 +50,7 @@ class ContestCard extends StatelessWidget {
         : (contest.description ?? '');
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -58,7 +59,7 @@ class ContestCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: HopeColors.cardBorder),
+            border: Border.all(color: HopeColors.cardBorderOf(context)),
             boxShadow: [
               BoxShadow(
                 color: HopeColors.purple.withValues(alpha: 0.05),
@@ -96,8 +97,8 @@ class ContestCard extends StatelessWidget {
                       contest.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: HopeColors.purple,
+                      style: TextStyle(
+                        color: HopeColors.headingOf(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 14,
                       ),
@@ -108,8 +109,8 @@ class ContestCard extends StatelessWidget {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: HopeColors.muted,
+                        style: TextStyle(
+                          color: HopeColors.mutedOf(context),
                           fontSize: 12,
                         ),
                       ),
@@ -172,8 +173,8 @@ class _IconThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: HopeColors.purpleSoft,
-      child: Icon(icon, color: HopeColors.purple, size: 32),
+      color: HopeColors.softOf(context),
+      child: Icon(icon, color: HopeColors.headingOf(context), size: 32),
     );
   }
 }
@@ -188,13 +189,13 @@ class _MetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: HopeColors.purpleSoft,
+        color: HopeColors.softOf(context),
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: HopeColors.purple,
+        style: TextStyle(
+          color: HopeColors.headingOf(context),
           fontSize: 11,
           fontWeight: FontWeight.w700,
         ),

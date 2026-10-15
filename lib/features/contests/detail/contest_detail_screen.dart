@@ -8,10 +8,10 @@ import '../../../core/models/contest.dart';
 import '../../../core/models/contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../auth/login_screen.dart';
 import '../../hope/hope_colors.dart';
 import '../submit/contest_submit_screen.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class ContestDetailScreen extends StatefulWidget {
   final int contestId;
@@ -148,16 +148,16 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: HopeColors.purple,
+        backgroundColor: context.pageBackground,
+        foregroundColor: HopeColors.headingOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
           l10n.contestDetailTitle,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -200,11 +200,11 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
               ? Center(
                   child: Text(
                     l10n.noContestsFound,
-                    style: const TextStyle(color: HopeColors.muted),
+                    style: TextStyle(color: HopeColors.mutedOf(context)),
                   ),
                 )
               : RefreshIndicator(
-                  color: HopeColors.purple,
+                  color: HopeColors.headingOf(context),
                   onRefresh: _load,
                   child: ListView(
                     padding: EdgeInsets.fromLTRB(
@@ -216,8 +216,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                     children: [
                       Text(
                         _contest!.title,
-                        style: const TextStyle(
-                          color: HopeColors.purple,
+                        style: TextStyle(
+                          color: HopeColors.headingOf(context),
                           fontWeight: FontWeight.w800,
                           fontSize: 22,
                           height: 1.25,
@@ -241,8 +241,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                         const SizedBox(height: 16),
                         Text(
                           _contest!.description!,
-                          style: const TextStyle(
-                            color: HopeColors.bodyText,
+                          style: TextStyle(
+                            color: HopeColors.bodyOf(context),
                             height: 1.5,
                             fontSize: 14,
                           ),
@@ -253,8 +253,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                         const SizedBox(height: 20),
                         Text(
                           l10n.contestRules,
-                          style: const TextStyle(
-                            color: HopeColors.purple,
+                          style: TextStyle(
+                            color: HopeColors.headingOf(context),
                             fontWeight: FontWeight.w800,
                             fontSize: 17,
                           ),
@@ -264,14 +264,14 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: HopeColors.purpleSoft,
+                            color: HopeColors.softOf(context),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: HopeColors.cardBorder),
+                            border: Border.all(color: HopeColors.cardBorderOf(context)),
                           ),
                           child: Text(
                             _contest!.rules!,
-                            style: const TextStyle(
-                              color: HopeColors.bodyText,
+                            style: TextStyle(
+                              color: HopeColors.bodyOf(context),
                               height: 1.5,
                               fontSize: 14,
                             ),
@@ -284,14 +284,14 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: HopeColors.purpleSoft,
+                            color: HopeColors.softOf(context),
                             borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: HopeColors.cardBorder),
+                            border: Border.all(color: HopeColors.cardBorderOf(context)),
                           ),
                           child: Text(
                             '${l10n.yourEntryStatus}: ${_myEntry!.status.toUpperCase()} — ${_myEntry!.title}',
-                            style: const TextStyle(
-                              color: HopeColors.purple,
+                            style: TextStyle(
+                              color: HopeColors.headingOf(context),
                               fontWeight: FontWeight.w700,
                               height: 1.4,
                             ),
@@ -312,7 +312,7 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                           child: Text(
                             l10n.submissionsClosed,
                             style: TextStyle(
-                              color: AppColors.nileBlue,
+                              color: context.heading,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -321,8 +321,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                       const SizedBox(height: 24),
                       Text(
                         l10n.publishedEntries,
-                        style: const TextStyle(
-                          color: HopeColors.purple,
+                        style: TextStyle(
+                          color: HopeColors.headingOf(context),
                           fontWeight: FontWeight.w800,
                           fontSize: 17,
                         ),
@@ -331,8 +331,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                       if (_entries.isEmpty)
                         Text(
                           l10n.noPublishedEntriesYet,
-                          style: const TextStyle(
-                            color: HopeColors.muted,
+                          style: TextStyle(
+                            color: HopeColors.mutedOf(context),
                             fontSize: 14,
                           ),
                         )
@@ -408,9 +408,9 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: HopeColors.cardBorder),
+        border: Border.all(color: HopeColors.cardBorderOf(context)),
         boxShadow: [
           BoxShadow(
             color: HopeColors.purple.withValues(alpha: 0.05),
@@ -427,8 +427,8 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
               Expanded(
                 child: Text(
                   entry.title,
-                  style: const TextStyle(
-                    color: HopeColors.purple,
+                  style: TextStyle(
+                    color: HopeColors.headingOf(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
                   ),
@@ -440,7 +440,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
           const SizedBox(height: 4),
           Text(
             entry.creatorName,
-            style: const TextStyle(color: HopeColors.muted, fontSize: 12),
+            style: TextStyle(color: HopeColors.mutedOf(context), fontSize: 12),
           ),
           if (_isPoster && posterUrl != null && posterUrl.isNotEmpty) ...[
             const SizedBox(height: 10),
@@ -454,10 +454,10 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
                 errorBuilder: (_, _, _) => Container(
                   height: 120,
                   alignment: Alignment.center,
-                  color: HopeColors.purpleSoft,
-                  child: const Icon(
+                  color: HopeColors.softOf(context),
+                  child: Icon(
                     Icons.broken_image_outlined,
-                    color: HopeColors.purple,
+                    color: HopeColors.headingOf(context),
                   ),
                 ),
               ),
@@ -488,14 +488,14 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
             const SizedBox(height: 8),
             Text(
               entry.lyrics!,
-              style: const TextStyle(color: HopeColors.bodyText, fontSize: 13),
+              style: TextStyle(color: HopeColors.bodyOf(context), fontSize: 13),
             ),
           ],
           if (entry.description != null && entry.description!.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
               entry.description!,
-              style: const TextStyle(color: HopeColors.muted, fontSize: 13),
+              style: TextStyle(color: HopeColors.mutedOf(context), fontSize: 13),
             ),
           ],
         ],
@@ -514,14 +514,14 @@ class _HopePill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: HopeColors.purpleSoft,
+        color: HopeColors.softOf(context),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: HopeColors.cardBorder),
+        border: Border.all(color: HopeColors.cardBorderOf(context)),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: HopeColors.purple,
+        style: TextStyle(
+          color: HopeColors.headingOf(context),
           fontWeight: FontWeight.w700,
           fontSize: 12,
         ),

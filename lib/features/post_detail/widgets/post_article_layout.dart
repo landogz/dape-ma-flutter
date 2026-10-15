@@ -600,8 +600,8 @@ class CommentsEmptyState extends StatelessWidget {
           Container(
             width: 52,
             height: 52,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: context.cardBackground,
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -616,7 +616,7 @@ class CommentsEmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.nileBlue,
+                  color: context.heading,
                 ),
           ),
           const SizedBox(height: 4),

@@ -44,10 +44,10 @@ class _HopeMovementCarouselState extends State<HopeMovementCarousel> {
                   fit: BoxFit.cover,
                   width: double.infinity,
                   errorBuilder: (_, _, _) => Container(
-                    color: HopeColors.purpleSoft,
+                    color: HopeColors.softOf(context),
                     alignment: Alignment.center,
-                    child: const Icon(Icons.image_outlined,
-                        color: HopeColors.purple, size: 40),
+                    child: Icon(Icons.image_outlined,
+                        color: HopeColors.headingOf(context), size: 40),
                   ),
                 ),
               );
@@ -65,7 +65,7 @@ class _HopeMovementCarouselState extends State<HopeMovementCarousel> {
               width: active ? 18 : 7,
               height: 7,
               decoration: BoxDecoration(
-                color: active ? HopeColors.purple : HopeColors.cardBorder,
+                color: active ? HopeColors.purple : HopeColors.cardBorderOf(context),
                 borderRadius: BorderRadius.circular(999),
               ),
             );

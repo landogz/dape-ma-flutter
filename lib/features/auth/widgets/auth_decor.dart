@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 /// Soft navy decorative motif for auth screens.
 ///
@@ -53,7 +54,7 @@ class AuthDecorBackground extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        const Positioned.fill(child: ColoredBox(color: Colors.white)),
+        Positioned.fill(child: ColoredBox(color: context.pageBackground)),
         // Top-right — mirrored partner of bottom-left
         Positioned(
           top: topInset - inset * 0.15,
@@ -72,9 +73,6 @@ class AuthDecorBackground extends StatelessWidget {
   }
 }
 
-const Color _authFieldFill = Color(0xFFF8F9FC);
-const Color _authMutedText = Color(0xFF6B7280);
-
 InputDecoration authFieldDecoration({
   required BuildContext context,
   required String hintText,
@@ -83,13 +81,13 @@ InputDecoration authFieldDecoration({
 }) {
   return InputDecoration(
     hintText: hintText,
-    hintStyle: const TextStyle(
-      color: _authMutedText,
+    hintStyle: TextStyle(
+      color: context.textSecondary,
       fontSize: 15,
       fontWeight: FontWeight.w400,
     ),
     filled: true,
-    fillColor: _authFieldFill,
+    fillColor: context.inputFill,
     prefixIcon: Icon(
       prefixIcon,
       color: AppColors.mediumElectricBlue,
@@ -242,14 +240,14 @@ class AuthOrDivider extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 12),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFFF1F3F6),
+            color: context.chipBackground,
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: const Color(0xFFE5E7EB)),
+            border: Border.all(color: context.borderSubtle),
           ),
           child: Text(
             label,
-            style: const TextStyle(
-              color: _authMutedText,
+            style: TextStyle(
+              color: context.textSecondary,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 import '../../settings/privacy_policy_screen.dart';
 import '../../settings/terms_of_use_screen.dart';
 import 'auth_decor.dart';
@@ -10,6 +11,11 @@ import 'auth_decor.dart';
 abstract final class AuthTokens {
   static const muted = Color(0xFF4B5563);
   static const inputText = AppColors.nileBlue;
+
+  static Color mutedOf(BuildContext context) => context.textSecondary;
+
+  static Color inputTextOf(BuildContext context) =>
+      context.isDarkMode ? context.textPrimary : inputText;
   static const headlineSize = 26.0;
   static const headlineWeight = FontWeight.w700;
   static const bodySize = 14.0;
@@ -40,7 +46,7 @@ class AuthScaffold extends StatelessWidget {
     return PopScope(
       canPop: canPop,
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: context.pageBackground,
         body: AuthDecorBackground(
           child: SafeArea(
             child: Column(
@@ -105,10 +111,10 @@ class AuthBackTitleBar extends StatelessWidget {
             onPressed: onBack,
             constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
             padding: EdgeInsets.zero,
-            icon: const Icon(
+            icon: Icon(
               Icons.arrow_back_ios_new_rounded,
               size: 20,
-              color: AppColors.nileBlue,
+              color: context.heading,
             ),
           ),
           if (title != null) ...[
@@ -116,8 +122,8 @@ class AuthBackTitleBar extends StatelessWidget {
             Expanded(
               child: Text(
                 title!,
-                style: const TextStyle(
-                  color: AppColors.nileBlue,
+                style: TextStyle(
+                  color: context.heading,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
@@ -149,11 +155,11 @@ class AuthBrandMark extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        const Text(
+        Text(
           'DAPE-MA',
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: AppColors.nileBlue,
+            color: context.heading,
             fontSize: 13,
             fontWeight: FontWeight.w600,
             letterSpacing: 1.2,
@@ -175,8 +181,8 @@ class AuthHeadline extends StatelessWidget {
     return Text(
       text,
       textAlign: center ? TextAlign.center : TextAlign.start,
-      style: const TextStyle(
-        color: AppColors.nileBlue,
+      style: TextStyle(
+        color: context.heading,
         fontSize: AuthTokens.headlineSize,
         fontWeight: AuthTokens.headlineWeight,
         height: 1.25,
@@ -196,8 +202,8 @@ class AuthSubtext extends StatelessWidget {
     return Text(
       text,
       textAlign: center ? TextAlign.center : TextAlign.start,
-      style: const TextStyle(
-        color: AuthTokens.muted,
+      style: TextStyle(
+        color: AuthTokens.mutedOf(context),
         fontSize: AuthTokens.bodySize,
         height: 1.4,
         fontWeight: FontWeight.w400,
@@ -273,10 +279,10 @@ class AuthSocialCircleRow extends StatelessWidget {
       children: [
         AuthSocialCircle(
           onTap: handler,
-          child: const Text(
+          child: Text(
             'G',
             style: TextStyle(
-              color: AppColors.nileBlue,
+              color: context.heading,
               fontWeight: FontWeight.w700,
               fontSize: 18,
             ),
@@ -285,16 +291,16 @@ class AuthSocialCircleRow extends StatelessWidget {
         const SizedBox(width: 16),
         AuthSocialCircle(
           onTap: handler,
-          child: const Icon(
+          child: Icon(
             Icons.facebook_rounded,
-            color: AppColors.nileBlue,
+            color: context.heading,
             size: 26,
           ),
         ),
         const SizedBox(width: 16),
         AuthSocialCircle(
           onTap: handler,
-          child: const Icon(Icons.apple, color: AppColors.nileBlue, size: 26),
+          child: Icon(Icons.apple, color: context.heading, size: 26),
         ),
       ],
     );
@@ -310,7 +316,7 @@ class AuthSocialCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       shape: const CircleBorder(),
       child: InkWell(
         customBorder: const CircleBorder(),
@@ -320,7 +326,7 @@ class AuthSocialCircle extends StatelessWidget {
           height: 52,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: Colors.white,
+            color: context.cardBackground,
             border: Border.all(color: const Color(0xFFD1D5DB)),
           ),
           child: Center(child: child),
@@ -347,8 +353,8 @@ class AuthLegalLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle linkStyle() => const TextStyle(
-          color: AppColors.nileBlue,
+    TextStyle linkStyle() => TextStyle(
+          color: context.heading,
           fontWeight: FontWeight.w600,
           fontSize: 12,
           height: 1.45,
@@ -360,8 +366,8 @@ class AuthLegalLine extends StatelessWidget {
       children: [
         Text(
           prefix,
-          style: const TextStyle(
-            color: AuthTokens.muted,
+          style: TextStyle(
+            color: AuthTokens.mutedOf(context),
             fontSize: 12,
             height: 1.45,
           ),
@@ -378,8 +384,8 @@ class AuthLegalLine extends StatelessWidget {
         ),
         Text(
           andLabel,
-          style: const TextStyle(
-            color: AuthTokens.muted,
+          style: TextStyle(
+            color: AuthTokens.mutedOf(context),
             fontSize: 12,
             height: 1.45,
           ),
@@ -394,10 +400,10 @@ class AuthLegalLine extends StatelessWidget {
           },
           child: Text(privacyLabel, style: linkStyle()),
         ),
-        const Text(
+        Text(
           '.',
           style: TextStyle(
-            color: AuthTokens.muted,
+            color: AuthTokens.mutedOf(context),
             fontSize: 12,
             height: 1.45,
           ),
@@ -416,12 +422,16 @@ class AuthFooterFade extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0x00FFFFFF), Colors.white, Colors.white],
-          stops: [0.0, 0.35, 1.0],
+          colors: [
+            context.pageBackground.withValues(alpha: 0),
+            context.pageBackground,
+            context.pageBackground,
+          ],
+          stops: const [0.0, 0.35, 1.0],
         ),
       ),
       child: Padding(

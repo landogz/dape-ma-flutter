@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 /// Hope module palette — aligned to DAPE-MA brand blues.
 ///
@@ -19,6 +20,26 @@ class HopeColors {
   static const bodyText = AppColors.nileBlue;
   static const slotsGreen = Color(0xFF16A34A);
   static const chipInactive = Color(0xFFF3F4F6);
+
+  static Color pageBgOf(BuildContext context) => context.pageBackground;
+
+  static Color mutedOf(BuildContext context) => context.textSecondary;
+
+  static Color bodyOf(BuildContext context) =>
+      context.isDarkMode ? context.textPrimary : bodyText;
+
+  static Color chipInactiveOf(BuildContext context) => context.chipBackground;
+
+  static Color cardBorderOf(BuildContext context) =>
+      context.isDarkMode ? context.borderSubtle : cardBorder;
+
+  static Color cardFillOf(BuildContext context) => context.cardBackground;
+
+  static Color softOf(BuildContext context) =>
+      context.pastelPanel(purpleSoft);
+
+  static Color headingOf(BuildContext context) =>
+      context.isDarkMode ? context.textPrimary : purple;
 
   // Preferred brand aliases
   static const primary = purple;

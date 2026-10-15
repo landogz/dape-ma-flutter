@@ -14,6 +14,7 @@ import 'calm_corner_screen.dart';
 import 'get_support_screen.dart';
 import 'self_care_toolkit_screen.dart';
 import 'widgets/daily_reflection_card.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class CareHubScreen extends StatefulWidget {
   const CareHubScreen({super.key});
@@ -130,7 +131,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: CareColors.mintSoft,
+      backgroundColor: CareColors.mintSoftOf(context),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -250,19 +251,19 @@ class _CareHubScreenState extends State<CareHubScreen> {
                           controller: _searchController,
                           onChanged: (v) => setState(() => _query = v),
                           style: AppTypography.body(
-                            color: CareColors.heading,
+                            color: CareColors.headingOf(context),
                             fontSize: 13,
                           ).copyWith(height: 1.2),
                           decoration: InputDecoration(
                             isDense: true,
                             hintText: l10n.careSearchHint,
                             hintStyle: AppTypography.body(
-                              color: CareColors.mutedText,
+                              color: CareColors.mutedOf(context),
                               fontSize: 13,
                             ),
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               Icons.search,
-                              color: CareColors.mutedText,
+                              color: CareColors.mutedOf(context),
                               size: 18,
                             ),
                             prefixIconConstraints: const BoxConstraints(
@@ -270,7 +271,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
                               minHeight: 32,
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: context.inputFill,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 8,
@@ -301,7 +302,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
                 ],
                 Text(
                   l10n.careSpeedDial,
-                  style: AppTypography.header(color: CareColors.heading),
+                  style: AppTypography.header(color: CareColors.headingOf(context)),
                 ),
                 const SizedBox(height: 14),
                 if (speedCards.isNotEmpty)
@@ -364,16 +365,16 @@ class _SpeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: CareColors.cardFill,
+      color: CareColors.cardFillOf(context),
       borderRadius: BorderRadius.circular(22),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
         child: Ink(
           decoration: BoxDecoration(
-            color: CareColors.cardFill,
+            color: CareColors.cardFillOf(context),
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: CareColors.cardBorder, width: 1.5),
+            border: Border.all(color: CareColors.cardBorderOf(context), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: CareColors.tealDark.withValues(alpha: 0.06),
@@ -395,7 +396,7 @@ class _SpeedCard extends StatelessWidget {
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) => Icon(
                       fallbackIcon,
-                      color: CareColors.tealDark,
+                      color: CareColors.headingOf(context),
                       size: 32,
                     ),
                   ),
@@ -407,7 +408,7 @@ class _SpeedCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.body(
-                    color: CareColors.heading,
+                    color: CareColors.headingOf(context),
                     fontSize: 13,
                   ).copyWith(fontWeight: FontWeight.w700, height: 1.15),
                 ),
@@ -418,7 +419,7 @@ class _SpeedCard extends StatelessWidget {
                   maxLines: 4,
                   overflow: TextOverflow.ellipsis,
                   style: AppTypography.body(
-                    color: CareColors.mutedText,
+                    color: CareColors.mutedOf(context),
                     fontSize: 12,
                   ).copyWith(height: 1.3, fontWeight: FontWeight.w500),
                 ),
@@ -445,16 +446,16 @@ class _CalmCornerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: CareColors.cardFill,
+      color: CareColors.cardFillOf(context),
       borderRadius: BorderRadius.circular(22),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(22),
         child: Ink(
           decoration: BoxDecoration(
-            color: CareColors.cardFill,
+            color: CareColors.cardFillOf(context),
             borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: CareColors.cardBorder, width: 1.5),
+            border: Border.all(color: CareColors.cardBorderOf(context), width: 1.5),
             boxShadow: [
               BoxShadow(
                 color: CareColors.tealDark.withValues(alpha: 0.06),
@@ -474,9 +475,9 @@ class _CalmCornerCard extends StatelessWidget {
                   child: Image.asset(
                     CareHubAssets.calm,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
+                    errorBuilder: (context, error, stackTrace) => Icon(
                       Icons.self_improvement_rounded,
-                      color: CareColors.teal,
+                      color: CareColors.headingOf(context),
                       size: 40,
                     ),
                   ),
@@ -488,14 +489,14 @@ class _CalmCornerCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: AppTypography.header(color: CareColors.heading)
+                        style: AppTypography.header(color: CareColors.headingOf(context))
                             .copyWith(fontSize: 17, height: 1.15),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         body,
                         style: AppTypography.body(
-                          color: CareColors.mutedText,
+                          color: CareColors.mutedOf(context),
                           fontSize: 13,
                         ).copyWith(height: 1.3, fontWeight: FontWeight.w500),
                       ),
@@ -507,8 +508,8 @@ class _CalmCornerCard extends StatelessWidget {
                           child: Container(
                             width: 36,
                             height: 36,
-                            decoration: const BoxDecoration(
-                              color: CareColors.tealDark,
+                            decoration: BoxDecoration(
+                              color: CareColors.headingOf(context),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(

@@ -208,8 +208,8 @@ class _GuestAuthCard extends StatelessWidget {
         children: [
           Text(
             l10n.welcomeTitle,
-            style: const TextStyle(
-              color: AppColors.secondaryBlue,
+            style: TextStyle(
+              color: context.heading,
               fontWeight: FontWeight.w800,
               fontSize: 18,
             ),

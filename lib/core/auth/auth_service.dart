@@ -131,6 +131,29 @@ class AuthService {
     await bindCurrentUser();
   }
 
+  static Future<void> sendLoginCode() async {
+    await authedPost<Map<String, dynamic>>(Endpoints.sendLoginCode);
+  }
+
+  static Future<void> verifyLoginCode(String code) async {
+    try {
+      final res = await authedPost<Map<String, dynamic>>(
+        Endpoints.verifyLoginCode,
+        data: <String, dynamic>{'code': code},
+      );
+      final root = res.data ?? <String, dynamic>{};
+      if (root['status'] != true) {
+        throw StateError(
+          (root['message'] as String?) ?? 'Verification failed.',
+        );
+      }
+    } on DioException catch (error) {
+      final data = error.response?.data;
+      final message = data is Map ? data['message'] as String? : null;
+      throw StateError(message ?? 'Verification failed.');
+    }
+  }
+
   static Future<void> register({
     required String name,
     required String email,

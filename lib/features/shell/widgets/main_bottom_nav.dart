@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class MainBottomNav extends StatelessWidget {
   const MainBottomNav({
@@ -23,7 +24,7 @@ class MainBottomNav extends StatelessWidget {
       child: Container(
         height: 68,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.cardBackground,
           borderRadius: BorderRadius.circular(999),
           boxShadow: [
             BoxShadow(

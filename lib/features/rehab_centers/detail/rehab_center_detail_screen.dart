@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/models/rehab_center.dart';
 import '../../hope/hope_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class RehabCenterDetailScreen extends StatelessWidget {
   const RehabCenterDetailScreen({super.key, required this.center});
@@ -98,7 +99,7 @@ class RehabCenterDetailScreen extends StatelessWidget {
     ].join(' · ');
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       body: Column(
         children: [
           Expanded(
@@ -122,21 +123,21 @@ class RehabCenterDetailScreen extends StatelessWidget {
                                 ),
                               )
                             : Container(
-                                color: HopeColors.purpleSoft,
+                                color: HopeColors.softOf(context),
                                 alignment: Alignment.center,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.map_outlined,
                                       size: 48,
-                                      color: HopeColors.purple,
+                                      color: HopeColors.headingOf(context),
                                     ),
                                     const SizedBox(height: 12),
-                                    const Text(
+                                    Text(
                                       'Map location not available',
                                       style: TextStyle(
-                                        color: HopeColors.muted,
+                                        color: HopeColors.mutedOf(context),
                                         fontSize: 14,
                                       ),
                                     ),
@@ -184,10 +185,10 @@ class RehabCenterDetailScreen extends StatelessWidget {
                   child: Transform.translate(
                     offset: const Offset(0, -18),
                     child: Container(
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
+                      decoration: BoxDecoration(
+                        color: context.cardBackground,
                         borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(24)),
+                            const BorderRadius.vertical(top: Radius.circular(24)),
                       ),
                       padding: const EdgeInsets.fromLTRB(16, 22, 16, 24),
                       child: Column(
@@ -195,8 +196,8 @@ class RehabCenterDetailScreen extends StatelessWidget {
                         children: [
                           Text(
                             center.name,
-                            style: const TextStyle(
-                              color: HopeColors.purple,
+                            style: TextStyle(
+                              color: HopeColors.headingOf(context),
                               fontWeight: FontWeight.w800,
                               fontSize: 22,
                               height: 1.25,
@@ -206,8 +207,8 @@ class RehabCenterDetailScreen extends StatelessWidget {
                             const SizedBox(height: 6),
                             Text(
                               regionLine,
-                              style: const TextStyle(
-                                color: HopeColors.muted,
+                              style: TextStyle(
+                                color: HopeColors.mutedOf(context),
                                 fontSize: 13,
                               ),
                             ),
@@ -286,9 +287,9 @@ class RehabCenterDetailScreen extends StatelessWidget {
                       icon: const Icon(Icons.map_outlined),
                       label: const Text('Open in Google Maps'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: HopeColors.purple,
-                        side: const BorderSide(
-                          color: HopeColors.purple,
+                        foregroundColor: HopeColors.headingOf(context),
+                        side: BorderSide(
+                          color: HopeColors.headingOf(context),
                           width: 1.5,
                         ),
                         shape: RoundedRectangleBorder(
@@ -326,9 +327,9 @@ class _DetailCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.cardBackground,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: HopeColors.cardBorder),
+        border: Border.all(color: HopeColors.cardBorderOf(context)),
         boxShadow: [
           BoxShadow(
             color: HopeColors.purple.withValues(alpha: 0.04),
@@ -343,11 +344,11 @@ class _DetailCard extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: const BoxDecoration(
-              color: HopeColors.purpleSoft,
+            decoration: BoxDecoration(
+              color: HopeColors.softOf(context),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 20, color: HopeColors.purple),
+            child: Icon(icon, size: 20, color: HopeColors.headingOf(context)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -356,8 +357,8 @@ class _DetailCard extends StatelessWidget {
               children: [
                 Text(
                   label.toUpperCase(),
-                  style: const TextStyle(
-                    color: HopeColors.muted,
+                  style: TextStyle(
+                    color: HopeColors.mutedOf(context),
                     fontWeight: FontWeight.w700,
                     fontSize: 11,
                     letterSpacing: 0.4,
@@ -367,7 +368,7 @@ class _DetailCard extends StatelessWidget {
                 Text(
                   value,
                   style: TextStyle(
-                    color: HopeColors.purple,
+                    color: HopeColors.headingOf(context),
                     fontWeight:
                         onTap != null ? FontWeight.w700 : FontWeight.w500,
                     fontSize: 14,

@@ -39,4 +39,20 @@ extension AppThemeColors on BuildContext {
   Color get softBrandSurface => isDarkMode
       ? AppColors.mediumElectricBlue.withValues(alpha: 0.22)
       : AppColors.mediumElectricBlue.withValues(alpha: 0.08);
+
+  /// Headings on page/card surfaces (nile in light, light text in dark).
+  Color get heading =>
+      isDarkMode ? textPrimary : AppColors.nileBlue;
+
+  Color get optionFill =>
+      isDarkMode ? const Color(0xFF334155) : const Color(0xFFF9FAFB);
+
+  /// Soft pastel tiles stay light in light mode; dark-tinted in dark mode
+  /// so [textPrimary] remains readable on them.
+  Color pastelPanel(Color lightPastel) => isDarkMode
+      ? Color.alphaBlend(
+          lightPastel.withValues(alpha: 0.28),
+          cardBackground,
+        )
+      : lightPastel;
 }

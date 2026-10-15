@@ -765,7 +765,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                               Text(
                                                 l10n.commentsTitle,
                                                 style: AppTypography.header(
-                                                  color: AppColors.nileBlue,
+                                                  color: context.heading,
                                                 ).copyWith(fontSize: 18),
                                               ),
                                               const SizedBox(height: 2),
@@ -1002,7 +1002,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                       top: -6,
                                       right: -6,
                                       child: Material(
-                                        color: AppColors.nileBlue,
+                                        color: context.heading,
                                         shape: const CircleBorder(),
                                         child: InkWell(
                                           customBorder: const CircleBorder(),

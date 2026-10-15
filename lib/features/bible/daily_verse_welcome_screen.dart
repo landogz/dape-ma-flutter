@@ -149,8 +149,8 @@ class _DailyVerseWelcomeScreenState extends State<DailyVerseWelcomeScreen> {
                       ),
                       child: Text(
                         l10n.kidListoDayLabel(_dayOfYear, _totalDays),
-                        style: const TextStyle(
-                          color: AppColors.secondaryBlue,
+                        style: TextStyle(
+                          color: context.heading,
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
                         ),

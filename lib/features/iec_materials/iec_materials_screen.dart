@@ -6,6 +6,7 @@ import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../hope/hope_colors.dart';
 import 'widgets/iec_material_card.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class IecMaterialsScreen extends StatefulWidget {
   const IecMaterialsScreen({super.key});
@@ -91,16 +92,16 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.pageBackground,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: HopeColors.purple,
+        backgroundColor: context.pageBackground,
+        foregroundColor: HopeColors.headingOf(context),
         elevation: 0,
         centerTitle: true,
         title: Text(
           l10n.iecMaterialsTitle,
-          style: const TextStyle(
-            color: HopeColors.purple,
+          style: TextStyle(
+            color: HopeColors.headingOf(context),
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -114,8 +115,8 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   l10n.iecMaterialsSubtitle,
-                  style: const TextStyle(
-                    color: HopeColors.muted,
+                  style: TextStyle(
+                    color: HopeColors.mutedOf(context),
                     fontSize: 13,
                     height: 1.35,
                   ),
@@ -139,13 +140,13 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
                     },
                     selectedColor: HopeColors.purple,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : HopeColors.muted,
+                      color: selected ? Colors.white : HopeColors.mutedOf(context),
                       fontWeight: FontWeight.w700,
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.pageBackground,
                     side: BorderSide(
                       color:
-                          selected ? HopeColors.purple : HopeColors.cardBorder,
+                          selected ? HopeColors.purple : HopeColors.cardBorderOf(context),
                     ),
                     showCheckmark: false,
                   ),
@@ -170,13 +171,13 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
                     },
                     selectedColor: HopeColors.purple,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : HopeColors.muted,
+                      color: selected ? Colors.white : HopeColors.mutedOf(context),
                       fontWeight: FontWeight.w700,
                     ),
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.pageBackground,
                     side: BorderSide(
                       color:
-                          selected ? HopeColors.purple : HopeColors.cardBorder,
+                          selected ? HopeColors.purple : HopeColors.cardBorderOf(context),
                     ),
                     showCheckmark: false,
                   ),
@@ -200,20 +201,20 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
               },
               decoration: InputDecoration(
                 hintText: l10n.searchIecMaterialsHint,
-                hintStyle: const TextStyle(color: HopeColors.muted),
+                hintStyle: TextStyle(color: HopeColors.mutedOf(context)),
                 prefixIcon:
-                    const Icon(Icons.search, color: HopeColors.purple),
+                    Icon(Icons.search, color: HopeColors.headingOf(context)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: context.inputFill,
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: const BorderSide(color: HopeColors.cardBorder),
+                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -232,14 +233,14 @@ class _IecMaterialsScreenState extends State<IecMaterialsScreen> {
                     ? Center(
                         child: Text(
                           l10n.noIecMaterialsFound,
-                          style: const TextStyle(
-                            color: HopeColors.muted,
+                          style: TextStyle(
+                            color: HopeColors.mutedOf(context),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       )
                     : RefreshIndicator(
-                        color: HopeColors.purple,
+                        color: HopeColors.headingOf(context),
                         onRefresh: _load,
                         child: ListView.separated(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),

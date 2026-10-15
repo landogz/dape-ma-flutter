@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 /// Care module palette — wired to [AppColors] / Color Branding guide.
 ///
@@ -54,4 +55,27 @@ class CareColors {
   static const calmBg = AppColors.lightBackground;
   static const calmMuted = mutedText;
   static const calmRing = AppColors.softBlueBorder;
+
+  static Color pageBgOf(BuildContext context) => context.pageBackground;
+
+  static Color cardFillOf(BuildContext context) => context.cardBackground;
+
+  static Color textOf(BuildContext context) => context.textPrimary;
+
+  static Color mutedOf(BuildContext context) => context.textSecondary;
+
+  static Color headingOf(BuildContext context) =>
+      context.isDarkMode ? context.textPrimary : heading;
+
+  static Color mintSoftOf(BuildContext context) =>
+      context.isDarkMode ? context.mutedSurface : mintSoft;
+
+  static Color mintOf(BuildContext context) =>
+      context.isDarkMode ? context.softBrandSurface : mint;
+
+  static Color cardBorderOf(BuildContext context) =>
+      context.isDarkMode ? context.borderSubtle : cardBorder;
+
+  static Color calmCardOf(BuildContext context) =>
+      context.isDarkMode ? context.cardBackground : calmMintCard;
 }

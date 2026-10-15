@@ -35,7 +35,7 @@ class _AboutScreenState extends State<AboutScreen> {
       appBar: AppBar(
         title: Text(l10n.aboutApp),
         backgroundColor: context.pageBackground,
-        foregroundColor: AppColors.secondaryBlue,
+        foregroundColor: context.heading,
         elevation: 0,
         centerTitle: true,
       ),
@@ -54,8 +54,8 @@ class _AboutScreenState extends State<AboutScreen> {
             Text(
               'DAPE-MA',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppColors.secondaryBlue,
+              style: TextStyle(
+                color: context.heading,
                 fontSize: 28,
                 fontWeight: FontWeight.w800,
               ),
@@ -81,7 +81,7 @@ class _AboutScreenState extends State<AboutScreen> {
             const SizedBox(height: 36),
             Icon(
               Icons.verified_rounded,
-              color: AppColors.primaryBlue.withValues(alpha: 0.55),
+              color: context.textSecondary,
               size: 34,
             ),
             const SizedBox(height: 10),
@@ -127,8 +127,8 @@ class _AboutRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                color: AppColors.secondaryBlue,
+              style: TextStyle(
+                color: context.heading,
                 fontWeight: FontWeight.w700,
                 fontSize: 15,
               ),

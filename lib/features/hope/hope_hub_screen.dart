@@ -12,6 +12,7 @@ import 'events/hope_events_screen.dart';
 import 'events/hope_events_service.dart';
 import 'hope_colors.dart';
 import 'widgets/hope_movement_carousel.dart';
+import '../../core/theme/app_theme_colors.dart';
 
 class HopeHubAssets {
   HopeHubAssets._();
@@ -121,7 +122,7 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
     final showMovement = _matches(l10n.hopeMovementTitle);
 
     return Scaffold(
-      backgroundColor: HopeColors.pageBg,
+      backgroundColor: HopeColors.pageBgOf(context),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
@@ -229,21 +230,21 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                         TextField(
                           controller: _searchController,
                           onChanged: (v) => setState(() => _query = v),
-                          style: const TextStyle(
-                            color: HopeColors.purpleDark,
+                          style: TextStyle(
+                            color: context.textPrimary,
                             fontSize: 13,
                             height: 1.2,
                           ),
                           decoration: InputDecoration(
                             isDense: true,
                             hintText: l10n.hopeSearchHint,
-                            hintStyle: const TextStyle(
-                              color: HopeColors.muted,
+                            hintStyle: TextStyle(
+                              color: HopeColors.mutedOf(context),
                               fontSize: 13,
                             ),
-                            prefixIcon: const Icon(
+                            prefixIcon: Icon(
                               Icons.search,
-                              color: HopeColors.muted,
+                              color: HopeColors.mutedOf(context),
                               size: 18,
                             ),
                             prefixIconConstraints: const BoxConstraints(
@@ -251,7 +252,7 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                               minHeight: 32,
                             ),
                             filled: true,
-                            fillColor: Colors.white,
+                            fillColor: context.inputFill,
                             contentPadding: const EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 8,
@@ -276,8 +277,8 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                 if (showMovement) ...[
                   Text(
                     l10n.hopeMovementTitle,
-                    style: const TextStyle(
-                      color: HopeColors.purple,
+                    style: TextStyle(
+                      color: HopeColors.headingOf(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
                     ),
@@ -289,8 +290,8 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                 if (showFeatured && _featured != null) ...[
                   Text(
                     l10n.hopeFeaturedTitle,
-                    style: const TextStyle(
-                      color: HopeColors.purple,
+                    style: TextStyle(
+                      color: HopeColors.headingOf(context),
                       fontWeight: FontWeight.w800,
                       fontSize: 18,
                     ),
@@ -312,8 +313,8 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                 ],
                 Text(
                   l10n.hopeSpeedDialTitle,
-                  style: const TextStyle(
-                    color: HopeColors.purple,
+                  style: TextStyle(
+                    color: HopeColors.headingOf(context),
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
                   ),
@@ -372,7 +373,7 @@ class _HopeSpeedCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -382,17 +383,17 @@ class _HopeSpeedCard extends StatelessWidget {
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: HopeColors.cardBorder, width: 1.2),
+            border: Border.all(color: HopeColors.cardBorderOf(context), width: 1.2),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(data.icon, color: HopeColors.purple, size: 36),
+              Icon(data.icon, color: HopeColors.headingOf(context), size: 36),
               const SizedBox(height: 12),
               Text(
                 data.title,
-                style: const TextStyle(
-                  color: HopeColors.purple,
+                style: TextStyle(
+                  color: HopeColors.headingOf(context),
                   fontWeight: FontWeight.w800,
                   fontSize: 14,
                 ),
@@ -400,8 +401,8 @@ class _HopeSpeedCard extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 data.body,
-                style: const TextStyle(
-                  color: HopeColors.muted,
+                style: TextStyle(
+                  color: HopeColors.mutedOf(context),
                   fontSize: 12,
                   height: 1.35,
                 ),
@@ -433,7 +434,7 @@ class _FeaturedCard extends StatelessWidget {
         : (event.venue ?? '');
 
     return Material(
-      color: Colors.white,
+      color: context.cardBackground,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -442,7 +443,7 @@ class _FeaturedCard extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: HopeColors.cardBorder),
+            border: Border.all(color: HopeColors.cardBorderOf(context)),
           ),
           child: Row(
             children: [
@@ -452,8 +453,8 @@ class _FeaturedCard extends StatelessWidget {
                   children: [
                     Text(
                       event.title,
-                      style: const TextStyle(
-                        color: HopeColors.purple,
+                      style: TextStyle(
+                        color: HopeColors.headingOf(context),
                         fontWeight: FontWeight.w800,
                         fontSize: 15,
                       ),
@@ -461,27 +462,27 @@ class _FeaturedCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today_outlined,
-                            size: 13, color: HopeColors.purple),
+                        Icon(Icons.calendar_today_outlined,
+                            size: 13, color: HopeColors.headingOf(context)),
                         const SizedBox(width: 4),
                         Text(dateLabel,
-                            style: const TextStyle(
-                                color: HopeColors.muted, fontSize: 12)),
+                            style: TextStyle(
+                                color: HopeColors.mutedOf(context), fontSize: 12)),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        const Icon(Icons.place_outlined,
-                            size: 14, color: HopeColors.purple),
+                        Icon(Icons.place_outlined,
+                            size: 14, color: HopeColors.headingOf(context)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             place,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                color: HopeColors.muted, fontSize: 12),
+                            style: TextStyle(
+                                color: HopeColors.mutedOf(context), fontSize: 12),
                           ),
                         ),
                       ],

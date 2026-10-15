@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import 'verification_success_screen.dart';
 import 'widgets/auth_decor.dart';
 
-/// UI-only verification step. Does not call any OTP API yet.
 class VerificationCodeScreen extends StatefulWidget {
   const VerificationCodeScreen({
     super.key,
@@ -29,6 +29,9 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
   final List<FocusNode> _focusNodes = List.generate(_length, (_) => FocusNode());
   int _secondsLeft = 45;
   Timer? _timer;
+  bool _loading = false;
+  bool _resending = false;
+  String? _error;
 
   @override
   void initState() {
@@ -61,15 +64,55 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
     return '$m:$s';
   }
 
-  Future<void> _continuePreview() async {
-    final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => const VerificationSuccessScreen(),
-      ),
-    );
-    if (!mounted) return;
-    if (result == true) {
-      Navigator.of(context).pop(true);
+  Future<void> _resend() async {
+    if (_resending || _secondsLeft > 0) return;
+    setState(() {
+      _resending = true;
+      _error = null;
+    });
+    try {
+      await AuthService.sendLoginCode();
+      if (!mounted) return;
+      _startTimer();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _error = context.l10n.resetFailed);
+    } finally {
+      if (mounted) setState(() => _resending = false);
+    }
+  }
+
+  Future<void> _verify() async {
+    final l10n = context.l10n;
+    if (_code.length != _length) {
+      setState(() => _error = l10n.loginCodeInvalid);
+      return;
+    }
+
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+
+    try {
+      await AuthService.verifyLoginCode(_code);
+      if (!mounted) return;
+      final result = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => const VerificationSuccessScreen(),
+        ),
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop(result == true);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = error is StateError && error.message.isNotEmpty
+            ? error.message
+            : l10n.loginCodeInvalid;
+      });
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -88,6 +131,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final canVerify = _code.length == _length && !_loading;
 
     return Scaffold(
       body: AuthDecorBackground(
@@ -97,9 +141,14 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: IconButton(
-                  onPressed: () => Navigator.of(context).maybePop(),
+                  onPressed:
+                      _loading ? null : () => Navigator.of(context).maybePop(),
                   icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-                  color: AppColors.secondaryBlue,
+                  color: context.heading,
+                  constraints: const BoxConstraints(
+                    minWidth: 44,
+                    minHeight: 44,
+                  ),
                 ),
               ),
               Expanded(
@@ -115,7 +164,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
-                          Icons.lock_rounded,
+                          Icons.mark_email_unread_rounded,
                           size: 42,
                           color: AppColors.primaryBlue,
                         ),
@@ -124,8 +173,8 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                       Text(
                         l10n.enterVerificationCode,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: AppColors.secondaryBlue,
+                        style: TextStyle(
+                          color: context.heading,
                           fontSize: 24,
                           fontWeight: FontWeight.w800,
                         ),
@@ -146,7 +195,7 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: context.textSecondary.withValues(alpha: 0.9),
-                          fontSize: 12,
+                          fontSize: 13,
                           height: 1.35,
                         ),
                       ),
@@ -160,13 +209,14 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             child: TextField(
                               controller: _controllers[index],
                               focusNode: _focusNodes[index],
+                              enabled: !_loading,
                               textAlign: TextAlign.center,
                               keyboardType: TextInputType.number,
                               maxLength: 1,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.secondaryBlue,
+                                color: context.heading,
                               ),
                               inputFormatters: [
                                 FilteringTextInputFormatter.digitsOnly,
@@ -203,15 +253,31 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                                   _focusNodes[index - 1].requestFocus();
                                 }
                                 setState(() {});
+                                if (_code.length == _length) {
+                                  _verify();
+                                }
                               },
                             ),
                           );
                         }),
                       ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 16),
+                        Text(
+                          _error!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: AppColors.fireEngineRed,
+                            fontSize: 13,
+                            height: 1.35,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 28),
                       AuthPrimaryButton(
                         label: l10n.verifyCode,
-                        onPressed: _continuePreview,
+                        loading: _loading,
+                        onPressed: canVerify ? _verify : null,
                       ),
                       const SizedBox(height: 18),
                       Wrap(
@@ -238,10 +304,13 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             )
                           else
                             TextButton(
-                              onPressed: _startTimer,
+                              onPressed: _resending ? null : _resend,
                               style: TextButton.styleFrom(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 10,
+                                ),
+                                minimumSize: const Size(44, 44),
                                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               ),
                               child: Text(
@@ -255,16 +324,6 @@ class _VerificationCodeScreenState extends State<VerificationCodeScreen> {
                             ),
                         ],
                       ),
-                      if (_code.isNotEmpty) ...[
-                        const SizedBox(height: 12),
-                        Text(
-                          _code,
-                          style: TextStyle(
-                            color: AppColors.primaryBlue.withValues(alpha: 0.35),
-                            letterSpacing: 4,
-                          ),
-                        ),
-                      ],
                     ],
                   ),
                 ),

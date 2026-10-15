@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../hope_colors.dart';
+import '../widgets/hope_event_cover.dart';
 import 'hope_event.dart';
 import 'hope_event_detail_screen.dart';
 import 'hope_events_service.dart';
@@ -242,12 +243,7 @@ class _EventCard extends StatelessWidget {
                 child: SizedBox(
                   width: 88,
                   height: 88,
-                  child: event.coverUrl != null
-                      ? Image.network(event.coverUrl!, fit: BoxFit.cover)
-                      : Image.asset(
-                          'assets/hope/hope_banner_caravan.png',
-                          fit: BoxFit.cover,
-                        ),
+                  child: HopeEventCover(event: event),
                 ),
               ),
               const SizedBox(width: 12),

@@ -18,6 +18,7 @@ class HopeEvent {
   final String? detailsText;
   final List<HopeSpeaker> speakers;
   final List<HopeFaq> faqs;
+  final int sortOrder;
 
   const HopeEvent({
     required this.id,
@@ -39,6 +40,7 @@ class HopeEvent {
     this.detailsText,
     this.speakers = const [],
     this.faqs = const [],
+    this.sortOrder = 0,
   });
 
   factory HopeEvent.fromJson(Map<String, dynamic> json) {
@@ -51,7 +53,7 @@ class HopeEvent {
       id: (json['id'] as num?)?.toInt() ?? 0,
       title: (json['title'] ?? '') as String,
       audience: json['audience'] as String?,
-      coverUrl: json['cover_url'] as String?,
+      coverUrl: _optionalString(json['cover_url']),
       status: (json['status'] ?? 'upcoming') as String,
       startDate: json['start_date'] as String?,
       endDate: json['end_date'] as String?,
@@ -87,7 +89,14 @@ class HopeEvent {
               .map((e) => HopeFaq.fromJson(Map<String, dynamic>.from(e)))
               .toList()
           : const [],
+      sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
     );
+  }
+
+  static String? _optionalString(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    return text.isEmpty ? null : text;
   }
 }
 

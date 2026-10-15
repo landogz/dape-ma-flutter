@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../hope_colors.dart';
+import '../widgets/hope_event_cover.dart';
 import 'hope_event.dart';
 import 'hope_events_service.dart';
 import '../../../core/theme/app_theme_colors.dart';
@@ -88,21 +89,14 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                       SizedBox(
                         height: 240 + top,
                         width: double.infinity,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image: event.coverUrl != null
-                                  ? NetworkImage(event.coverUrl!)
-                                  : const AssetImage(
-                                      'assets/hope/hope_banner_caravan.png',
-                                    ) as ImageProvider,
-                              fit: BoxFit.cover,
-                              colorFilter: ColorFilter.mode(
-                                Colors.black.withValues(alpha: 0.35),
-                                BlendMode.darken,
-                              ),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            HopeEventCover(event: event),
+                            ColoredBox(
+                              color: Colors.black.withValues(alpha: 0.35),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                       Positioned(

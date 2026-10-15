@@ -1565,33 +1565,33 @@ class AppStrings {
   String get hopeMovementTitle =>
       _t('Be part of the movement!', 'Maging bahagi ng kilusan!');
   String get hopeFeaturedTitle => _t('Featured', 'Tampok');
-  String get hopeSpeedDialTitle => _t('Speed Dial', 'Mabilisang Access');
+  String get hopeSpeedDialTitle => _t('Quick Access', 'Mabilisang Access');
   String get hopeEventsTile =>
       _t('Events & Seminars', 'Events at Seminars');
   String get hopeEventsTileBody => _t(
-        'Discover official events and learning sessions!',
-        'Tuklasin ang opisyal na events at learning sessions!',
+        'Discover official events',
+        'Tuklasin ang opisyal na events',
       );
   String get hopeDirectoryTile =>
       _t('Official Directory', 'Opisyal na Directory');
   String get hopeDirectoryTileBody => _t(
-        'Check recognized offices and organizations.',
-        'Tingnan ang kinikilalang opisina at organisasyon.',
+        'Check recognized offices',
+        'Tingnan ang kinikilalang opisina',
       );
   String get hopeContestsTile => _t('Contests', 'Mga Contest');
   String get hopeContestsTileBody => _t(
-        'Join creative contests and show your advocacy.',
-        'Sumali sa creative contests at ipakita ang advocacy.',
+        'Join creative contests',
+        'Sumali sa creative contests',
       );
   String get hopeIecTile => _t('IEC Materials', 'IEC Materials');
   String get hopeIecTileBody => _t(
-        'Browse prevention education materials.',
-        'Tingnan ang prevention education materials.',
+        'Browse prevention materials',
+        'Tingnan ang prevention materials',
       );
   String get hopeRehabTile => _t('Rehab Centers', 'Rehab Centers');
   String get hopeRehabTileBody => _t(
-        'Find treatment and rehab facilities.',
-        'Hanapin ang treatment at rehab facilities.',
+        'Find rehab facilities',
+        'Hanapin ang rehab facilities',
       );
   String get hopeLearnPhase2 => _t(
         'DAPE Learn is coming in Phase 2.',

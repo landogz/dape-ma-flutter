@@ -27,10 +27,17 @@ class HopeEventsService {
             ? data
             : const [];
 
-    return list
+    final events = list
         .whereType<Map<String, dynamic>>()
         .map((json) => _withResolvedCover(HopeEvent.fromJson(json)))
-        .toList();
+        .toList()
+      ..sort((a, b) {
+        final byOrder = a.sortOrder.compareTo(b.sortOrder);
+        if (byOrder != 0) return byOrder;
+        return a.id.compareTo(b.id);
+      });
+
+    return events;
   }
 
   static Future<HopeEvent> fetchOne(int id) async {
@@ -72,6 +79,7 @@ class HopeEventsService {
           )
           .toList(),
       faqs: event.faqs,
+      sortOrder: event.sortOrder,
     );
   }
 }

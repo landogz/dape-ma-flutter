@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/share/app_share.dart';
 import '../../../core/utils/api_url.dart';
 
 class FeaturedPostCard extends StatelessWidget {
@@ -62,23 +63,47 @@ class FeaturedPostCard extends StatelessWidget {
                 ),
               ),
               Positioned(
-                top: 12,
-                right: 12,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentRed,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    l10n.featuredBadge,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
+                top: 8,
+                right: 8,
+                child: Row(
+                  children: [
+                    Material(
+                      color: Colors.black38,
+                      shape: const CircleBorder(),
+                      child: IconButton(
+                        tooltip: l10n.sharePost,
+                        onPressed: () {
+                          AppShare.item(
+                            title: post.title,
+                            url: ApiUrl.sharePost(post.id),
+                            postId: post.id,
+                          );
+                        },
+                        icon: const Icon(
+                          Icons.ios_share_rounded,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: AppColors.accentRed,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        l10n.featuredBadge,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Positioned(

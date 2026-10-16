@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/share/app_share.dart';
+import '../../../core/utils/api_url.dart';
 import '../hope_colors.dart';
 import '../widgets/hope_event_cover.dart';
 import 'hope_event.dart';
@@ -318,6 +320,20 @@ class _EventCard extends StatelessWidget {
                           )
                         else
                           const Spacer(),
+                        IconButton(
+                          tooltip: l10n.sharePost,
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            AppShare.item(
+                              title: event.title,
+                              url: ApiUrl.shareEvent(event.id),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.ios_share_rounded,
+                            color: HopeColors.headingOf(context),
+                          ),
+                        ),
                         SizedBox(
                           height: 34,
                           child: FilledButton(

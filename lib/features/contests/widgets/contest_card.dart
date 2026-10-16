@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/share/app_share.dart';
+import '../../../core/utils/api_url.dart';
 import '../../../core/models/contest.dart';
 import '../../hope/hope_colors.dart';
 import '../detail/contest_detail_screen.dart';
@@ -119,11 +121,26 @@ class ContestCard extends StatelessWidget {
                     Wrap(
                       spacing: 6,
                       runSpacing: 6,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _MetaChip(label: _categoryLabel(context)),
                         _MetaChip(label: contest.status.toUpperCase()),
                         if (contest.contestYear != null)
                           _MetaChip(label: '${contest.contestYear}'),
+                        IconButton(
+                          tooltip: l10n.sharePost,
+                          visualDensity: VisualDensity.compact,
+                          onPressed: () {
+                            AppShare.item(
+                              title: contest.title,
+                              url: ApiUrl.shareContest(contest.id),
+                            );
+                          },
+                          icon: Icon(
+                            Icons.ios_share_rounded,
+                            color: HopeColors.headingOf(context),
+                          ),
+                        ),
                       ],
                     ),
                     if (contest.canSubmitEntry) ...[

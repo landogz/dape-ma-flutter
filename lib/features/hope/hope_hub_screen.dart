@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/l10n/locale_scope.dart';
+import '../../core/share/app_share.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
+import '../../core/utils/api_url.dart';
 import '../contests/contests_screen.dart';
 import '../iec_materials/iec_materials_screen.dart';
 import '../rehab_centers/rehab_centers_screen.dart';
@@ -14,7 +17,6 @@ import 'events/hope_events_service.dart';
 import 'hope_colors.dart';
 import 'widgets/hope_event_cover.dart';
 import 'widgets/hope_movement_carousel.dart';
-import '../../core/theme/app_theme_colors.dart';
 
 class HopeHubAssets {
   HopeHubAssets._();
@@ -682,6 +684,22 @@ class _FeaturedCard extends StatelessWidget {
                         ),
                       ),
                     ],
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        tooltip: l10n.sharePost,
+                        onPressed: () {
+                          AppShare.item(
+                            title: event.title,
+                            url: ApiUrl.shareEvent(event.id),
+                          );
+                        },
+                        icon: Icon(
+                          Icons.ios_share_rounded,
+                          color: HopeColors.headingOf(context),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

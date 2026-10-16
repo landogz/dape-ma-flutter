@@ -6,6 +6,8 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../../core/share/app_share.dart';
+import '../../../core/utils/api_url.dart';
 import '../../post_engagement/post_reaction.dart';
 import '../../post_engagement/reaction_picker.dart';
 
@@ -341,6 +343,17 @@ class _PostCardState extends State<PostCard> {
                     label: l10n.comment,
                     onTap: widget.onCommentTap,
                   ),
+                  _ActionButton(
+                    icon: Icons.ios_share_rounded,
+                    label: l10n.sharePost,
+                    onTap: () {
+                      AppShare.item(
+                        title: post.title,
+                        url: ApiUrl.sharePost(post.id),
+                        postId: post.id,
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
@@ -379,7 +392,7 @@ class _ActionButton extends StatelessWidget {
         onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(4),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

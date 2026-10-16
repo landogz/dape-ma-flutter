@@ -10,7 +10,7 @@ class AppShare {
     required String url,
     int? postId,
   }) async {
-    await Share.share('$title\n$url', subject: title);
+    await Share.share(url);
     if (postId != null) {
       await AnalyticsClient.instance.trackShare(postId);
     }

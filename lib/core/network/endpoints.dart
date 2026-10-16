@@ -89,10 +89,10 @@ class Endpoints {
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';
-  static String hopeEventDetail(int id) => '/hope-events/$id';
+  static String hopeEventDetail(Object id) => '/hope-events/$id';
   static String legalPage(String slug) => '/legal-pages/$slug';
 
-  static String postDetail(int postId) => '/posts/$postId';
+  static String postDetail(Object postId) => '/posts/$postId';
   static String postLike(int postId) => '/posts/$postId/like';
   static String postReactions(int postId) => '/posts/$postId/reactions';
   static String postComments(int postId) => '/posts/$postId/comments';
@@ -100,7 +100,7 @@ class Endpoints {
       '/posts/$postId/comments/$commentId';
   static String postReviews(int postId) => '/posts/$postId/reviews';
   static String trainingDetail(int id) => '/trainings/$id';
-  static String contestDetail(int id) => '/contests/$id';
+  static String contestDetail(Object id) => '/contests/$id';
   static String contestSubmit(int id) => '/contests/$id/entries';
   static String contestMyEntry(int id) => '/contests/$id/my-entry';
   /// Deprecated: use [contestDetail].

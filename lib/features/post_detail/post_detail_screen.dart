@@ -521,7 +521,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _onShareTap() async {
     await AppShare.item(
       title: _post.title,
-      url: ApiUrl.sharePost(_post.id),
+      url: ApiUrl.sharePost(_post.id, uuid: _post.uuid),
       postId: _post.id,
     );
   }

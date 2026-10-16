@@ -40,7 +40,7 @@ class HopeEventsService {
     return events;
   }
 
-  static Future<HopeEvent> fetchOne(int id) async {
+  static Future<HopeEvent> fetchOne(Object id) async {
     final client = ApiClient();
     final res = await client.get<Map<String, dynamic>>(
       Endpoints.hopeEventDetail(id),
@@ -53,6 +53,7 @@ class HopeEventsService {
   static HopeEvent _withResolvedCover(HopeEvent event) {
     return HopeEvent(
       id: event.id,
+      uuid: event.uuid,
       title: event.title,
       audience: event.audience,
       coverUrl: ApiUrl.resolve(event.coverUrl),

@@ -326,7 +326,7 @@ class _EventCard extends StatelessWidget {
                           onPressed: () {
                             AppShare.item(
                               title: event.title,
-                              url: ApiUrl.shareEvent(event.id),
+                              url: ApiUrl.shareEvent(event.id, uuid: event.uuid),
                             );
                           },
                           icon: Icon(

@@ -75,7 +75,7 @@ class FeaturedPostCard extends StatelessWidget {
                         onPressed: () {
                           AppShare.item(
                             title: post.title,
-                            url: ApiUrl.sharePost(post.id),
+                            url: ApiUrl.sharePost(post.id, uuid: post.uuid),
                             postId: post.id,
                           );
                         },

@@ -35,7 +35,7 @@ class PostEngagementService {
     return l10n.actionFailed(action);
   }
 
-  static Future<Post> fetchPost(int postId) async {
+  static Future<Post> fetchPost(Object postId) async {
     final token = await AuthService.getToken();
     final res = await ApiClient(token: token).get<Map<String, dynamic>>(
       Endpoints.postDetail(postId),

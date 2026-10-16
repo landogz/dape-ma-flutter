@@ -11,9 +11,14 @@ import 'hope_events_service.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
 class HopeEventDetailScreen extends StatefulWidget {
-  const HopeEventDetailScreen({super.key, required this.eventId});
+  const HopeEventDetailScreen({
+    super.key,
+    required this.eventId,
+    this.eventKey,
+  });
 
   final int eventId;
+  final String? eventKey;
 
   @override
   State<HopeEventDetailScreen> createState() => _HopeEventDetailScreenState();
@@ -32,7 +37,9 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
 
   Future<void> _load() async {
     try {
-      final event = await HopeEventsService.fetchOne(widget.eventId);
+      final event = await HopeEventsService.fetchOne(
+        widget.eventKey ?? widget.eventId,
+      );
       if (!mounted) return;
       setState(() {
         _event = event;
@@ -112,7 +119,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                             onTap: () {
                               AppShare.item(
                                 title: event.title,
-                                url: ApiUrl.shareEvent(event.id),
+                                url: ApiUrl.shareEvent(event.id, uuid: event.uuid),
                               );
                             },
                             child: const SizedBox(

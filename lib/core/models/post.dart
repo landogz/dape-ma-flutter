@@ -3,6 +3,7 @@ import '../../features/post_engagement/post_reaction.dart';
 
 class Post {
   final int id;
+  final String? uuid;
   final String title;
   final String excerpt;
   final String content;
@@ -24,6 +25,7 @@ class Post {
 
   Post({
     required this.id,
+    this.uuid,
     required this.title,
     required this.excerpt,
     required this.content,
@@ -60,6 +62,7 @@ class Post {
   }) {
     return Post(
       id: id,
+      uuid: uuid,
       title: title,
       excerpt: excerpt,
       content: content,
@@ -92,6 +95,7 @@ class Post {
 
     return Post(
       id: parseJsonInt(json['id']),
+      uuid: json['uuid'] as String?,
       title: json['title'] as String,
       excerpt: excerptStr,
       content: bodyOrContent,

@@ -17,8 +17,13 @@ import '../../../core/theme/app_theme_colors.dart';
 
 class ContestDetailScreen extends StatefulWidget {
   final int contestId;
+  final String? contestKey;
 
-  const ContestDetailScreen({super.key, required this.contestId});
+  const ContestDetailScreen({
+    super.key,
+    required this.contestId,
+    this.contestKey,
+  });
 
   @override
   State<ContestDetailScreen> createState() => _ContestDetailScreenState();
@@ -45,12 +50,12 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
       final Map<String, dynamic> root;
       if (loggedIn) {
         final res = await AuthService.authedGet<Map<String, dynamic>>(
-          Endpoints.contestDetail(widget.contestId),
+          Endpoints.contestDetail(widget.contestKey ?? widget.contestId),
         );
         root = res.data ?? <String, dynamic>{};
       } else {
         final res = await ApiClient().get<Map<String, dynamic>>(
-          Endpoints.contestDetail(widget.contestId),
+          Endpoints.contestDetail(widget.contestKey ?? widget.contestId),
         );
         root = res.data ?? <String, dynamic>{};
       }
@@ -171,7 +176,7 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                 : () {
                     AppShare.item(
                       title: _contest!.title,
-                      url: ApiUrl.shareContest(_contest!.id),
+                      url: ApiUrl.shareContest(_contest!.id, uuid: _contest!.uuid),
                     );
                   },
             icon: const Icon(Icons.ios_share_rounded),

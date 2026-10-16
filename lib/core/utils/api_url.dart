@@ -50,9 +50,20 @@ class ApiUrl {
     return '$origin/$trimmed';
   }
 
-  static String sharePost(int id) => '$origin/posts/$id';
+  static String sharePost(int id, {String? uuid}) =>
+      '$origin/posts/${shareKey(id, uuid)}';
 
-  static String shareEvent(int id) => '$origin/events/$id';
+  static String shareEvent(int id, {String? uuid}) =>
+      '$origin/events/${shareKey(id, uuid)}';
 
-  static String shareContest(int id) => '$origin/contests/$id';
+  static String shareContest(int id, {String? uuid}) =>
+      '$origin/contests/${shareKey(id, uuid)}';
+
+  static String shareKey(int id, String? uuid) {
+    final value = uuid?.trim();
+    if (value != null && value.isNotEmpty) {
+      return value;
+    }
+    return '$id';
+  }
 }

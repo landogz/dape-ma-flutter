@@ -1,5 +1,6 @@
 class Contest {
   final int id;
+  final String? uuid;
   final String category;
   final String title;
   final String? description;
@@ -17,6 +18,7 @@ class Contest {
 
   Contest({
     required this.id,
+    this.uuid,
     required this.category,
     required this.title,
     this.description,
@@ -46,6 +48,7 @@ class Contest {
       id: json['id'] is int
           ? json['id'] as int
           : int.tryParse('${json['id']}') ?? 0,
+      uuid: json['uuid']?.toString(),
       category: json['category'] as String? ?? 'song',
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,

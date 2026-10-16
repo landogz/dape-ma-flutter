@@ -1,5 +1,6 @@
 class HopeEvent {
   final int id;
+  final String? uuid;
   final String title;
   final String? audience;
   final String? coverUrl;
@@ -22,6 +23,7 @@ class HopeEvent {
 
   const HopeEvent({
     required this.id,
+    this.uuid,
     required this.title,
     this.audience,
     this.coverUrl,
@@ -51,6 +53,7 @@ class HopeEvent {
 
     return HopeEvent(
       id: (json['id'] as num?)?.toInt() ?? 0,
+      uuid: _optionalString(json['uuid']),
       title: (json['title'] ?? '') as String,
       audience: json['audience'] as String?,
       coverUrl: _optionalString(json['cover_url']),

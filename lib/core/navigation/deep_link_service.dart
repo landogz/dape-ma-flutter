@@ -55,11 +55,11 @@ class DeepLinkService {
     }
 
     final type = parsed.$1;
-    final id = parsed.$2;
+    final key = parsed.$2;
 
     if (type == 'posts') {
       try {
-        final post = await PostEngagementService.fetchPost(id);
+        final post = await PostEngagementService.fetchPost(key);
         await nav.push(
           MaterialPageRoute<void>(
             builder: (_) => PostDetailScreen(post: post),
@@ -70,44 +70,47 @@ class DeepLinkService {
     }
 
     if (type == 'events') {
+      final id = int.tryParse(key);
       await nav.push(
         MaterialPageRoute<void>(
-          builder: (_) => HopeEventDetailScreen(eventId: id),
+          builder: (_) => HopeEventDetailScreen(eventId: id ?? 0, eventKey: key),
         ),
       );
       return;
     }
 
     if (type == 'contests') {
+      final id = int.tryParse(key);
       await nav.push(
         MaterialPageRoute<void>(
-          builder: (_) => ContestDetailScreen(contestId: id),
+          builder: (_) =>
+              ContestDetailScreen(contestId: id ?? 0, contestKey: key),
         ),
       );
     }
   }
 
-  static (String, int)? _parse(Uri uri) {
+  static (String, String)? _parse(Uri uri) {
     final segments = uri.pathSegments.where((s) => s.isNotEmpty).toList();
 
     if (uri.scheme == 'dapema') {
       final type = uri.host.toLowerCase();
-      final id = segments.isNotEmpty
-          ? int.tryParse(segments.first)
-          : int.tryParse(uri.path.replaceAll('/', ''));
-      if (id == null) return null;
+      final key = segments.isNotEmpty
+          ? segments.first
+          : uri.path.replaceAll('/', '');
+      if (key.isEmpty) return null;
       if (type == 'posts' || type == 'events' || type == 'contests') {
-        return (type, id);
+        return (type, key);
       }
       return null;
     }
 
     if (segments.length < 2) return null;
     final type = segments[0].toLowerCase();
-    final id = int.tryParse(segments[1]);
-    if (id == null) return null;
+    final key = segments[1];
+    if (key.isEmpty) return null;
     if (type == 'posts' || type == 'events' || type == 'contests') {
-      return (type, id);
+      return (type, key);
     }
     return null;
   }

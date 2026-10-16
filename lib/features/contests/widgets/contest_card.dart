@@ -133,7 +133,7 @@ class ContestCard extends StatelessWidget {
                           onPressed: () {
                             AppShare.item(
                               title: contest.title,
-                              url: ApiUrl.shareContest(contest.id),
+                              url: ApiUrl.shareContest(contest.id, uuid: contest.uuid),
                             );
                           },
                           icon: Icon(

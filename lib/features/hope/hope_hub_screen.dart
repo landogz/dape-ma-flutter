@@ -690,7 +690,6 @@ class _FeaturedCard extends StatelessWidget {
                         tooltip: l10n.sharePost,
                         onPressed: () {
                           AppShare.item(
-                            title: event.title,
                             url: ApiUrl.shareEvent(event.id, uuid: event.uuid),
                           );
                         },

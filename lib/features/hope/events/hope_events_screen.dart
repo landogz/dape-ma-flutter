@@ -325,7 +325,6 @@ class _EventCard extends StatelessWidget {
                           visualDensity: VisualDensity.compact,
                           onPressed: () {
                             AppShare.item(
-                              title: event.title,
                               url: ApiUrl.shareEvent(event.id, uuid: event.uuid),
                             );
                           },

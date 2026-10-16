@@ -132,7 +132,6 @@ class ContestCard extends StatelessWidget {
                           visualDensity: VisualDensity.compact,
                           onPressed: () {
                             AppShare.item(
-                              title: contest.title,
                               url: ApiUrl.shareContest(contest.id, uuid: contest.uuid),
                             );
                           },

@@ -175,7 +175,6 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                 ? null
                 : () {
                     AppShare.item(
-                      title: _contest!.title,
                       url: ApiUrl.shareContest(_contest!.id, uuid: _contest!.uuid),
                     );
                   },

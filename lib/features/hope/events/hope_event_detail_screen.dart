@@ -118,7 +118,6 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                             customBorder: const CircleBorder(),
                             onTap: () {
                               AppShare.item(
-                                title: event.title,
                                 url: ApiUrl.shareEvent(event.id, uuid: event.uuid),
                               );
                             },

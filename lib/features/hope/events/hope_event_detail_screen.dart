@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/utils/api_url.dart';
 import '../hope_colors.dart';
 import '../widgets/hope_event_cover.dart';
 import 'hope_event.dart';
@@ -97,6 +99,36 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                               color: Colors.black.withValues(alpha: 0.35),
                             ),
                           ],
+                        ),
+                      ),
+                      Positioned(
+                        top: top + 8,
+                        right: 12,
+                        child: Material(
+                          color: Colors.black38,
+                          shape: const CircleBorder(),
+                          child: InkWell(
+                            customBorder: const CircleBorder(),
+                            onTap: () async {
+                              final shareText = [
+                                event.title,
+                                ApiUrl.shareEvent(event.id),
+                              ].join('\n\n');
+                              await Clipboard.setData(
+                                ClipboardData(text: shareText),
+                              );
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(l10n.linkCopied)),
+                              );
+                            },
+                            child: const SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: Icon(Icons.ios_share_rounded,
+                                  color: Colors.white, size: 18),
+                            ),
+                          ),
                         ),
                       ),
                       Positioned(

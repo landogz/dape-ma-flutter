@@ -13,6 +13,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/models/post_comment.dart';
 import '../../core/network/endpoints.dart';
+import '../../core/utils/api_url.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/theme/app_typography.dart';
@@ -521,6 +522,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final shareText = [
       _post.title,
       if (_post.excerpt.trim().isNotEmpty) _post.excerpt.trim(),
+      ApiUrl.sharePost(_post.id),
     ].join('\n\n');
     await Clipboard.setData(ClipboardData(text: shareText));
     if (!mounted) return;

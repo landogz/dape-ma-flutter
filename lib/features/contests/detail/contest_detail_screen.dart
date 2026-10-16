@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -8,6 +9,7 @@ import '../../../core/models/contest.dart';
 import '../../../core/models/contest_entry.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
+import '../../../core/utils/api_url.dart';
 import '../../auth/login_screen.dart';
 import '../../hope/hope_colors.dart';
 import '../submit/contest_submit_screen.dart';
@@ -161,6 +163,25 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: l10n.sharePost,
+            onPressed: _contest == null
+                ? null
+                : () async {
+                    final shareText = [
+                      _contest!.title,
+                      ApiUrl.shareContest(_contest!.id),
+                    ].join('\n\n');
+                    await Clipboard.setData(ClipboardData(text: shareText));
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(l10n.linkCopied)),
+                    );
+                  },
+            icon: const Icon(Icons.ios_share_rounded),
+          ),
+        ],
       ),
       bottomNavigationBar: _loading || _contest == null || !_showSubmitCta
           ? null

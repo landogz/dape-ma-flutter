@@ -8,6 +8,7 @@ import 'core/l10n/app_locale.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/l10n/locale_scope.dart';
 import 'core/theme/app_theme.dart';
+import 'core/navigation/deep_link_service.dart';
 import 'features/push/push_notification_service.dart';
 import 'features/splash/splash_screen.dart';
 
@@ -39,6 +40,7 @@ Future<void> _safeStartup() async {
     PushNotificationService.instance.initialize(),
     'push',
   );
+  await withTimeout(DeepLinkService.init(), 'deep links');
 }
 
 class DapeMaApp extends StatelessWidget {
@@ -68,6 +70,7 @@ class DapeMaApp extends StatelessWidget {
           child: AccessibilityScope(
             controller: a11y,
             child: MaterialApp(
+              navigatorKey: DeepLinkService.navigatorKey,
               title: 'DAPE-MA Mobile',
               debugShowCheckedModeBanner: false,
               theme: theme,

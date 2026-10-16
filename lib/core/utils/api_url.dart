@@ -3,7 +3,7 @@ import '../network/endpoints.dart';
 class ApiUrl {
   ApiUrl._();
 
-  static String get _origin {
+  static String get origin {
     final base = Endpoints.baseUrl;
     final apiIndex = base.indexOf('/api/');
     if (apiIndex == -1) return base;
@@ -27,7 +27,7 @@ class ApiUrl {
 
     if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
       final uri = Uri.tryParse(trimmed);
-      final originUri = Uri.tryParse(_origin);
+      final originUri = Uri.tryParse(origin);
       if (uri == null || originUri == null || !originUri.hasAuthority) {
         return trimmed;
       }
@@ -45,8 +45,14 @@ class ApiUrl {
     }
 
     if (trimmed.startsWith('/')) {
-      return '$_origin$trimmed';
+      return '$origin$trimmed';
     }
-    return '$_origin/$trimmed';
+    return '$origin/$trimmed';
   }
+
+  static String sharePost(int id) => '$origin/posts/$id';
+
+  static String shareEvent(int id) => '$origin/events/$id';
+
+  static String shareContest(int id) => '$origin/contests/$id';
 }

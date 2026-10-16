@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/auth/auth_service.dart';
+import '../../core/navigation/deep_link_service.dart';
 import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
@@ -91,6 +92,9 @@ class _SplashScreenState extends State<SplashScreen>
         ),
       );
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      DeepLinkService.consumePending();
+    });
   }
 
   @override

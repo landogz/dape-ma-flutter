@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
+import '../../core/accessibility/accessibility_scope.dart';
 import '../../core/auth/auth_service.dart';
-import '../../core/navigation/deep_link_service.dart';
+import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
+import '../../core/navigation/deep_link_service.dart';
+import '../../core/navigation/fade_route.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/network/server_status.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/brand_launch_backdrop.dart';
 import '../auth/login_screen.dart';
 import '../kid_listo/kid_listo_welcome_screen.dart';
 import '../maintenance/under_maintenance_screen.dart';
@@ -29,18 +33,33 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _scaleAnimation = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
+      duration: const Duration(milliseconds: 650),
     );
     _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOut,
+      curve: Curves.easeOutCubic,
     );
-    _controller.forward();
+    _scaleAnimation = Tween<double>(begin: 0.9, end: 1).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutCubic,
+      ),
+    );
     _loadInitialData();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final reduceMotion = context.accessibility.reduceMotion ||
+        MediaQuery.disableAnimationsOf(context);
+    if (reduceMotion) {
+      _controller.value = 1;
+      return;
+    }
+    if (!_controller.isAnimating && _controller.value == 0) {
+      _controller.forward();
+    }
   }
 
   @override
@@ -57,6 +76,11 @@ class _SplashScreenState extends State<SplashScreen>
     }
   }
 
+  Future<void> _openNext(Widget page) async {
+    if (!mounted) return;
+    Navigator.of(context).pushReplacement(fadeRoute<void>(page));
+  }
+
   Future<void> _loadInitialData() async {
     final start = DateTime.now();
     List<Post> posts = [];
@@ -65,16 +89,10 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
     if (!reachable) {
       await _waitMinSplash(start);
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => const UnderMaintenanceScreen(),
-        ),
-      );
+      await _openNext(const UnderMaintenanceScreen());
       return;
     }
 
-    // Require a live session — stale AlwaysData/local tokens must not skip login.
     final loggedIn = await AuthService.ensureValidSession();
 
     try {
@@ -100,18 +118,12 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (loggedIn) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => KidListoWelcomeScreen(initialPosts: posts),
-        ),
-      );
+      await _openNext(KidListoWelcomeScreen(initialPosts: posts));
     } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute<void>(
-          builder: (_) => LoginScreen(
-            asAuthGate: true,
-            initialPosts: posts,
-          ),
+      await _openNext(
+        LoginScreen(
+          asAuthGate: true,
+          initialPosts: posts,
         ),
       );
     }
@@ -122,65 +134,82 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final shortest = MediaQuery.sizeOf(context).shortestSide;
+    final sealSize = shortest < 360 ? 120.0 : 132.0;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: FadeTransition(
-          opacity: _fadeAnimation,
-          child: ScaleTransition(
-            scale: _scaleAnimation,
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.08),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.3),
-                        width: 2,
+      backgroundColor: AppColors.primaryBlue,
+      body: BrandLaunchBackdrop(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: const Alignment(0, -0.12),
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            BrandSeal(size: sealSize),
+                            const SizedBox(height: 30),
+                            Text(
+                              l10n.splashAppName,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 34,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 4.2,
+                                height: 1.1,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.splashFullName,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.72),
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                                height: 1.35,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Image.asset(
-                        'assets/ddb.png',
-                        fit: BoxFit.contain,
-                      ),
+                  ),
+                ),
+                SizedBox(
+                  width: 128,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(99),
+                    child: LinearProgressIndicator(
+                      minHeight: 3,
+                      backgroundColor: Colors.white.withValues(alpha: 0.18),
+                      color: AppColors.accentYellow,
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Drug Abuse Prevention\nEducation Mobile Application',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.6,
-                    ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.splashFooter,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.62),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    height: 1.35,
                   ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    '(DAPE-MA)',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 48),
+              ],
             ),
           ),
         ),

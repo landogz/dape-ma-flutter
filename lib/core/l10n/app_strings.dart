@@ -18,6 +18,16 @@ class AppStrings {
   String get navKidListo => _t('Kid Listo', 'Kid Listo');
   String get navAccount => _t('Profile', 'Profile');
 
+  String get splashAppName => _t('DAPE-MA', 'DAPE-MA');
+  String get splashFullName => _t(
+        'Drug Abuse Prevention\nEducation Mobile Application',
+        'Drug Abuse Prevention\nEducation Mobile Application',
+      );
+  String get splashFooter => _t(
+        'Dangerous Drugs Board · Office of the President',
+        'Dangerous Drugs Board · Office of the President',
+      );
+
   // DDB Services
   String get ddbServicesTitle => _t('DDB Services', 'Mga Serbisyo ng DDB');
   String get ddbServicesSubtitle => _t(

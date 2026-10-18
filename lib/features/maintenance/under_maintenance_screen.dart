@@ -9,6 +9,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/navigation/app_restart.dart';
 import '../../core/network/server_status.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/brand_launch_backdrop.dart';
 
 class UnderMaintenanceScreen extends StatefulWidget {
   const UnderMaintenanceScreen({super.key});
@@ -125,19 +126,9 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
     );
 
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primaryBlue, AppColors.secondaryBlue],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Stack(
-          children: [
-            const Positioned.fill(child: _SoftRadialLight()),
-            SafeArea(
+      backgroundColor: AppColors.primaryBlue,
+      body: BrandLaunchBackdrop(
+        child: SafeArea(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                 child: Column(
@@ -295,30 +286,6 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
                   ],
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SoftRadialLight extends StatelessWidget {
-  const _SoftRadialLight();
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: RadialGradient(
-            center: const Alignment(0, -0.06),
-            radius: 0.82,
-            colors: [
-              Colors.white.withValues(alpha: 0.14),
-              Colors.transparent,
-            ],
-          ),
         ),
       ),
     );

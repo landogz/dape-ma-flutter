@@ -1392,13 +1392,25 @@ class AppStrings {
       _t('No internet connection. Check your network and try again.',
           'Walang internet. Suriin ang network at subukan muli.');
   String get underMaintenanceTitle =>
-      _t('Under Maintenance', 'Under Maintenance');
+      _t('We’ll be right back', 'Babalik kami agad');
   String get underMaintenanceBadge =>
-      _t('Temporarily unavailable', 'Pansamantalang hindi available');
+      _t('Service status', 'Status ng serbisyo');
   String get underMaintenanceMessage => _t(
-        'DAPE-MA is temporarily unavailable. The server may be down. Please try again in a few minutes.',
-        'Pansamantalang hindi available ang DAPE-MA. Maaaring down ang server. Subukan muli sa ilang minuto.',
+        'We’re having trouble connecting right now. Please check back in a few minutes.',
+        'Hindi kami makakonekta sa ngayon. Subukan ulit sa ilang minuto.',
       );
+  String underMaintenanceLastChecked(String time) => _t(
+        'Last checked $time',
+        'Huling tiningnan $time',
+      );
+  String get underMaintenanceStillUnavailable => _t(
+        'Still unavailable. Try again shortly.',
+        'Hindi pa available. Subukan ulit saglit.',
+      );
+  String get underMaintenanceChecking =>
+      _t('Checking…', 'Tinitingnan…');
+  String get contactSupport =>
+      _t('Contact support', 'Makipag-ugnayan sa support');
   String actionFailed(String action) =>
       _t('Could not $action. Try again.', 'Hindi ma-$action. Subukan muli.');
 

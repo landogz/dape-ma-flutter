@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/accessibility/accessibility_scope.dart';
 import '../../core/auth/auth_service.dart';
@@ -23,25 +24,39 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+    with TickerProviderStateMixin {
+  static const _lightStatusBar = SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.light,
+    statusBarBrightness: Brightness.dark,
+    systemNavigationBarColor: AppColors.secondaryBlue,
+    systemNavigationBarIconBrightness: Brightness.light,
+  );
+
+  late final AnimationController _entrance;
+  late final AnimationController _loader;
   late final Animation<double> _scaleAnimation;
   late final Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+    SystemChrome.setSystemUIOverlayStyle(_lightStatusBar);
+    _entrance = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 650),
     );
+    _loader = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
     _fadeAnimation = CurvedAnimation(
-      parent: _controller,
+      parent: _entrance,
       curve: Curves.easeOutCubic,
     );
     _scaleAnimation = Tween<double>(begin: 0.9, end: 1).animate(
       CurvedAnimation(
-        parent: _controller,
+        parent: _entrance,
         curve: Curves.easeOutCubic,
       ),
     );
@@ -54,17 +69,23 @@ class _SplashScreenState extends State<SplashScreen>
     final reduceMotion = context.accessibility.reduceMotion ||
         MediaQuery.disableAnimationsOf(context);
     if (reduceMotion) {
-      _controller.value = 1;
+      _entrance.value = 1;
+      _loader.stop();
+      _loader.value = 0.35;
       return;
     }
-    if (!_controller.isAnimating && _controller.value == 0) {
-      _controller.forward();
+    if (!_entrance.isAnimating && _entrance.value == 0) {
+      _entrance.forward();
+    }
+    if (!_loader.isAnimating) {
+      _loader.repeat();
     }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _entrance.dispose();
+    _loader.dispose();
     super.dispose();
   }
 
@@ -136,82 +157,148 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final shortest = MediaQuery.sizeOf(context).shortestSide;
-    final sealSize = shortest < 360 ? 120.0 : 132.0;
+    final sealSize = shortest < 360 ? 132.0 : 148.0;
+    final reduceMotion = context.accessibility.reduceMotion ||
+        MediaQuery.disableAnimationsOf(context);
 
-    return Scaffold(
-      backgroundColor: AppColors.primaryBlue,
-      body: BrandLaunchBackdrop(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Align(
-                    alignment: const Alignment(0, -0.12),
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            BrandSeal(size: sealSize),
-                            const SizedBox(height: 30),
-                            Text(
-                              l10n.splashAppName,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 34,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: 4.2,
-                                height: 1.1,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _lightStatusBar,
+      child: Scaffold(
+        backgroundColor: AppColors.primaryBlue,
+        body: BrandLaunchBackdrop(
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Align(
+                      alignment: const Alignment(0, -0.02),
+                      child: FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: ScaleTransition(
+                          scale: _scaleAnimation,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              BrandSeal(size: sealSize),
+                              const SizedBox(height: 30),
+                              Text(
+                                l10n.splashAppName,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 34,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 4.2,
+                                  height: 1.1,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.splashFullName,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.72),
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
-                                height: 1.35,
+                              const SizedBox(height: 14),
+                              Text(
+                                l10n.splashFullName,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.78),
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.35,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(
-                  width: 128,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(99),
-                    child: LinearProgressIndicator(
-                      minHeight: 3,
-                      backgroundColor: Colors.white.withValues(alpha: 0.18),
-                      color: AppColors.accentYellow,
+                  _SplashLoader(
+                    controller: _loader,
+                    reduceMotion: reduceMotion,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.splashFooter,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.64),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      height: 1.35,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.splashFooter,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.62),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 48),
-              ],
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SplashLoader extends StatelessWidget {
+  const _SplashLoader({
+    required this.controller,
+    required this.reduceMotion,
+  });
+
+  final AnimationController controller;
+  final bool reduceMotion;
+
+  @override
+  Widget build(BuildContext context) {
+    const width = 152.0;
+    const height = 3.0;
+    const marker = 56.0;
+
+    return SizedBox(
+      width: width,
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.22),
+          borderRadius: BorderRadius.circular(99),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(99),
+          child: reduceMotion
+            ? Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  width: marker,
+                  height: height,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentYellow,
+                    borderRadius: BorderRadius.circular(99),
+                  ),
+                ),
+              )
+            : AnimatedBuilder(
+                animation: controller,
+                builder: (context, _) {
+                  final t = controller.value;
+                  final maxOffset = width - marker;
+                  final dx = t * maxOffset;
+
+                  return Stack(
+                    children: [
+                      Positioned(
+                        left: dx,
+                        top: 0,
+                        child: Container(
+                          width: marker,
+                          height: height,
+                          decoration: BoxDecoration(
+                            color: AppColors.accentYellow,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
         ),
       ),
     );

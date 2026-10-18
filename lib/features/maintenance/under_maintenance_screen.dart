@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -125,7 +126,13 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
       DateFormat.jm().format(_lastChecked),
     );
 
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: AppColors.secondaryBlue,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
+      child: Scaffold(
       backgroundColor: AppColors.primaryBlue,
       body: BrandLaunchBackdrop(
         child: SafeArea(
@@ -288,6 +295,7 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
               ),
         ),
       ),
+    ),
     );
   }
 }

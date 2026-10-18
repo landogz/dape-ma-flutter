@@ -1391,6 +1391,14 @@ class AppStrings {
   String get noInternet =>
       _t('No internet connection. Check your network and try again.',
           'Walang internet. Suriin ang network at subukan muli.');
+  String get underMaintenanceTitle =>
+      _t('Under Maintenance', 'Under Maintenance');
+  String get underMaintenanceBadge =>
+      _t('Temporarily unavailable', 'Pansamantalang hindi available');
+  String get underMaintenanceMessage => _t(
+        'DAPE-MA is temporarily unavailable. The server may be down. Please try again in a few minutes.',
+        'Pansamantalang hindi available ang DAPE-MA. Maaaring down ang server. Subukan muli sa ilang minuto.',
+      );
   String actionFailed(String action) =>
       _t('Could not $action. Try again.', 'Hindi ma-$action. Subukan muli.');
 

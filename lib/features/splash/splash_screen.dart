@@ -5,9 +5,11 @@ import '../../core/navigation/deep_link_service.dart';
 import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
+import '../../core/network/server_status.dart';
 import '../../core/theme/app_colors.dart';
 import '../auth/login_screen.dart';
 import '../kid_listo/kid_listo_welcome_screen.dart';
+import '../maintenance/under_maintenance_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -47,9 +49,30 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+  Future<void> _waitMinSplash(DateTime start) async {
+    final elapsed = DateTime.now().difference(start);
+    final remaining = const Duration(milliseconds: 1200) - elapsed;
+    if (remaining > Duration.zero) {
+      await Future<void>.delayed(remaining);
+    }
+  }
+
   Future<void> _loadInitialData() async {
     final start = DateTime.now();
     List<Post> posts = [];
+
+    final reachable = await ServerStatus.isReachable();
+    if (!mounted) return;
+    if (!reachable) {
+      await _waitMinSplash(start);
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute<void>(
+          builder: (_) => const UnderMaintenanceScreen(),
+        ),
+      );
+      return;
+    }
 
     // Require a live session — stale AlwaysData/local tokens must not skip login.
     final loggedIn = await AuthService.ensureValidSession();

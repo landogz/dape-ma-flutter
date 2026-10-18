@@ -41,6 +41,7 @@ class Endpoints {
   static String get localLanBaseUrl =>
       'http://$_localLanHost:$_localPort/api/v1';
 
+  static const health = '/health';
   static const posts = '/posts';
   static const rehabCenters = '/rehab-centers';
   static const trainings = '/trainings';

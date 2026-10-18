@@ -1394,7 +1394,7 @@ class AppStrings {
   String get underMaintenanceTitle =>
       _t('We’ll be right back', 'Babalik kami agad');
   String get underMaintenanceBadge =>
-      _t('Service status', 'Status ng serbisyo');
+      _t('Connection issue', 'May problema sa koneksyon');
   String get underMaintenanceMessage => _t(
         'We’re having trouble connecting right now. Please check back in a few minutes.',
         'Hindi kami makakonekta sa ngayon. Subukan ulit sa ilang minuto.',

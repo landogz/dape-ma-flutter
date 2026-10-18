@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/accessibility/accessibility_scope.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/navigation/app_restart.dart';
 import '../../core/network/server_status.dart';
@@ -38,9 +39,15 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
     super.initState();
     _pulse = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    )..repeat();
+      duration: const Duration(milliseconds: 3600),
+    );
     _autoRetry = Timer.periodic(_autoRetryEvery, (_) => _retry(fromAuto: true));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncPulse();
   }
 
   @override
@@ -48,6 +55,24 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
     _autoRetry?.cancel();
     _pulse.dispose();
     super.dispose();
+  }
+
+  bool get _reduceMotion {
+    return context.accessibility.reduceMotion ||
+        MediaQuery.disableAnimationsOf(context);
+  }
+
+  void _syncPulse() {
+    if (_reduceMotion) {
+      if (_pulse.isAnimating) {
+        _pulse.stop();
+      }
+      _pulse.value = 0;
+      return;
+    }
+    if (!_pulse.isAnimating) {
+      _pulse.repeat();
+    }
   }
 
   bool get _inCooldown {
@@ -70,7 +95,6 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
     final ok = await ServerStatus.isReachable();
     if (!mounted) return;
 
-    _lastChecked = DateTime.now();
     if (ok) {
       _autoRetry?.cancel();
       restartFromSplash(context);
@@ -79,6 +103,7 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
 
     setState(() {
       _checking = false;
+      _lastChecked = DateTime.now();
       _cooldownUntil = DateTime.now().add(_cooldown);
       _showStillUnavailable = !fromAuto;
     });
@@ -114,134 +139,160 @@ class _UnderMaintenanceScreenState extends State<UnderMaintenanceScreen>
             const Positioned.fill(child: _SoftRadialLight()),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return SingleChildScrollView(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minHeight: constraints.maxHeight,
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _PulsingLogo(controller: _pulse, size: logoSize),
-                            const SizedBox(height: 24),
-                            const _ServiceStatusPill(),
-                            const SizedBox(height: 16),
-                            Text(
-                              l10n.underMaintenanceTitle,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w800,
-                                height: 1.2,
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 300),
-                              child: Text(
-                                l10n.underMaintenanceMessage,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  fontSize: 16,
-                                  height: 1.45,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 28),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 360),
-                              child: SizedBox(
-                                width: double.infinity,
-                                height: 52,
-                                child: ElevatedButton.icon(
-                                  onPressed: _checking
-                                      ? null
-                                      : () => _retry(),
-                                  style: ElevatedButton.styleFrom(
-                                    elevation: 4,
-                                    shadowColor: Colors.black
-                                        .withValues(alpha: 0.28),
-                                    backgroundColor: AppColors.accentYellow,
-                                    foregroundColor: AppColors.secondaryBlue,
-                                    disabledBackgroundColor: AppColors
-                                        .accentYellow
-                                        .withValues(alpha: 0.75),
-                                    disabledForegroundColor:
-                                        AppColors.secondaryBlue,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
+                              child: Align(
+                                alignment: const Alignment(0, -0.12),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _PulsingLogo(
+                                      controller: _pulse,
+                                      size: logoSize,
+                                      animate: !_reduceMotion,
                                     ),
-                                  ),
-                                  icon: _checking
-                                      ? const SizedBox(
-                                          width: 20,
-                                          height: 20,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2.4,
-                                            color: AppColors.secondaryBlue,
+                                    const SizedBox(height: 24),
+                                    const _ConnectionIssuePill(),
+                                    const SizedBox(height: 16),
+                                    Text(
+                                      l10n.underMaintenanceTitle,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.w800,
+                                        height: 1.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ConstrainedBox(
+                                      constraints:
+                                          const BoxConstraints(maxWidth: 300),
+                                      child: Text(
+                                        l10n.underMaintenanceMessage,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.88),
+                                          fontSize: 16,
+                                          height: 1.45,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 32),
+                                    SizedBox(
+                                      width: 260,
+                                      height: 48,
+                                      child: ElevatedButton.icon(
+                                        onPressed:
+                                            _checking ? null : () => _retry(),
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 4,
+                                          shadowColor: Colors.black
+                                              .withValues(alpha: 0.28),
+                                          backgroundColor:
+                                              AppColors.accentYellow,
+                                          foregroundColor:
+                                              AppColors.secondaryBlue,
+                                          disabledBackgroundColor: AppColors
+                                              .accentYellow
+                                              .withValues(alpha: 0.75),
+                                          disabledForegroundColor:
+                                              AppColors.secondaryBlue,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(16),
                                           ),
-                                        )
-                                      : const Icon(Icons.refresh_rounded),
-                                  label: Text(
-                                    _checking
-                                        ? l10n.underMaintenanceChecking
-                                        : l10n.retry,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
+                                        ),
+                                        icon: _checking
+                                            ? const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                  strokeWidth: 2.4,
+                                                  color:
+                                                      AppColors.secondaryBlue,
+                                                ),
+                                              )
+                                            : const Icon(Icons.refresh_rounded),
+                                        label: Text(
+                                          _checking
+                                              ? l10n.underMaintenanceChecking
+                                              : l10n.retry,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      lastCheckedLabel,
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: Colors.white
+                                            .withValues(alpha: 0.68),
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    if (_showStillUnavailable) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        l10n.underMaintenanceStillUnavailable,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          color: Colors.white
+                                              .withValues(alpha: 0.82),
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              lastCheckedLabel,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.55),
-                                fontSize: 12,
-                              ),
-                            ),
-                            if (_showStillUnavailable) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                l10n.underMaintenanceStillUnavailable,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.8),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                            const SizedBox(height: 16),
-                            TextButton(
-                              onPressed: _contactSupport,
-                              style: TextButton.styleFrom(
-                                minimumSize: const Size(44, 44),
-                                foregroundColor:
-                                    Colors.white.withValues(alpha: 0.85),
-                              ),
-                              child: Text(
-                                l10n.contactSupport,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  decoration: TextDecoration.underline,
-                                  decorationColor: Colors.white54,
-                                ),
-                              ),
-                            ),
-                          ],
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    OutlinedButton.icon(
+                      onPressed: _contactSupport,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white.withValues(alpha: 0.88),
+                        minimumSize: const Size(44, 44),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.35),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                    );
-                  },
+                      icon: const Icon(Icons.mail_outline_rounded, size: 18),
+                      label: Text(
+                        l10n.contactSupport,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -261,8 +312,8 @@ class _SoftRadialLight extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           gradient: RadialGradient(
-            center: const Alignment(0, -0.22),
-            radius: 0.85,
+            center: const Alignment(0, -0.06),
+            radius: 0.82,
             colors: [
               Colors.white.withValues(alpha: 0.14),
               Colors.transparent,
@@ -274,8 +325,8 @@ class _SoftRadialLight extends StatelessWidget {
   }
 }
 
-class _ServiceStatusPill extends StatelessWidget {
-  const _ServiceStatusPill();
+class _ConnectionIssuePill extends StatelessWidget {
+  const _ConnectionIssuePill();
 
   @override
   Widget build(BuildContext context) {
@@ -284,10 +335,10 @@ class _ServiceStatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: AppColors.accentYellow.withValues(alpha: 0.18),
+        color: AppColors.fireEngineRed.withValues(alpha: 0.18),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: AppColors.accentYellow.withValues(alpha: 0.45),
+          color: AppColors.fireEngineRed.withValues(alpha: 0.45),
         ),
       ),
       child: Row(
@@ -297,15 +348,15 @@ class _ServiceStatusPill extends StatelessWidget {
             width: 8,
             height: 8,
             decoration: const BoxDecoration(
-              color: AppColors.accentYellow,
+              color: AppColors.fireEngineRed,
               shape: BoxShape.circle,
             ),
           ),
           const SizedBox(width: 8),
           Text(
             l10n.underMaintenanceBadge,
-            style: TextStyle(
-              color: AppColors.accentYellow.withValues(alpha: 0.95),
+            style: const TextStyle(
+              color: Color(0xFFFFD0D2),
               fontWeight: FontWeight.w700,
               fontSize: 12,
             ),
@@ -320,78 +371,84 @@ class _PulsingLogo extends StatelessWidget {
   const _PulsingLogo({
     required this.controller,
     required this.size,
+    required this.animate,
   });
 
   final AnimationController controller;
   final double size;
+  final bool animate;
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) {
-        final t = controller.value;
-        final ringScale = 1.0 + (t * 0.28);
-        final ringOpacity = (1 - t) * 0.35;
+    final logo = Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.08),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.35),
+          width: 2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withValues(alpha: 0.16),
+            blurRadius: 24,
+            spreadRadius: 2,
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Image.asset(
+          'assets/ddb.png',
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
 
-        return SizedBox(
-          width: size + 36,
-          height: size + 36,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Transform.scale(
-                scale: ringScale,
-                child: Container(
-                  width: size,
-                  height: size,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: ringOpacity),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.accentYellow.withValues(alpha: 0.18),
-                        blurRadius: 28,
-                        spreadRadius: 4,
+    return SizedBox(
+      width: size + 36,
+      height: size + 36,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (animate)
+            AnimatedBuilder(
+              animation: controller,
+              builder: (context, _) {
+                final t = controller.value;
+                return Transform.scale(
+                  scale: 1.0 + (t * 0.12),
+                  child: Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: (1 - t) * 0.28),
+                        width: 2,
                       ),
-                    ],
+                    ),
                   ),
+                );
+              },
+            )
+          else
+            Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  width: 2,
                 ),
               ),
-              child!,
-            ],
-          ),
-        );
-      },
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.08),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.35),
-            width: 2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.white.withValues(alpha: 0.16),
-              blurRadius: 24,
-              spreadRadius: 2,
             ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Padding(
-          padding: const EdgeInsets.all(18),
-          child: Image.asset(
-            'assets/ddb.png',
-            fit: BoxFit.contain,
-          ),
-        ),
+          logo,
+        ],
       ),
     );
   }

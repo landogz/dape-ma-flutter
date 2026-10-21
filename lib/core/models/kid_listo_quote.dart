@@ -1,3 +1,29 @@
+/// Quote body without a repeated "Kid Listo says:" / "Sabi ni Kid Listo:" prefix.
+String kidListoQuoteBody(String? raw) {
+  var text = (raw ?? '').trim();
+  if (text.isEmpty) return '';
+
+  const prefixes = [
+    'Kid Listo says:',
+    'Kid Listo says',
+    'Kid Listo Says:',
+    'Kid Listo Says',
+    'Sabi ni Kid Listo:',
+    'Sabi ni Kid Listo',
+  ];
+  final lower = text.toLowerCase();
+  for (final prefix in prefixes) {
+    if (lower.startsWith(prefix.toLowerCase())) {
+      text = text.substring(prefix.length).trim();
+      break;
+    }
+  }
+  if (text.startsWith(':')) {
+    text = text.substring(1).trim();
+  }
+  return text;
+}
+
 class KidListoQuote {
   const KidListoQuote({
     required this.id,

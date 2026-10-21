@@ -1440,8 +1440,8 @@ class AppStrings {
   String get anotherKidListoQuote =>
       _t('Another Kid Listo Quote', 'Ibang Quote ni Kid Listo');
   String get kidListoQuoteFallback => _t(
-        'Kid Listo says: Choose courage over comfort. A drug-free life starts with one brave decision today.',
-        'Sabi ni Kid Listo: Piliin ang tapang kaysa ginhawa. Nagsisimula ang drug-free life sa isang matapang na desisyon ngayon.',
+        'Choose courage over comfort. A drug-free life starts with one brave decision today.',
+        'Piliin ang tapang kaysa ginhawa. Nagsisimula ang drug-free life sa isang matapang na desisyon ngayon.',
       );
   String get todaysScripture => _t("Today's quote", 'Quote ngayon');
   String kidListoDayLabel(int day, int total) => _t(
@@ -1456,8 +1456,8 @@ class AppStrings {
   String get openKidListoBible =>
       _t('Open Kid Listo', 'Buksan ang Kid Listo');
   String get dailyVerseFallback => _t(
-        'Kid Listo says: Choose courage over comfort. A drug-free life starts with one brave decision today.',
-        'Sabi ni Kid Listo: Piliin ang tapang kaysa ginhawa. Nagsisimula ang drug-free life sa isang matapang na desisyon ngayon.',
+        'Choose courage over comfort. A drug-free life starts with one brave decision today.',
+        'Piliin ang tapang kaysa ginhawa. Nagsisimula ang drug-free life sa isang matapang na desisyon ngayon.',
       );
   String get dailyVerseReferenceFallback => _t('Kid Listo', 'Kid Listo');
 

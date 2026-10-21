@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/l10n/locale_scope.dart';
+import '../../core/models/kid_listo_quote.dart';
 import '../../core/models/post.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
@@ -80,8 +81,9 @@ class _KidListoWelcomeScreenState extends State<KidListoWelcomeScreen> {
     final cardColor = isDark ? AppColors.cardDark : AppColors.cardLight;
     final titleAccent =
         isDark ? const Color(0xFF7DD3FC) : AppColors.primaryBlue;
-    final displayMessage =
-        _message.isNotEmpty ? _message : l10n.kidListoQuoteFallback;
+    final displayMessage = kidListoQuoteBody(
+      _message.isNotEmpty ? _message : l10n.kidListoQuoteFallback,
+    );
 
     return Scaffold(
       body: Container(
@@ -203,7 +205,7 @@ class _KidListoWelcomeScreenState extends State<KidListoWelcomeScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  l10n.kidListoSaysTitle,
+                                  l10n.todaysScripture,
                                   style: Theme.of(context)
                                       .textTheme
                                       .labelLarge

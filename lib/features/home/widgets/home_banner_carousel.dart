@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/models/kid_listo_quote.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../kid_listo/kid_listo_quote_service.dart';
 import 'continue_learning_card.dart';
@@ -76,28 +77,10 @@ class _HomeBannerCarouselState extends State<HomeBannerCarousel> {
     final quote = await KidListoQuoteService.fetchRandom(locale: locale);
     if (!mounted) return;
     setState(() {
-      _thoughtMessage = _cleanThoughtMessage(quote?.message);
+      final cleaned = kidListoQuoteBody(quote?.message);
+      _thoughtMessage = cleaned.isEmpty ? null : cleaned;
       _loadingThought = false;
     });
-  }
-
-  /// Prefer the inspirational line without a repeated "Kid Listo says:" prefix.
-  String? _cleanThoughtMessage(String? raw) {
-    var text = (raw ?? '').trim();
-    if (text.isEmpty) return null;
-    final prefixes = [
-      'Kid Listo says:',
-      'Kid Listo says',
-      'Sabi ni Kid Listo:',
-      'Sabi ni Kid Listo',
-    ];
-    for (final p in prefixes) {
-      if (text.toLowerCase().startsWith(p.toLowerCase())) {
-        text = text.substring(p.length).trim();
-        break;
-      }
-    }
-    return text.isEmpty ? null : text;
   }
 
   @override

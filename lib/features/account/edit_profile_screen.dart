@@ -360,10 +360,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                   ? NetworkImage(_photoUrl!) as ImageProvider
                                   : null),
                           child: _pickedFile == null && _photoUrl == null
-                              ? const Icon(
+                              ? Icon(
                                   Icons.person_rounded,
                                   size: 42,
-                                  color: AppColors.primaryBlue,
+                                  color: context.iconOnSurface,
                                 )
                               : null,
                         ),

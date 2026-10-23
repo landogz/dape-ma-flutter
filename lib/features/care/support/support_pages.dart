@@ -139,7 +139,7 @@ class _HotlineCard extends StatelessWidget {
                     Row(
                       children: [
                         Icon(Icons.info_outline,
-                            size: 14, color: CareColors.headingOf(context)),
+                            size: 14, color: CareColors.iconOf(context)),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -172,7 +172,7 @@ class _HotlineCard extends StatelessWidget {
                 tooltip: 'Call',
                 onPressed: () => launchCareTel(primaryPhone),
                 icon: Icon(Icons.phone_in_talk_rounded,
-                    color: CareColors.headingOf(context)),
+                    color: CareColors.iconOf(context)),
               ),
           ],
         ),
@@ -284,7 +284,7 @@ class _CounselingCard extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.only(top: 1),
                           child: Icon(Icons.info_outline,
-                              size: 14, color: CareColors.headingOf(context)),
+                              size: 14, color: CareColors.iconOf(context)),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
@@ -307,7 +307,7 @@ class _CounselingCard extends StatelessWidget {
               IconButton(
                 tooltip: 'Open website',
                 onPressed: () => launchCareWeb(item.webUrl!),
-                icon: Icon(Icons.link_rounded, color: CareColors.headingOf(context)),
+                icon: Icon(Icons.link_rounded, color: CareColors.iconOf(context)),
               ),
           ],
         ),
@@ -379,11 +379,11 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                   child: IconButton(
                     onPressed: () => Navigator.pop(ctx),
                     icon: Icon(Icons.close_rounded,
-                        color: CareColors.headingOf(context)),
+                        color: CareColors.iconOf(context)),
                   ),
                 ),
                 Icon(Icons.info_rounded,
-                    size: 56, color: CareColors.headingOf(context)),
+                    size: 56, color: CareColors.iconOf(context)),
                 const SizedBox(height: 12),
                 Text(
                   item.title,
@@ -522,7 +522,7 @@ class _CrisisSupportScreenState extends State<CrisisSupportScreen> {
                           backgroundColor: CareColors.mintOf(context),
                           child: Icon(
                             _iconFor(item.iconKey),
-                            color: CareColors.headingOf(context),
+                            color: CareColors.iconOf(context),
                           ),
                         ),
                         title: Text(
@@ -606,7 +606,7 @@ class _LogoAvatar extends StatelessWidget {
               initial,
               style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: CareColors.headingOf(context),
+                color: CareColors.iconOf(context),
               ),
             )
           : null,

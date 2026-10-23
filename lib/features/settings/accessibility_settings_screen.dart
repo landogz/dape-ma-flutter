@@ -218,7 +218,7 @@ class AccessibilitySettingsScreen extends StatelessWidget {
               l10n.accessibilityFooter,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.primaryBlue.withValues(alpha: 0.65),
+                color: context.textSecondary,
                 fontSize: 12.5,
                 height: 1.45,
               ),

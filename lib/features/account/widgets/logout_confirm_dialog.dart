@@ -27,10 +27,10 @@ Future<bool> showLogoutConfirmDialog(BuildContext context) async {
                   color: ctx.softBrandSurface,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.logout_rounded,
                   size: 42,
-                  color: AppColors.primaryBlue,
+                  color: ctx.iconOnSurface,
                 ),
               ),
               const SizedBox(height: 18),

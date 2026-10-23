@@ -223,18 +223,18 @@ class _CareBitsCheckScreenState extends State<CareBitsCheckScreen> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.swipe_rounded,
                                       size: 14,
-                                      color: AppColors.mediumElectricBlue,
+                                      color: context.iconOnSurface,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       l10n.careBitsSwipeHint,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 11,
                                         fontWeight: FontWeight.w700,
-                                        color: AppColors.mediumElectricBlue,
+                                        color: context.iconOnSurface,
                                       ),
                                     ),
                                   ],
@@ -371,10 +371,10 @@ class _IntroCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          Icon(
+            Icon(
             Icons.emoji_emotions_rounded,
             size: 64,
-            color: CareColors.headingOf(context),
+            color: CareColors.iconOf(context),
           ),
         ],
       ),
@@ -393,7 +393,7 @@ class _RememberRow extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          Icon(Icons.check_circle, size: 16, color: CareColors.headingOf(context)),
+          Icon(Icons.check_circle, size: 16, color: CareColors.iconOf(context)),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -553,8 +553,8 @@ class _LikertList extends StatelessWidget {
                 fontSize: 14,
                 fontWeight: selected == i ? FontWeight.w800 : FontWeight.w600,
                 color: selected == i
-                    ? CareColors.tealDark
-                    : CareColors.textOf(context).withValues(alpha: 0.75),
+                    ? CareColors.iconOf(context)
+                    : CareColors.textOf(context),
               ),
             ),
           ),
@@ -625,7 +625,9 @@ class _LikertButtons extends StatelessWidget {
           child: FilledButton(
             onPressed: () => onSelect(i),
             style: FilledButton.styleFrom(
-              backgroundColor: active ? CareColors.tealDark : CareColors.teal,
+              backgroundColor: active
+                  ? CareColors.primaryDark
+                  : CareColors.teal,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),

@@ -41,6 +41,8 @@ class HopeColors {
   static Color headingOf(BuildContext context) =>
       context.isDarkMode ? context.textPrimary : purple;
 
+  static Color iconOf(BuildContext context) => context.iconOnSurface;
+
   // Preferred brand aliases
   static const primary = purple;
   static const primaryDark = purpleDark;

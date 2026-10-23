@@ -311,7 +311,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFD1D5DB),
+                  color: context.borderSubtle,
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -328,11 +328,11 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
                       children: [
                         Text(
                           l10n.journalStepOf(_step + 1, _totalSteps),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 1.2,
-                            color: Color(0xFF6B7280),
+                            color: context.textSecondary,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -381,10 +381,10 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
                     child: FilledButton(
                       onPressed: (_saving || _optimizingImage) ? null : _nextOrSave,
                       style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.secondaryBlue,
+                        backgroundColor: AppColors.primaryBlue,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor:
-                            AppColors.secondaryBlue.withValues(alpha: 0.5),
+                            AppColors.primaryBlue.withValues(alpha: 0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -486,7 +486,7 @@ class _CircleIconButton extends StatelessWidget {
         child: SizedBox(
           width: 44,
           height: 44,
-          child: Icon(icon, size: 18, color: AppColors.primaryBlue),
+          child: Icon(icon, size: 18, color: context.iconOnSurface),
         ),
       ),
     );
@@ -566,7 +566,7 @@ class _SkyStep extends StatelessWidget {
                           color: opt.accent.withValues(alpha: 0.22),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Icon(opt.icon, color: AppColors.primaryBlue),
+                        child: Icon(opt.icon, color: context.iconOnSurface),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -575,16 +575,14 @@ class _SkyStep extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? context.brandPrimary
-                                : context.textPrimary,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),
                       if (isSelected)
-                        const Icon(
+                        Icon(
                           Icons.check_circle,
-                          color: AppColors.primaryBlue,
+                          color: context.iconOnSurface,
                         ),
                     ],
                   ),
@@ -809,7 +807,7 @@ class _ImpactStep extends StatelessWidget {
                     children: [
                       Icon(
                         opt.icon,
-                        color: AppColors.primaryBlue,
+                        color: context.iconOnSurface,
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -818,16 +816,14 @@ class _ImpactStep extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? context.brandPrimary
-                                : context.textPrimary,
+                            color: context.textPrimary,
                           ),
                         ),
                       ),
                       if (isSelected)
-                        const Icon(
+                        Icon(
                           Icons.check_circle,
-                          color: AppColors.primaryBlue,
+                          color: context.iconOnSurface,
                         ),
                     ],
                   ),
@@ -941,7 +937,7 @@ class _NotesStep extends StatelessWidget {
           decoration: InputDecoration(
             hintText: gratitudeHint,
             filled: true,
-            fillColor: const Color(0xFFFFFBEB),
+            fillColor: context.pastelPanel(const Color(0xFFFFFBEB)),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
@@ -1052,7 +1048,7 @@ class _NotesStep extends StatelessWidget {
                           Icon(
                             Icons.add_a_photo_outlined,
                             size: 28,
-                            color: AppColors.primaryBlue,
+                            color: context.iconOnSurface,
                           ),
                           const SizedBox(height: 8),
                           Text(

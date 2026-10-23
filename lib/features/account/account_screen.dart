@@ -422,7 +422,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     child: Icon(
                       Icons.photo_camera_rounded,
                       size: 14,
-                      color: AppColors.nileBlue,
+                      color: context.iconOnSurface,
                     ),
                   ),
                 ),
@@ -900,8 +900,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                         _badgesPhase2Locked
                                             ? l10n.comingSoon
                                             : l10n.seeAll,
-                                        style: const TextStyle(
-                                          color: AppColors.primaryBlue,
+                                        style: TextStyle(
+                                          color: context.iconOnSurface,
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -1010,8 +1010,8 @@ class _AccountScreenState extends State<AccountScreen> {
                                         _open(const ForgotPasswordScreen()),
                                     child: Text(
                                       l10n.forgotPassword,
-                                      style: const TextStyle(
-                                        color: AppColors.primaryBlue,
+                                        style: TextStyle(
+                                        color: context.iconOnSurface,
                                       ),
                                     ),
                                   ),

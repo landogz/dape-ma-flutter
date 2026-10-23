@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
-import '../../../core/theme/app_colors.dart';
 import 'home_header.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -97,9 +96,9 @@ class WhatsNewCard extends StatelessWidget {
                     HomeAssets.whatsNewArt,
                     fit: BoxFit.contain,
                     alignment: Alignment.centerRight,
-                    errorBuilder: (context, error, stackTrace) => const Icon(
+                    errorBuilder: (context, error, stackTrace) => Icon(
                       Icons.campaign_rounded,
-                      color: AppColors.primaryBlue,
+                      color: context.iconOnSurface,
                       size: 56,
                     ),
                   ),
@@ -146,7 +145,7 @@ class _WhatsNewRow extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.star_rounded,
                   size: 14,
-                  color: AppColors.primaryBlue,
+                  color: context.iconOnSurface,
                 ),
               ),
             ),

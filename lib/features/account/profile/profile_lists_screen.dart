@@ -144,8 +144,7 @@ class CertificatesScreen extends StatelessWidget {
                                   ),
                                   Icon(
                                     Icons.info_outline_rounded,
-                                    color: AppColors.primaryBlue
-                                        .withValues(alpha: 0.8),
+                                    color: context.iconOnSurface,
                                   ),
                                 ],
                               ),

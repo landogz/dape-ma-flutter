@@ -132,8 +132,8 @@ class _PostCardState extends State<PostCard> {
                     backgroundColor: AppColors.primaryBlue.withOpacity(0.2),
                     child: Text(
                       initial,
-                      style: const TextStyle(
-                        color: AppColors.primaryBlue,
+                      style: TextStyle(
+                        color: context.iconOnSurface,
                         fontWeight: FontWeight.bold,
                         fontSize: 18,
                       ),
@@ -167,7 +167,7 @@ class _PostCardState extends State<PostCard> {
                     icon: Icon(
                       isBookmarked ? Icons.bookmark : Icons.bookmark_border,
                     ),
-                    color: AppColors.primaryBlue,
+                    color: context.iconOnSurface,
                     onPressed: onBookmarkTap,
                   ),
                   IconButton(
@@ -217,7 +217,7 @@ class _PostCardState extends State<PostCard> {
                   child: Text(
                     post.categoryName,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primaryBlue,
+                          color: context.iconOnSurface,
                           fontWeight: FontWeight.w600,
                         ),
                   ),

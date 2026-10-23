@@ -218,7 +218,7 @@ class _GuestAuthCard extends StatelessWidget {
           Text(
             l10n.welcomeBody,
             style: TextStyle(
-              color: AppColors.primaryBlue.withValues(alpha: 0.85),
+              color: context.textSecondary,
               fontSize: 13.5,
               height: 1.4,
             ),
@@ -258,7 +258,7 @@ class _GuestAuthCard extends StatelessWidget {
             onPressed: onForgot,
             child: Text(
               l10n.forgotPassword,
-              style: const TextStyle(color: AppColors.primaryBlue),
+              style: TextStyle(color: context.iconOnSurface),
             ),
           ),
         ],

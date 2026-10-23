@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
-import '../../../core/theme/app_colors.dart';
 import 'home_header.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -123,9 +122,9 @@ class ContinueLearningCard extends StatelessWidget {
                       fit: BoxFit.contain,
                       alignment: Alignment.centerRight,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(
+                          Icon(
                         Icons.menu_book_rounded,
-                        color: AppColors.primaryBlue,
+                        color: context.iconOnSurface,
                         size: 56,
                       ),
                     ),

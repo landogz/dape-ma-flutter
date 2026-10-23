@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_theme_colors.dart';
 
 class DapeServiceTiles extends StatelessWidget {
   const DapeServiceTiles({
@@ -121,9 +122,14 @@ class _ServiceTileState extends State<_ServiceTile> {
             constraints: const BoxConstraints(minHeight: 118),
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
             decoration: BoxDecoration(
-              color: widget.background,
+              color: context.pastelPanel(widget.background),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: widget.border, width: 1.2),
+              border: Border.all(
+                color: context.isDarkMode
+                    ? context.borderSubtle
+                    : widget.border,
+                width: 1.2,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -136,7 +142,9 @@ class _ServiceTileState extends State<_ServiceTile> {
                     fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) => Icon(
                       widget.fallbackIcon,
-                      color: widget.foreground,
+                      color: context.isDarkMode
+                          ? context.textPrimary
+                          : widget.foreground,
                       size: 36,
                     ),
                   ),
@@ -148,7 +156,9 @@ class _ServiceTileState extends State<_ServiceTile> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: widget.foreground,
+                    color: context.isDarkMode
+                        ? context.textPrimary
+                        : widget.foreground,
                     fontWeight: FontWeight.w800,
                     fontSize: 13,
                     height: 1.2,

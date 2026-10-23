@@ -39,9 +39,9 @@ class LanguagePickerCard extends StatelessWidget {
                   color: context.softBrandSurface,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.translate_rounded,
-                  color: AppColors.primaryBlue,
+                  color: context.iconOnSurface,
                 ),
               ),
               const SizedBox(width: 12),
@@ -125,9 +125,9 @@ class LanguagePickerCard extends StatelessWidget {
                           ),
                         ),
                         if (selected)
-                          const Icon(
+                          Icon(
                             Icons.check_circle_rounded,
-                            color: AppColors.primaryBlue,
+                            color: context.iconOnSurface,
                             size: 22,
                           ),
                       ],

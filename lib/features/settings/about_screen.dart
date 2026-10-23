@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/l10n/locale_scope.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -65,7 +64,7 @@ class _AboutScreenState extends State<AboutScreen> {
               l10n.aboutTagline,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.primaryBlue.withValues(alpha: 0.85),
+                color: context.textSecondary,
                 fontSize: 13.5,
                 height: 1.4,
               ),
@@ -89,7 +88,7 @@ class _AboutScreenState extends State<AboutScreen> {
               l10n.aboutCopyright,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: AppColors.primaryBlue.withValues(alpha: 0.65),
+                color: context.textSecondary,
                 fontSize: 12.5,
               ),
             ),
@@ -139,7 +138,7 @@ class _AboutRow extends StatelessWidget {
               value,
               textAlign: TextAlign.right,
               style: TextStyle(
-                color: AppColors.primaryBlue.withValues(alpha: 0.8),
+                color: context.textSecondary,
                 fontSize: 14,
               ),
             ),

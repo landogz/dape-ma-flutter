@@ -67,6 +67,8 @@ class CareColors {
   static Color headingOf(BuildContext context) =>
       context.isDarkMode ? context.textPrimary : heading;
 
+  static Color iconOf(BuildContext context) => context.iconOnSurface;
+
   static Color mintSoftOf(BuildContext context) =>
       context.isDarkMode ? context.mutedSurface : mintSoft;
 

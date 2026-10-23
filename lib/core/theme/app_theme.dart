@@ -141,6 +141,18 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
         ),
       ),
     ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        backgroundColor: filledPrimary,
+        foregroundColor: Colors.white,
+        disabledForegroundColor: Colors.white.withValues(alpha: 0.7),
+        textStyle: AppTypography.body(fontSize: 14).copyWith(
+          fontWeight: FontWeight.w600,
+          height: 1.3,
+          color: Colors.white,
+        ),
+      ),
+    ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: filledPrimary,
       foregroundColor: Colors.white,
@@ -194,6 +206,8 @@ ThemeData buildDarkTheme({bool highContrast = false}) {
       onPrimary: Colors.white,
       onSecondary: Colors.white,
       onError: Colors.white,
+      primaryContainer: filledPrimary,
+      onPrimaryContainer: Colors.white,
     ),
   );
 }

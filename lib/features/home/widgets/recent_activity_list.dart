@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
 class HomeActivityRow {
@@ -51,14 +50,14 @@ class RecentActivityList extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
-              color: const Color(0xFFEEF4FF),
+              color: context.pastelPanel(const Color(0xFFEEF4FF)),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Text(
               l10n.homeActivityEmptyBody,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF64748B),
+                color: context.textSecondary,
               ),
             ),
           )
@@ -67,7 +66,7 @@ class RecentActivityList extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
               child: Material(
-                color: const Color(0xFFEEF4FF),
+                color: context.pastelPanel(const Color(0xFFEEF4FF)),
                 borderRadius: BorderRadius.circular(14),
                 child: InkWell(
                   onTap: () => onTap(item),
@@ -84,8 +83,8 @@ class RecentActivityList extends StatelessWidget {
                           height: 36,
                           decoration: BoxDecoration(
                             color: item.isLesson
-                                ? const Color(0xFFDCFCE7)
-                                : Colors.white,
+                                ? context.pastelPanel(const Color(0xFFDCFCE7))
+                                : context.cardBackground,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -94,7 +93,7 @@ class RecentActivityList extends StatelessWidget {
                                 : Icons.menu_book_outlined,
                             color: item.isLesson
                                 ? const Color(0xFF16A34A)
-                                : AppColors.primaryBlue,
+                                : context.iconOnSurface,
                             size: 20,
                           ),
                         ),
@@ -130,7 +129,7 @@ class RecentActivityList extends StatelessWidget {
                         ),
                         Icon(
                           Icons.chevron_right_rounded,
-                          color: Colors.grey.shade400,
+                          color: context.textSecondary,
                         ),
                       ],
                     ),

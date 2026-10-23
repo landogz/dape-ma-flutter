@@ -20,6 +20,10 @@ extension AppThemeColors on BuildContext {
 
   Color get brandSecondary => AppColors.nileBlue;
 
+  /// Icons and selected labels on dark cards. Brand navy is unreadable there.
+  Color get iconOnSurface =>
+      isDarkMode ? AppColors.textPrimaryDark : AppColors.mediumElectricBlue;
+
   Color get brandAccent => AppColors.brightGold;
 
   Color get brandDanger => AppColors.fireEngineRed;

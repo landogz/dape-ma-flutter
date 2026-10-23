@@ -274,7 +274,7 @@ class ProfileQuickLinkTile extends StatelessWidget {
                   color: AppColors.primaryBlue.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: Icon(icon, color: AppColors.primaryBlue, size: 20),
+                child: Icon(icon, color: context.iconOnSurface, size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(

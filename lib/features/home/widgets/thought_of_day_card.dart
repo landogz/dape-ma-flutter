@@ -96,9 +96,9 @@ class ThoughtOfDayBanner extends StatelessWidget {
                       fit: BoxFit.contain,
                       alignment: Alignment.centerRight,
                       errorBuilder: (context, error, stackTrace) =>
-                          const Icon(
+                          Icon(
                         Icons.favorite_rounded,
-                        color: AppColors.primaryBlue,
+                        color: context.iconOnSurface,
                         size: 56,
                       ),
                     ),

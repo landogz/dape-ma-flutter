@@ -96,7 +96,16 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primaryBlue : const Color(0xFF94A3B8);
+    final isDark = context.isDarkMode;
+    final idleColor =
+        isDark ? const Color(0xFFCBD5E1) : const Color(0xFF94A3B8);
+    final selectedLabel =
+        isDark ? const Color(0xFF7DD3FC) : AppColors.primaryBlue;
+    final iconColor = selected
+        ? (isDark ? Colors.white : AppColors.primaryBlue)
+        : idleColor;
+    final labelColor = selected ? selectedLabel : idleColor;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(24),
@@ -110,13 +119,15 @@ class _NavItem extends StatelessWidget {
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: selected
-                    ? AppColors.primaryBlue.withValues(alpha: 0.12)
+                    ? (isDark
+                        ? AppColors.primaryBlue
+                        : AppColors.primaryBlue.withValues(alpha: 0.12))
                     : Colors.transparent,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 selected ? activeIcon : icon,
-                color: color,
+                color: iconColor,
                 size: 22,
               ),
             ),
@@ -126,7 +137,7 @@ class _NavItem extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: color,
+                color: labelColor,
                 fontSize: 10,
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               ),

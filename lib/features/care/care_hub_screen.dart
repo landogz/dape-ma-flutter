@@ -508,8 +508,8 @@ class _CalmCornerCard extends StatelessWidget {
                           child: Container(
                             width: 36,
                             height: 36,
-                            decoration: BoxDecoration(
-                              color: CareColors.headingOf(context),
+                            decoration: const BoxDecoration(
+                              color: CareColors.primary,
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(

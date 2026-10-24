@@ -413,7 +413,7 @@ class AuthConsentChecks extends StatelessWidget {
         if (!(acceptedTerms &&
             acceptedPrivacyPolicy &&
             acceptedPrivacyNotice)) ...[
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             l10n.consentRequired,
             style: TextStyle(
@@ -454,7 +454,7 @@ class _ConsentRow extends StatelessWidget {
       color: context.heading,
       fontWeight: FontWeight.w700,
       fontSize: 13,
-      height: 1.4,
+      height: 1.25,
       decoration: TextDecoration.underline,
       decorationColor: AppColors.mediumElectricBlue,
     );
@@ -464,62 +464,69 @@ class _ConsentRow extends StatelessWidget {
       child: InkWell(
         onTap: enabled ? () => onChanged(!value) : null,
         borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 44,
-                height: 44,
-                child: IgnorePointer(
-                  child: Checkbox(
-                    value: value,
-                    onChanged: enabled ? (_) {} : null,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    visualDensity: VisualDensity.compact,
-                    side: BorderSide(
-                      color: context.isDarkMode
-                          ? context.textSecondary
-                          : AppColors.nileBlue,
-                      width: 1.6,
-                    ),
-                    fillColor: WidgetStateProperty.resolveWith((states) {
-                      if (states.contains(WidgetState.selected)) {
-                        return AppColors.mediumElectricBlue;
-                      }
-                      return Colors.transparent;
-                    }),
-                    checkColor: Colors.white,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 12, right: 4, bottom: 8),
-                  child: Text.rich(
-                    TextSpan(
-                      style: TextStyle(
-                        color: AuthTokens.mutedOf(context),
-                        fontSize: 13,
-                        height: 1.4,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 36),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 1),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: IgnorePointer(
+                    child: Checkbox(
+                      value: value,
+                      onChanged: enabled ? (_) {} : null,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: const VisualDensity(
+                        horizontal: -4,
+                        vertical: -4,
                       ),
-                      children: [
-                        TextSpan(text: prefix),
-                        WidgetSpan(
-                          alignment: PlaceholderAlignment.baseline,
-                          baseline: TextBaseline.alphabetic,
-                          child: GestureDetector(
-                            onTap: onOpenDocument,
-                            child: Text(documentLabel, style: linkStyle),
-                          ),
-                        ),
-                      ],
+                      side: BorderSide(
+                        color: context.isDarkMode
+                            ? context.textSecondary
+                            : AppColors.nileBlue,
+                        width: 1.6,
+                      ),
+                      fillColor: WidgetStateProperty.resolveWith((states) {
+                        if (states.contains(WidgetState.selected)) {
+                          return AppColors.mediumElectricBlue;
+                        }
+                        return Colors.transparent;
+                      }),
+                      checkColor: Colors.white,
                     ),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 4),
+                    child: Text.rich(
+                      TextSpan(
+                        style: TextStyle(
+                          color: AuthTokens.mutedOf(context),
+                          fontSize: 13,
+                          height: 1.25,
+                        ),
+                        children: [
+                          TextSpan(text: prefix),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.baseline,
+                            baseline: TextBaseline.alphabetic,
+                            child: GestureDetector(
+                              onTap: onOpenDocument,
+                              child: Text(documentLabel, style: linkStyle),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

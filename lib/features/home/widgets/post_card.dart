@@ -170,11 +170,6 @@ class _PostCardState extends State<PostCard> {
                     color: context.iconOnSurface,
                     onPressed: onBookmarkTap,
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.keyboard_arrow_down),
-                    color: context.textSecondary,
-                    onPressed: () {},
-                  ),
                 ],
               ),
             ),

@@ -1057,13 +1057,6 @@ class _AccountScreenState extends State<AccountScreen> {
                                   label: l10n.myGains,
                                   onTap: _showFeatureUnavailable,
                                 ),
-                                const SizedBox(height: 8),
-                                ProfileQuickLinkTile(
-                                  icon: Icons.settings_rounded,
-                                  label: l10n.dapeSettings,
-                                  onTap: () =>
-                                      _open(const SettingsHubScreen()),
-                                ),
                                 if (!_loggedIn) ...[
                                   const SizedBox(height: 20),
                                   TextButton(

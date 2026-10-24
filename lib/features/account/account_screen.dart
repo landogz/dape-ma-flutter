@@ -744,20 +744,22 @@ class _AccountScreenState extends State<AccountScreen> {
                                           ),
                                         ),
                                       ],
-                                      const SizedBox(height: 16),
-                                      ProfileSetupCta(
-                                        percent: completenessPct,
-                                        completeLabel:
-                                            l10n.profileCompleteLabel,
-                                        percentLabel:
-                                            l10n.profilePercentComplete(
-                                          completenessPct,
+                                      if (completenessPct < 100) ...[
+                                        const SizedBox(height: 16),
+                                        ProfileSetupCta(
+                                          percent: completenessPct,
+                                          completeLabel:
+                                              l10n.profileCompleteLabel,
+                                          percentLabel:
+                                              l10n.profilePercentComplete(
+                                            completenessPct,
+                                          ),
+                                          finishLabel: l10n.profileFinishSetup,
+                                          onTap: () => _open(
+                                            const EditProfileScreen(),
+                                          ),
                                         ),
-                                        finishLabel: l10n.profileFinishSetup,
-                                        onTap: () => _open(
-                                          const EditProfileScreen(),
-                                        ),
-                                      ),
+                                      ],
                                       if (_needsKidListoSetup &&
                                           completenessPct < 100) ...[
                                         const SizedBox(height: 12),

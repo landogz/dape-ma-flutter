@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 class Endpoints {
   /// Set to `true` only when using local Laravel on port 8000 (simulator/emulator).
-  static const bool useLocalApi = false;
+  static const bool useLocalApi = true;
 
   static const String _productionBaseUrl =
       'https://dapemade.ddb.gov.ph/api/v1';
@@ -88,6 +88,7 @@ class Endpoints {
   static const careSupportResources = '/care-support/resources';
   static const legalPages = '/legal-pages';
   static const appOptions = '/app-options';
+  static const translations = '/translations';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';

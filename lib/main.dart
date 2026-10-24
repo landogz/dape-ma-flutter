@@ -8,6 +8,7 @@ import 'core/l10n/app_locale.dart';
 import 'core/options/app_option_catalog.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/l10n/locale_scope.dart';
+import 'core/l10n/translation_catalog.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/deep_link_service.dart';
 import 'features/push/push_notification_service.dart';
@@ -43,6 +44,7 @@ Future<void> _safeStartup() async {
   );
   await withTimeout(DeepLinkService.init(), 'deep links');
   await withTimeout(AppOptionCatalog.prefetch(), 'app options');
+  await withTimeout(TranslationCatalog.prefetch(), 'translations');
 }
 
 class DapeMaApp extends StatelessWidget {
@@ -54,6 +56,7 @@ class DapeMaApp extends StatelessWidget {
       listenable: Listenable.merge([
         LocaleController.instance,
         AccessibilityController.instance,
+        TranslationCatalog.instance,
       ]),
       builder: (context, _) {
         final localeController = LocaleController.instance;

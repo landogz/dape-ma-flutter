@@ -3,6 +3,7 @@ class ProfileSummary {
     required this.name,
     required this.photoUrl,
     required this.memberSinceRaw,
+    required this.interests,
     required this.isChampion,
     required this.lessonsCompleted,
     required this.articlesRead,
@@ -20,6 +21,7 @@ class ProfileSummary {
   final String name;
   final String? photoUrl;
   final String? memberSinceRaw;
+  final List<String> interests;
   final bool isChampion;
   final int lessonsCompleted;
   final int articlesRead;
@@ -42,6 +44,10 @@ class ProfileSummary {
       name: (user['name'] as String?)?.trim() ?? '',
       photoUrl: user['profile_image_url'] as String?,
       memberSinceRaw: user['created_at'] as String?,
+      interests: ((user['interests'] as List?) ?? const [])
+          .map((value) => value?.toString().trim() ?? '')
+          .where((value) => value.isNotEmpty)
+          .toList(),
       isChampion: user['is_champion'] == true,
       lessonsCompleted: _asInt(stats['lessons_completed']),
       articlesRead: _asInt(stats['articles_read']),

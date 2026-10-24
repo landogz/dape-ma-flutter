@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
+import '../../core/l10n/app_strings.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
@@ -16,11 +17,13 @@ import '../../core/utils/api_url.dart';
 import '../auth/forgot_password_screen.dart';
 import '../auth/login_screen.dart';
 import '../auth/register_screen.dart';
+import '../auth/registration/registration_constants.dart';
 import '../bookmarks/bookmarks_screen.dart';
 import '../diary/diary_list_screen.dart';
 import '../post_detail/post_detail_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../settings/settings_hub_screen.dart';
+import 'edit_profile/interests_picker_sheet.dart';
 import 'edit_profile_screen.dart';
 import 'profile/profile_completeness.dart';
 import 'profile/profile_lists_screen.dart';
@@ -50,6 +53,7 @@ class _AccountScreenState extends State<AccountScreen> {
   String _name = '';
   String? _photoUrl;
   String? _memberSince;
+  List<String> _interests = const [];
   bool _isChampion = false;
   int _lessons = 0;
   int _articles = 0;
@@ -84,6 +88,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _name = '';
         _photoUrl = null;
         _memberSince = null;
+        _interests = const [];
         _isChampion = false;
         _lessons = 0;
         _articles = 0;
@@ -116,6 +121,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _photoUrl = ApiUrl.resolve(summary.photoUrl);
         _pickedFile = null;
         _memberSince = memberSince;
+        _interests = summary.interests;
         _isChampion = summary.isChampion;
         _lessons = summary.lessonsCompleted;
         _articles = summary.articlesRead;
@@ -296,6 +302,36 @@ class _AccountScreenState extends State<AccountScreen> {
         .replaceAll(RegExp(r'[^a-z0-9]'), '');
     if (base.isEmpty) return '@member';
     return '@$base';
+  }
+
+  List<_InterestBadgeData> _interestBadges(AppStrings l10n) {
+    final byKey = {
+      for (final interest in RegistrationConstants.interests)
+        interest.key: interest,
+    };
+    final badges = <_InterestBadgeData>[];
+    for (final raw in _interests) {
+      final preset = byKey[raw];
+      if (preset != null) {
+        badges.add(
+          _InterestBadgeData(
+            icon: preset.icon,
+            label: l10n.regInterestLabel(raw),
+          ),
+        );
+        continue;
+      }
+      if (raw.startsWith(InterestsPickerSheet.otherPrefix)) {
+        final label = raw
+            .substring(InterestsPickerSheet.otherPrefix.length)
+            .trim();
+        if (label.isEmpty) continue;
+        badges.add(
+          _InterestBadgeData(icon: Icons.interests_rounded, label: label),
+        );
+      }
+    }
+    return badges;
   }
 
   /// Name + photo only, so a new account can finish setup on Profile.
@@ -650,6 +686,24 @@ class _AccountScreenState extends State<AccountScreen> {
                                           height: 1.3,
                                         ),
                                       ),
+                                      if (_interestBadges(l10n).isNotEmpty) ...[
+                                        const SizedBox(height: 10),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                          ),
+                                          child: Wrap(
+                                            alignment: WrapAlignment.center,
+                                            spacing: 8,
+                                            runSpacing: 8,
+                                            children: [
+                                              for (final badge
+                                                  in _interestBadges(l10n))
+                                                _InterestBadge(badge: badge),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                       if (_isChampion) ...[
                                         const SizedBox(height: 10),
                                         Container(
@@ -1080,6 +1134,50 @@ class _AccountScreenState extends State<AccountScreen> {
                 ],
               ),
             ),
+    );
+  }
+}
+
+class _InterestBadgeData {
+  const _InterestBadgeData({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+}
+
+class _InterestBadge extends StatelessWidget {
+  const _InterestBadge({required this.badge});
+
+  final _InterestBadgeData badge;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.9),
+          width: 1.4,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(badge.icon, color: AppColors.brightGold, size: 16),
+          const SizedBox(width: 6),
+          Text(
+            badge.label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+              height: 1.2,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

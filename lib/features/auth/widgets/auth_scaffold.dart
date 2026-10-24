@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../settings/privacy_notice_screen.dart';
 import '../../settings/privacy_policy_screen.dart';
 import '../../settings/terms_of_use_screen.dart';
 import 'auth_decor.dart';
@@ -336,79 +338,191 @@ class AuthSocialCircle extends StatelessWidget {
   }
 }
 
-/// Terms + Privacy line for registration.
-class AuthLegalLine extends StatelessWidget {
-  const AuthLegalLine({
+/// Required consent checkboxes for registration.
+class AuthConsentChecks extends StatelessWidget {
+  const AuthConsentChecks({
     super.key,
-    required this.prefix,
-    required this.termsLabel,
-    required this.andLabel,
-    required this.privacyLabel,
+    required this.acceptedTerms,
+    required this.acceptedPrivacyPolicy,
+    required this.acceptedPrivacyNotice,
+    required this.onAcceptedTermsChanged,
+    required this.onAcceptedPrivacyPolicyChanged,
+    required this.onAcceptedPrivacyNoticeChanged,
+    this.enabled = true,
+    this.showError = false,
   });
 
-  final String prefix;
-  final String termsLabel;
-  final String andLabel;
-  final String privacyLabel;
+  final bool acceptedTerms;
+  final bool acceptedPrivacyPolicy;
+  final bool acceptedPrivacyNotice;
+  final ValueChanged<bool> onAcceptedTermsChanged;
+  final ValueChanged<bool> onAcceptedPrivacyPolicyChanged;
+  final ValueChanged<bool> onAcceptedPrivacyNoticeChanged;
+  final bool enabled;
+  final bool showError;
 
   @override
   Widget build(BuildContext context) {
-    TextStyle linkStyle() => TextStyle(
-          color: context.heading,
-          fontWeight: FontWeight.w600,
-          fontSize: 12,
-          height: 1.45,
-        );
+    final l10n = context.l10n;
 
-    return Wrap(
-      alignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          prefix,
-          style: TextStyle(
-            color: AuthTokens.mutedOf(context),
-            fontSize: 12,
-            height: 1.45,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
+        _ConsentRow(
+          value: acceptedTerms,
+          enabled: enabled,
+          prefix: l10n.consentAgreePrefix,
+          documentLabel: l10n.termsOfUse,
+          onChanged: onAcceptedTermsChanged,
+          onOpenDocument: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const TermsOfUseScreen(),
               ),
             );
           },
-          child: Text(termsLabel, style: linkStyle()),
         ),
-        Text(
-          andLabel,
-          style: TextStyle(
-            color: AuthTokens.mutedOf(context),
-            fontSize: 12,
-            height: 1.45,
-          ),
-        ),
-        GestureDetector(
-          onTap: () {
+        _ConsentRow(
+          value: acceptedPrivacyPolicy,
+          enabled: enabled,
+          prefix: l10n.consentAgreePrefix,
+          documentLabel: l10n.privacyPolicy,
+          onChanged: onAcceptedPrivacyPolicyChanged,
+          onOpenDocument: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const PrivacyPolicyScreen(),
               ),
             );
           },
-          child: Text(privacyLabel, style: linkStyle()),
         ),
-        Text(
-          '.',
-          style: TextStyle(
-            color: AuthTokens.mutedOf(context),
-            fontSize: 12,
-            height: 1.45,
+        _ConsentRow(
+          value: acceptedPrivacyNotice,
+          enabled: enabled,
+          prefix: l10n.consentAcceptPrefix,
+          documentLabel: l10n.privacyNotice,
+          onChanged: onAcceptedPrivacyNoticeChanged,
+          onOpenDocument: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const PrivacyNoticeScreen(),
+              ),
+            );
+          },
+        ),
+        if (!(acceptedTerms &&
+            acceptedPrivacyPolicy &&
+            acceptedPrivacyNotice)) ...[
+          const SizedBox(height: 8),
+          Text(
+            l10n.consentRequired,
+            style: TextStyle(
+              color: showError
+                  ? AppColors.fireEngineRed
+                  : AuthTokens.mutedOf(context),
+              fontSize: 12,
+              height: 1.4,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _ConsentRow extends StatelessWidget {
+  const _ConsentRow({
+    required this.value,
+    required this.enabled,
+    required this.prefix,
+    required this.documentLabel,
+    required this.onChanged,
+    required this.onOpenDocument,
+  });
+
+  final bool value;
+  final bool enabled;
+  final String prefix;
+  final String documentLabel;
+  final ValueChanged<bool> onChanged;
+  final VoidCallback onOpenDocument;
+
+  @override
+  Widget build(BuildContext context) {
+    final linkStyle = TextStyle(
+      color: context.heading,
+      fontWeight: FontWeight.w700,
+      fontSize: 13,
+      height: 1.4,
+      decoration: TextDecoration.underline,
+      decorationColor: AppColors.mediumElectricBlue,
+    );
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: enabled ? () => onChanged(!value) : null,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 44,
+                height: 44,
+                child: IgnorePointer(
+                  child: Checkbox(
+                    value: value,
+                    onChanged: enabled ? (_) {} : null,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+                    side: BorderSide(
+                      color: context.isDarkMode
+                          ? context.textSecondary
+                          : AppColors.nileBlue,
+                      width: 1.6,
+                    ),
+                    fillColor: WidgetStateProperty.resolveWith((states) {
+                      if (states.contains(WidgetState.selected)) {
+                        return AppColors.mediumElectricBlue;
+                      }
+                      return Colors.transparent;
+                    }),
+                    checkColor: Colors.white,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 12, right: 4, bottom: 8),
+                  child: Text.rich(
+                    TextSpan(
+                      style: TextStyle(
+                        color: AuthTokens.mutedOf(context),
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                      children: [
+                        TextSpan(text: prefix),
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.baseline,
+                          baseline: TextBaseline.alphabetic,
+                          child: GestureDetector(
+                            onTap: onOpenDocument,
+                            child: Text(documentLabel, style: linkStyle),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-      ],
+      ),
     );
   }
 }

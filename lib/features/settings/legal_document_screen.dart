@@ -15,6 +15,7 @@ class LegalDocumentScreen extends StatefulWidget {
     required this.fallbackBody,
     required this.icon,
     required this.iconBackground,
+    this.iconColor = Colors.white,
   });
 
   final String slug;
@@ -23,6 +24,7 @@ class LegalDocumentScreen extends StatefulWidget {
   final String fallbackBody;
   final IconData icon;
   final Color iconBackground;
+  final Color iconColor;
 
   @override
   State<LegalDocumentScreen> createState() => _LegalDocumentScreenState();
@@ -81,9 +83,11 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
                     title: _title,
                     subtitle: _intro,
                     iconBackground: widget.iconBackground,
+                    iconColor: widget.iconColor,
                   ),
                   const SizedBox(height: 24),
                   Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: context.softBrandSurface,
@@ -92,9 +96,9 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
                         color: AppColors.primaryBlue.withValues(alpha: 0.25),
                       ),
                     ),
-                    child: Text(
+                    child: SelectableText(
                       _body,
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.start,
                       style: TextStyle(
                         color: context.textPrimary.withValues(alpha: 0.9),
                         fontSize: 14,

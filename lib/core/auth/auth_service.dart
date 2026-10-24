@@ -159,6 +159,9 @@ class AuthService {
     required String email,
     required String password,
     required String passwordConfirmation,
+    required bool acceptedTermsOfUse,
+    required bool acceptedPrivacyPolicy,
+    required bool acceptedPrivacyNotice,
   }) async {
     final client = ApiClient();
     final res = await client.post<Map<String, dynamic>>(
@@ -168,6 +171,9 @@ class AuthService {
         'email': email,
         'password': password,
         'password_confirmation': passwordConfirmation,
+        'accepted_terms_of_use': acceptedTermsOfUse,
+        'accepted_privacy_policy': acceptedPrivacyPolicy,
+        'accepted_privacy_notice': acceptedPrivacyNotice,
       },
     );
 

@@ -17,6 +17,9 @@ class GetStartedStep extends StatefulWidget {
     required String email,
     required String password,
     required String passwordConfirmation,
+    required bool acceptedTermsOfUse,
+    required bool acceptedPrivacyPolicy,
+    required bool acceptedPrivacyNotice,
   }) onContinue;
   final bool loading;
   final String? error;
@@ -32,6 +35,10 @@ class _GetStartedStepState extends State<GetStartedStep> {
   final _confirmController = TextEditingController();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
+  bool _acceptedTerms = false;
+  bool _acceptedPrivacyPolicy = false;
+  bool _acceptedPrivacyNotice = false;
+  bool _consentError = false;
 
   @override
   void dispose() {
@@ -41,12 +48,22 @@ class _GetStartedStepState extends State<GetStartedStep> {
     super.dispose();
   }
 
+  bool get _allAccepted =>
+      _acceptedTerms && _acceptedPrivacyPolicy && _acceptedPrivacyNotice;
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_allAccepted) {
+      setState(() => _consentError = true);
+      return;
+    }
     await widget.onContinue(
       email: _emailController.text.trim(),
       password: _passwordController.text,
       passwordConfirmation: _confirmController.text,
+      acceptedTermsOfUse: _acceptedTerms,
+      acceptedPrivacyPolicy: _acceptedPrivacyPolicy,
+      acceptedPrivacyNotice: _acceptedPrivacyNotice,
     );
   }
 
@@ -175,17 +192,36 @@ class _GetStartedStepState extends State<GetStartedStep> {
             AuthBanner(message: widget.error!),
           ],
           const SizedBox(height: 16),
-          AuthLegalLine(
-            prefix: l10n.authAgreePrefix,
-            termsLabel: l10n.termsOfUse,
-            andLabel: l10n.authAgreeAnd,
-            privacyLabel: l10n.privacyPolicy,
+          AuthConsentChecks(
+            acceptedTerms: _acceptedTerms,
+            acceptedPrivacyPolicy: _acceptedPrivacyPolicy,
+            acceptedPrivacyNotice: _acceptedPrivacyNotice,
+            enabled: !widget.loading,
+            showError: _consentError,
+            onAcceptedTermsChanged: (value) {
+              setState(() {
+                _acceptedTerms = value;
+                if (_allAccepted) _consentError = false;
+              });
+            },
+            onAcceptedPrivacyPolicyChanged: (value) {
+              setState(() {
+                _acceptedPrivacyPolicy = value;
+                if (_allAccepted) _consentError = false;
+              });
+            },
+            onAcceptedPrivacyNoticeChanged: (value) {
+              setState(() {
+                _acceptedPrivacyNotice = value;
+                if (_allAccepted) _consentError = false;
+              });
+            },
           ),
           const SizedBox(height: 20),
           AuthPrimaryButton(
             label: l10n.continueLabel,
             loading: widget.loading,
-            onPressed: _submit,
+            onPressed: (widget.loading || !_allAccepted) ? null : _submit,
           ),
           const SizedBox(height: 20),
           AuthOrDivider(label: l10n.orDivider),

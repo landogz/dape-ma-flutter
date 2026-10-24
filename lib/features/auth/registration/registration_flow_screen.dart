@@ -81,6 +81,9 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
     required String email,
     required String password,
     required String passwordConfirmation,
+    required bool acceptedTermsOfUse,
+    required bool acceptedPrivacyPolicy,
+    required bool acceptedPrivacyNotice,
   }) async {
     setState(() {
       _loading = true;
@@ -92,6 +95,9 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
         email: email,
         password: password,
         passwordConfirmation: passwordConfirmation,
+        acceptedTermsOfUse: acceptedTermsOfUse,
+        acceptedPrivacyPolicy: acceptedPrivacyPolicy,
+        acceptedPrivacyNotice: acceptedPrivacyNotice,
       );
       if (!mounted) return;
       setState(() => _step = 1);

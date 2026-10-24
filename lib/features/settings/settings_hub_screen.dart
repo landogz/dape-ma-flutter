@@ -16,6 +16,7 @@ import '../auth/register_screen.dart';
 import 'about_screen.dart';
 import 'accessibility_settings_screen.dart';
 import 'notification_settings_screen.dart';
+import 'privacy_notice_screen.dart';
 import 'privacy_policy_screen.dart';
 import 'terms_of_use_screen.dart';
 
@@ -128,6 +129,19 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
                         ? const Color(0xFF86EFAC)
                         : const Color(0xFF16A34A),
                     onTap: () => _open(const PrivacyPolicyScreen()),
+                  ),
+                  const SizedBox(height: 12),
+                  SettingsMenuTile(
+                    title: l10n.privacyNotice,
+                    subtitle: l10n.privacyNoticeSubtitle,
+                    icon: Icons.policy_rounded,
+                    iconBackground: context.isDarkMode
+                        ? const Color(0xFF422006)
+                        : const Color(0xFFFEF9C3),
+                    iconColor: context.isDarkMode
+                        ? const Color(0xFFFDE047)
+                        : AppColors.nileBlue,
+                    onTap: () => _open(const PrivacyNoticeScreen()),
                   ),
                   const SizedBox(height: 12),
                   SettingsMenuTile(

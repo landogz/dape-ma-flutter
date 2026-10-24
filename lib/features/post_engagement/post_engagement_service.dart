@@ -121,7 +121,8 @@ class PostEngagementService {
     return (reactors: reactors, hasMore: hasMore);
   }
 
-  static Future<({List<PostComment> comments, bool hasMore})> fetchComments(
+  static Future<({List<PostComment> comments, bool hasMore, int? total})>
+      fetchComments(
     int postId, {
     int page = 1,
   }) async {
@@ -131,6 +132,9 @@ class PostEngagementService {
     );
     final root = res.data ?? <String, dynamic>{};
     final data = root['data'];
+    final total = root.containsKey('comments_count')
+        ? parseJsonInt(root['comments_count'])
+        : null;
     List<dynamic> raw = const [];
     var hasMore = false;
 
@@ -153,7 +157,7 @@ class PostEngagementService {
       }
     }
 
-    return (comments: comments, hasMore: hasMore);
+    return (comments: comments, hasMore: hasMore, total: total);
   }
 
   static Future<PostComment> postComment(

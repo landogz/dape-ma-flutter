@@ -164,10 +164,31 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     try {
       final fresh = await PostEngagementService.fetchPost(_post.id);
       if (!mounted) return;
-      setState(() => _post = fresh);
+      setState(() {
+        _post = fresh.copyWith(
+          commentsCount: _displayCommentCount(fresh.commentsCount),
+        );
+      });
     } catch (_) {
       // Keep the post passed from the feed when refresh fails.
     }
+  }
+
+  /// The post payload often omits `comments_count`. Prefer a real API count,
+  /// otherwise the comments already loaded on this screen.
+  int _displayCommentCount(int apiCount) {
+    final loaded = countCommentsInTree(_comments);
+    if (apiCount > 0) return apiCount;
+    if (loaded > 0) return loaded;
+    if (_loadingComments && _post.commentsCount > 0) return _post.commentsCount;
+    return apiCount;
+  }
+
+  int _countFromLoadedComments({int? apiCount, required bool hasMore}) {
+    final loaded = countCommentsInTree(_comments);
+    if (apiCount != null) return apiCount;
+    if (!hasMore) return loaded;
+    return loaded > _post.commentsCount ? loaded : _post.commentsCount;
   }
 
   Future<void> _loadComments({bool loadMore = false}) async {
@@ -199,6 +220,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _commentsPage = page;
         _hasMoreComments = result.hasMore;
         _commentsError = null;
+        _post = _post.copyWith(
+          commentsCount: _countFromLoadedComments(
+            apiCount: result.total,
+            hasMore: result.hasMore,
+          ),
+        );
       });
     } catch (e) {
       if (!mounted) return;

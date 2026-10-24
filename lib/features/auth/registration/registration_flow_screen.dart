@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/options/app_option_catalog.dart';
 import 'steps/birthday_step.dart';
 import 'steps/get_started_step.dart';
 import 'steps/interests_step.dart';
@@ -27,8 +28,16 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
   final _nicknameController = TextEditingController();
   String? _pronouns;
   DateTime? _birthday;
-  String? _persona;
+  final Set<String> _personas = {};
   final Set<String> _interests = {};
+
+  @override
+  void initState() {
+    super.initState();
+    AppOptionCatalog.prefetch().then((_) {
+      if (mounted) setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -165,7 +174,7 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
   }
 
   Future<void> _nextFromPersona() async {
-    if (_persona == null || _persona!.isEmpty) {
+    if (_personas.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.regPersonaRequired)),
       );
@@ -173,7 +182,7 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
     }
     setState(() => _loading = true);
     try {
-      await AuthService.updateOnboarding(persona: _persona);
+      await AuthService.updateOnboarding(personas: _personas.toList());
       if (!mounted) return;
       setState(() => _step = 4);
     } catch (_) {
@@ -245,6 +254,7 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
             nicknameController: _nicknameController,
             selectedPronouns: _pronouns,
             onPronounsChanged: (v) => setState(() => _pronouns = v),
+            pronouns: AppOptionCatalog.pronouns(),
           ),
         ),
       2 => RegistrationShell(
@@ -261,8 +271,17 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
           onBack: _back,
           onNext: _nextFromPersona,
           child: PersonaStep(
-            selected: _persona,
-            onSelect: (v) => setState(() => _persona = v),
+            selected: _personas,
+            onToggle: (key) {
+              setState(() {
+                if (_personas.contains(key)) {
+                  _personas.remove(key);
+                } else {
+                  _personas.add(key);
+                }
+              });
+            },
+            options: AppOptionCatalog.personas(),
           ),
         ),
       4 => RegistrationShell(

@@ -194,6 +194,7 @@ class AuthService {
     String? pronouns,
     String? birthday,
     String? persona,
+    List<String>? personas,
     List<String>? interests,
     bool complete = false,
   }) async {
@@ -204,6 +205,7 @@ class AuthService {
         'pronouns': ?pronouns,
         'birthday': ?birthday,
         'persona': ?persona,
+        'personas': ?personas,
         'interests': ?interests,
         if (complete) 'complete': true,
       },

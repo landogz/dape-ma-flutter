@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/locale_scope.dart';
+import '../../../../core/options/app_option_catalog.dart';
+import '../../../../core/options/app_option_item.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../widgets/auth_decor.dart';
-import '../registration_constants.dart';
 import '../widgets/registration_shell.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 
@@ -13,15 +14,18 @@ class NicknameStep extends StatelessWidget {
     required this.nicknameController,
     required this.selectedPronouns,
     required this.onPronounsChanged,
+    this.pronouns = const [],
   });
 
   final TextEditingController nicknameController;
   final String? selectedPronouns;
   final ValueChanged<String?> onPronounsChanged;
+  final List<AppOptionItem> pronouns;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final options = pronouns.isNotEmpty ? pronouns : AppOptionCatalog.pronouns();
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -112,14 +116,14 @@ class NicknameStep extends StatelessWidget {
           alignment: WrapAlignment.center,
           spacing: 8,
           runSpacing: 8,
-          children: RegistrationConstants.pronouns.map((key) {
-            final selected = selectedPronouns == key;
+          children: options.map((option) {
+            final selected = selectedPronouns == option.key;
             return FilterChip(
-              label: Text(l10n.regPronounLabel(key)),
+              label: Text(option.label(isTagalog: l10n.isTagalog)),
               selected: selected,
               showCheckmark: false,
               onSelected: (_) =>
-                  onPronounsChanged(selected ? null : key),
+                  onPronounsChanged(selected ? null : option.key),
               selectedColor: AppColors.primaryBlue.withValues(alpha: 0.12),
               backgroundColor: context.chipBackground,
               labelStyle: TextStyle(

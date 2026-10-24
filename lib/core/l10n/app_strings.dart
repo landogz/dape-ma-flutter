@@ -1145,11 +1145,11 @@ class AppStrings {
   String get regPersonaTitle =>
       _t('Which best describes you?', 'Alin ang pinakakatugma sa iyo?');
   String get regPersonaSubtitle => _t(
-        'This helps us tailor the DAPE-MA app to your needs.',
-        'Nakakatulong ito para iangkop ang DAPE-MA app sa iyong pangangailangan.',
+        'Select all that apply. This helps us tailor the DAPE-MA app to your needs.',
+        'Pumili ng lahat ng naaangkop. Nakakatulong ito para iangkop ang DAPE-MA app sa iyong pangangailangan.',
       );
   String get regPersonaRequired =>
-      _t('Please select one option.', 'Pumili ng isang opsyon.');
+      _t('Please select at least one option.', 'Pumili ng kahit isang opsyon.');
   String regPersonaLabel(String key) => switch (key) {
         'student' => _t('Student', 'Estudyante'),
         'parent' => _t('Parent', 'Magulang'),

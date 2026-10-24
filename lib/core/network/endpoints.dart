@@ -87,6 +87,7 @@ class Endpoints {
   static const careToolkitQuestions = '/care-toolkit/questions';
   static const careSupportResources = '/care-support/resources';
   static const legalPages = '/legal-pages';
+  static const appOptions = '/app-options';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';

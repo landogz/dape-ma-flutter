@@ -9,6 +9,7 @@ import '../../../../core/auth/auth_service.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/models/diary_entry.dart';
 import '../../../../core/network/endpoints.dart';
+import '../../../../core/options/app_option_catalog.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/api_url.dart';
 import '../../diary_service.dart';
@@ -101,6 +102,9 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
     if (_resolvedFirstName == null || _resolvedFirstName!.trim().isEmpty) {
       _loadFirstName();
     }
+    AppOptionCatalog.prefetch().then((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   Future<void> _loadFirstName() async {
@@ -273,10 +277,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
   }
 
   String _feelingDisplay(String key) {
-    for (final o in JournalConstants.feelingOptions) {
-      if (o.key == key) return _feelingLabel(o);
-    }
-    return key;
+    return AppOptionCatalog.feelingLabel(key, isTagalog: _isTagalog);
   }
 
   void _addCustomFeeling() {
@@ -422,12 +423,14 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
     return switch (_step) {
       0 => _SkyStep(
           selected: _sky,
+          options: AppOptionCatalog.skies(),
           onSelect: (key) => setState(() => _sky = key),
           labelOf: _skyLabel,
           subtitleOf: _skySubtitle,
         ),
       1 => _FeelingsStep(
           selected: _feelings,
+          options: AppOptionCatalog.feelings(),
           onToggle: (key) {
             setState(() {
               if (_feelings.contains(key)) {
@@ -443,6 +446,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
         ),
       2 => _ImpactStep(
           selected: _impact,
+          options: AppOptionCatalog.impacts(),
           onSelect: (key) => setState(() => _impact = key),
           labelOf: _impactLabel,
         ),
@@ -451,12 +455,12 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
           gratitudeController: _gratitudeController,
           firstName: _resolvedFirstName,
           skyLabel: () {
-            final opt = JournalConstants.skyByKey(_sky);
+            final opt = AppOptionCatalog.skyByKey(_sky);
             return opt == null ? null : _skyLabel(opt);
           }(),
           feelingLabels: _feelings.map(_feelingDisplay).toList(),
           impactLabel: () {
-            final opt = JournalConstants.impactByKey(_impact);
+            final opt = AppOptionCatalog.impactByKey(_impact);
             return opt == null ? null : _impactLabel(opt);
           }(),
           imageFile: _imageFile,
@@ -496,12 +500,14 @@ class _CircleIconButton extends StatelessWidget {
 class _SkyStep extends StatelessWidget {
   const _SkyStep({
     required this.selected,
+    required this.options,
     required this.onSelect,
     required this.labelOf,
     required this.subtitleOf,
   });
 
   final String? selected;
+  final List<JournalSkyOption> options;
   final ValueChanged<String> onSelect;
   final String Function(JournalSkyOption) labelOf;
   final String Function(JournalSkyOption) subtitleOf;
@@ -509,7 +515,13 @@ class _SkyStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final selectedOpt = JournalConstants.skyByKey(selected);
+    JournalSkyOption? selectedOpt;
+    for (final option in options) {
+      if (option.key == selected) {
+        selectedOpt = option;
+        break;
+      }
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -533,7 +545,7 @@ class _SkyStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        ...JournalConstants.skyOptions.map((opt) {
+        ...options.map((opt) {
           final isSelected = selected == opt.key;
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
@@ -611,6 +623,7 @@ class _SkyStep extends StatelessWidget {
 class _FeelingsStep extends StatelessWidget {
   const _FeelingsStep({
     required this.selected,
+    required this.options,
     required this.onToggle,
     required this.labelOf,
     required this.customController,
@@ -618,6 +631,7 @@ class _FeelingsStep extends StatelessWidget {
   });
 
   final Set<String> selected;
+  final List<JournalFeelingOption> options;
   final ValueChanged<String> onToggle;
   final String Function(JournalFeelingOption) labelOf;
   final TextEditingController customController;
@@ -626,8 +640,7 @@ class _FeelingsStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final presetKeys =
-        JournalConstants.feelingOptions.map((e) => e.key).toSet();
+    final presetKeys = options.map((e) => e.key).toSet();
     final custom = selected.where((f) => !presetKeys.contains(f)).toList();
 
     return ListView(
@@ -656,7 +669,7 @@ class _FeelingsStep extends StatelessWidget {
           spacing: 8,
           runSpacing: 8,
           children: [
-            ...JournalConstants.feelingOptions.map((opt) {
+            ...options.map((opt) {
               final isOn = selected.contains(opt.key);
               return FilterChip(
                 label: Text(labelOf(opt)),
@@ -745,11 +758,13 @@ class _FeelingsStep extends StatelessWidget {
 class _ImpactStep extends StatelessWidget {
   const _ImpactStep({
     required this.selected,
+    required this.options,
     required this.onSelect,
     required this.labelOf,
   });
 
   final String? selected;
+  final List<JournalImpactOption> options;
   final ValueChanged<String> onSelect;
   final String Function(JournalImpactOption) labelOf;
 
@@ -779,7 +794,7 @@ class _ImpactStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        ...JournalConstants.impactOptions.map((opt) {
+        ...options.map((opt) {
           final isSelected = selected == opt.key;
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),

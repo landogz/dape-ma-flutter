@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/l10n/locale_scope.dart';
+import '../../../../core/options/app_option_catalog.dart';
+import '../../../../core/options/app_option_item.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../registration_constants.dart';
 import '../widgets/registration_shell.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 
@@ -10,15 +11,18 @@ class PersonaStep extends StatelessWidget {
   const PersonaStep({
     super.key,
     required this.selected,
-    required this.onSelect,
+    required this.onToggle,
+    this.options = const [],
   });
 
-  final String? selected;
-  final ValueChanged<String> onSelect;
+  final Set<String> selected;
+  final ValueChanged<String> onToggle;
+  final List<AppOptionItem> options;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final personas = options.isNotEmpty ? options : AppOptionCatalog.personas();
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -49,16 +53,16 @@ class PersonaStep extends StatelessWidget {
           style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
         ),
         const SizedBox(height: 20),
-        ...RegistrationConstants.personas.map((persona) {
-          final isOn = selected == persona.key;
+        ...personas.map((persona) {
+          final isOn = selected.contains(persona.key);
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Material(
-              color: Colors.white,
+              color: isOn ? context.softBrandSurface : context.optionFill,
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
-                onTap: () => onSelect(persona.key),
+                onTap: () => onToggle(persona.key),
                 child: Container(
                   constraints: const BoxConstraints(minHeight: 56),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -77,7 +81,7 @@ class PersonaStep extends StatelessWidget {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          l10n.regPersonaLabel(persona.key),
+                          persona.label(isTagalog: l10n.isTagalog),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
@@ -87,8 +91,8 @@ class PersonaStep extends StatelessWidget {
                       ),
                       Icon(
                         isOn
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
+                            ? Icons.check_box_rounded
+                            : Icons.check_box_outline_blank_rounded,
                         color: isOn
                             ? AppColors.primaryBlue
                             : const Color(0xFFD1D5DB),

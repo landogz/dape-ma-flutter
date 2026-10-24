@@ -5,12 +5,12 @@ import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/diary_entry.dart';
 import '../../core/network/endpoints.dart';
+import '../../core/options/app_option_catalog.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/api_url.dart';
 import '../auth/login_screen.dart';
 import 'diary_service.dart';
-import 'widgets/journal_wizard/journal_constants.dart';
 import 'widgets/journal_wizard/journal_prompts.dart';
 import 'widgets/journal_wizard/journal_wizard_sheet.dart';
 
@@ -40,7 +40,12 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
     if (!mounted) return;
     setState(() => _isLoggedIn = loggedIn);
     if (loggedIn) {
-      await Future.wait([_loadEntries(), _loadFirstName()]);
+      await Future.wait([
+        _loadEntries(),
+        _loadFirstName(),
+        AppOptionCatalog.prefetch(),
+      ]);
+      if (mounted) setState(() {});
     }
   }
 
@@ -137,7 +142,7 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
   }
 
   String _skyDisplayLabel(String? skyKey) {
-    final opt = JournalConstants.skyByKey(skyKey);
+    final opt = AppOptionCatalog.skyByKey(skyKey);
     if (opt == null) return '';
     return context.l10n.isTagalog ? opt.labelTl : opt.labelEn;
   }
@@ -458,7 +463,7 @@ class _EntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final accent = JournalConstants.accentForSky(entry.sky);
+    final accent = AppOptionCatalog.accentForSky(entry.sky);
     final preview = entry.hasNotes ? entry.notesPreview : l10n.journalNoWrittenNotes;
     final feelings = entry.feelings;
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
@@ -620,17 +625,17 @@ class _JournalEntrySummarySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final empty = l10n.journalSummaryEmpty;
-    final accent = JournalConstants.accentForSky(entry.sky);
+    final accent = AppOptionCatalog.accentForSky(entry.sky);
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
     final notes = entry.hasNotes ? entry.notesPreview : empty;
     final gratitude = entry.gratitude?.trim() ?? '';
-    final impact = JournalConstants.impactLabel(
+    final impact = AppOptionCatalog.impactLabel(
       entry.impact,
       isTagalog: l10n.isTagalog,
     );
     final feelings = entry.feelings
         .map(
-          (feeling) => JournalConstants.feelingLabel(
+          (feeling) => AppOptionCatalog.feelingLabel(
             feeling,
             isTagalog: l10n.isTagalog,
           ),

@@ -5,6 +5,7 @@ import 'core/accessibility/accessibility_controller.dart';
 import 'core/accessibility/accessibility_scope.dart';
 import 'core/auth/auth_service.dart';
 import 'core/l10n/app_locale.dart';
+import 'core/options/app_option_catalog.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/l10n/locale_scope.dart';
 import 'core/theme/app_theme.dart';
@@ -41,6 +42,7 @@ Future<void> _safeStartup() async {
     'push',
   );
   await withTimeout(DeepLinkService.init(), 'deep links');
+  await withTimeout(AppOptionCatalog.prefetch(), 'app options');
 }
 
 class DapeMaApp extends StatelessWidget {

@@ -6,10 +6,26 @@ class RegistrationPersona {
   const RegistrationPersona({
     required this.key,
     required this.icon,
+    required this.labelEn,
+    required this.labelTl,
   });
 
   final String key;
   final IconData icon;
+  final String labelEn;
+  final String labelTl;
+}
+
+class RegistrationPronoun {
+  const RegistrationPronoun({
+    required this.key,
+    required this.labelEn,
+    required this.labelTl,
+  });
+
+  final String key;
+  final String labelEn;
+  final String labelTl;
 }
 
 class RegistrationInterest {
@@ -30,21 +46,59 @@ class RegistrationConstants {
   RegistrationConstants._();
 
   static const personas = <RegistrationPersona>[
-    RegistrationPersona(key: 'student', icon: Icons.school_outlined),
-    RegistrationPersona(key: 'parent', icon: Icons.family_restroom_outlined),
-    RegistrationPersona(key: 'teacher', icon: Icons.menu_book_outlined),
-    RegistrationPersona(key: 'youth_leader', icon: Icons.star_outline_rounded),
-    RegistrationPersona(key: 'health_worker', icon: Icons.favorite_outline),
-    RegistrationPersona(key: 'concerned_citizen', icon: Icons.flag_outlined),
+    RegistrationPersona(
+      key: 'student',
+      icon: Icons.school_outlined,
+      labelEn: 'Student',
+      labelTl: 'Estudyante',
+    ),
+    RegistrationPersona(
+      key: 'parent',
+      icon: Icons.family_restroom_outlined,
+      labelEn: 'Parent',
+      labelTl: 'Magulang',
+    ),
+    RegistrationPersona(
+      key: 'teacher',
+      icon: Icons.menu_book_outlined,
+      labelEn: 'Teacher',
+      labelTl: 'Guro',
+    ),
+    RegistrationPersona(
+      key: 'youth_leader',
+      icon: Icons.star_outline_rounded,
+      labelEn: 'Youth Leader',
+      labelTl: 'Youth Leader',
+    ),
+    RegistrationPersona(
+      key: 'health_worker',
+      icon: Icons.favorite_outline,
+      labelEn: 'Health Worker',
+      labelTl: 'Health Worker',
+    ),
+    RegistrationPersona(
+      key: 'concerned_citizen',
+      icon: Icons.flag_outlined,
+      labelEn: 'Concerned Citizen',
+      labelTl: 'Concerned Citizen',
+    ),
   ];
 
-  static const pronouns = <String>[
-    'she_her',
-    'he_him',
-    'they_them',
-    'ze_hir',
-    'prefer_not',
-    'others',
+  static const pronouns = <RegistrationPronoun>[
+    RegistrationPronoun(key: 'she_her', labelEn: 'She/Her', labelTl: 'She/Her'),
+    RegistrationPronoun(key: 'he_him', labelEn: 'He/Him', labelTl: 'He/Him'),
+    RegistrationPronoun(
+      key: 'they_them',
+      labelEn: 'They/Them',
+      labelTl: 'They/Them',
+    ),
+    RegistrationPronoun(key: 'ze_hir', labelEn: 'Ze/Hir', labelTl: 'Ze/Hir'),
+    RegistrationPronoun(
+      key: 'prefer_not',
+      labelEn: 'Prefer not to say',
+      labelTl: 'Ayaw sabihin',
+    ),
+    RegistrationPronoun(key: 'others', labelEn: 'Others', labelTl: 'Iba pa'),
   ];
 
   static const interests = <RegistrationInterest>[

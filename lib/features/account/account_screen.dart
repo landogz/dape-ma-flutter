@@ -334,6 +334,18 @@ class _AccountScreenState extends State<AccountScreen> {
     return badges;
   }
 
+  List<_InterestBadgeData> _headerTags(AppStrings l10n) {
+    return [
+      ..._interestBadges(l10n),
+      if (_isChampion)
+        _InterestBadgeData(
+          icon: Icons.emoji_events_rounded,
+          label: l10n.championBadge,
+          featured: true,
+        ),
+    ];
+  }
+
   /// Name + photo only, so a new account can finish setup on Profile.
   double get _profileCompleteness {
     if (!_loggedIn) return 0;
@@ -686,60 +698,20 @@ class _AccountScreenState extends State<AccountScreen> {
                                           height: 1.3,
                                         ),
                                       ),
-                                      if (_interestBadges(l10n).isNotEmpty) ...[
+                                      if (_headerTags(l10n).isNotEmpty) ...[
                                         const SizedBox(height: 10),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
+                                            horizontal: 20,
                                           ),
                                           child: Wrap(
                                             alignment: WrapAlignment.center,
-                                            spacing: 8,
-                                            runSpacing: 8,
+                                            spacing: 6,
+                                            runSpacing: 6,
                                             children: [
                                               for (final badge
-                                                  in _interestBadges(l10n))
+                                                  in _headerTags(l10n))
                                                 _InterestBadge(badge: badge),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                      if (_isChampion) ...[
-                                        const SizedBox(height: 10),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 6,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withValues(
-                                              alpha: 0.18,
-                                            ),
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                            border: Border.all(
-                                              color: Colors.white.withValues(
-                                                alpha: 0.28,
-                                              ),
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.emoji_events_rounded,
-                                                color: AppColors.accentYellow,
-                                                size: 16,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                l10n.championBadge,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w700,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
                                             ],
                                           ),
                                         ),
@@ -1141,10 +1113,15 @@ class _AccountScreenState extends State<AccountScreen> {
 }
 
 class _InterestBadgeData {
-  const _InterestBadgeData({required this.icon, required this.label});
+  const _InterestBadgeData({
+    required this.icon,
+    required this.label,
+    this.featured = false,
+  });
 
   final IconData icon;
   final String label;
+  final bool featured;
 }
 
 class _InterestBadge extends StatelessWidget {
@@ -1154,28 +1131,36 @@ class _InterestBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final featured = badge.featured;
+    final fill = featured
+        ? AppColors.brightGold.withValues(alpha: 0.18)
+        : Colors.white.withValues(alpha: 0.10);
+    final stroke = featured
+        ? AppColors.brightGold.withValues(alpha: 0.55)
+        : Colors.white.withValues(alpha: 0.22);
+    final iconColor = featured ? AppColors.brightGold : Colors.white.withValues(alpha: 0.88);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      height: 26,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.9),
-          width: 1.4,
-        ),
+        color: fill,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: stroke, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(badge.icon, color: AppColors.brightGold, size: 16),
-          const SizedBox(width: 6),
+          Icon(badge.icon, color: iconColor, size: 12),
+          const SizedBox(width: 5),
           Text(
             badge.label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
-              height: 1.2,
+            style: TextStyle(
+              color: featured ? AppColors.brightGold : Colors.white,
+              fontWeight: FontWeight.w600,
+              fontSize: 11,
+              height: 1.1,
+              letterSpacing: 0.15,
             ),
           ),
         ],

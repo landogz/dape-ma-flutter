@@ -26,7 +26,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('DAPE Care'), findsWidgets);
-    expect(find.text('Speed Dial'), findsOneWidget);
+    expect(find.text('Your Toolkit'), findsOneWidget);
     expect(find.text('My Journal'), findsOneWidget);
     expect(find.text('Self-Care Toolkit'), findsOneWidget);
     expect(find.text('Get Support'), findsOneWidget);
@@ -36,6 +36,12 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     expect(find.text('Calm Corner'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Kid Listo'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Kid Listo'), findsOneWidget);
   });
 
   testWidgets('Toolkit and support screens render', (tester) async {

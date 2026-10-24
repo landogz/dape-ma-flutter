@@ -375,6 +375,11 @@ class AppStrings {
         'Take a moment for yourself. You deserve it.',
         'Maglaan ng sandali para sa sarili. Deserve mo ito.',
       );
+  String get careKidListo => _t('Kid Listo', 'Kid Listo');
+  String get careKidListoBody => _t(
+        'A daily motivational quote for a drug-free youth.',
+        'Araw-araw na motivational quote para sa drug-free youth.',
+      );
   String get careBreathingExercise =>
       _t('Breathing Exercise', 'Breathing Exercise');
   String get careBreathingExerciseBody => _t(

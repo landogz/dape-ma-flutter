@@ -4,17 +4,18 @@ import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/diary_entry.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import '../../core/theme/app_typography.dart';
 import '../auth/login_screen.dart';
 import '../diary/diary_list_screen.dart';
 import '../diary/diary_service.dart';
 import '../diary/widgets/journal_wizard/journal_wizard_sheet.dart';
-import 'care_colors.dart';
+import '../kid_listo/kid_listo_welcome_screen.dart';
 import 'calm_corner_screen.dart';
+import 'care_colors.dart';
 import 'get_support_screen.dart';
 import 'self_care_toolkit_screen.dart';
 import 'widgets/daily_reflection_card.dart';
-import '../../core/theme/app_theme_colors.dart';
 
 class CareHubScreen extends StatefulWidget {
   const CareHubScreen({super.key});
@@ -96,6 +97,8 @@ class _CareHubScreenState extends State<CareHubScreen> {
         _matches('${l10n.careSpeedSupport} ${l10n.careSpeedSupportBody}');
     final showCalm =
         _matches('${l10n.careCalmCorner} ${l10n.careCalmCornerBody}');
+    final showKidListo =
+        _matches('${l10n.careKidListo} ${l10n.careKidListoBody}');
 
     final speedCards = <Widget>[
       if (showJournal)
@@ -319,12 +322,31 @@ class _CareHubScreenState extends State<CareHubScreen> {
                   ),
                 if (showCalm) ...[
                   const SizedBox(height: 14),
-                  _CalmCornerCard(
+                  _WideCareCard(
                     title: l10n.careCalmCorner,
                     body: l10n.careCalmCornerBody,
+                    imageAsset: CareHubAssets.calm,
+                    fallbackIcon: Icons.self_improvement_rounded,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const CalmCornerScreen(),
+                      ),
+                    ),
+                  ),
+                ],
+                if (showKidListo) ...[
+                  const SizedBox(height: 14),
+                  _WideCareCard(
+                    title: l10n.careKidListo,
+                    body: l10n.careKidListoBody,
+                    imageAsset: CareHubAssets.kidListo,
+                    fallbackIcon: Icons.auto_awesome_rounded,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const KidListoWelcomeScreen(
+                          initialPosts: [],
+                          replaceOnContinue: false,
+                        ),
                       ),
                     ),
                   ),
@@ -343,6 +365,7 @@ class CareHubAssets {
   static const selfCare = 'assets/care/care_selfcare.png';
   static const support = 'assets/care/care_support.png';
   static const calm = 'assets/care/care_calm.png';
+  static const kidListo = 'assets/kid_listo/kid_listo_logo.png';
   static const headerBanner = 'assets/care/care_header_banner.png';
   static const logoWhite = 'assets/care/care_logo_white.png';
 }
@@ -432,15 +455,19 @@ class _SpeedCard extends StatelessWidget {
   }
 }
 
-class _CalmCornerCard extends StatelessWidget {
-  const _CalmCornerCard({
+class _WideCareCard extends StatelessWidget {
+  const _WideCareCard({
     required this.title,
     required this.body,
+    required this.imageAsset,
+    required this.fallbackIcon,
     required this.onTap,
   });
 
   final String title;
   final String body;
+  final String imageAsset;
+  final IconData fallbackIcon;
   final VoidCallback onTap;
 
   @override
@@ -464,66 +491,74 @@ class _CalmCornerCard extends StatelessWidget {
               ),
             ],
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SizedBox(
-                  width: 80,
-                  height: 72,
-                  child: Image.asset(
-                    CareHubAssets.calm,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.self_improvement_rounded,
-                      color: CareColors.headingOf(context),
-                      size: 40,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 108),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 80,
+                    height: 72,
+                    child: Image.asset(
+                      imageAsset,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        fallbackIcon,
+                        color: CareColors.headingOf(context),
+                        size: 40,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: AppTypography.header(color: CareColors.headingOf(context))
-                            .copyWith(fontSize: 17, height: 1.15),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        body,
-                        style: AppTypography.body(
-                          color: CareColors.mutedOf(context),
-                          fontSize: 13,
-                        ).copyWith(height: 1.3, fontWeight: FontWeight.w500),
-                      ),
-                      const SizedBox(height: 14),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 2, bottom: 2),
-                          child: Container(
-                            width: 36,
-                            height: 36,
-                            decoration: const BoxDecoration(
-                              color: CareColors.primary,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 18,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.header(
+                            color: CareColors.headingOf(context),
+                          ).copyWith(fontSize: 17, height: 1.15),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          body,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.body(
+                            color: CareColors.mutedOf(context),
+                            fontSize: 13,
+                          ).copyWith(height: 1.3, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 14),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 2, bottom: 2),
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: const BoxDecoration(
+                                color: CareColors.primary,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

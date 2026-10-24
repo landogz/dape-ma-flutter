@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../core/auth/auth_navigator.dart';
+import '../../core/auth/app_entry.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
@@ -37,9 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   String? _error;
 
-  void _enterAppOrPop() {
+  Future<void> _enterAppOrPop() async {
     if (widget.asAuthGate) {
-      AuthNavigator.enterApp(context, posts: widget.initialPosts);
+      await AppEntry.enter(context, posts: widget.initialPosts);
       return;
     }
     Navigator.of(context).pop(true);

@@ -807,6 +807,10 @@ class AppStrings {
       _t('$percent% complete', '$percent% kumpleto');
   String get profileFinishSetup =>
       _t('Finish setup', 'Tapusin ang setup');
+  String get profileSetupBeforeKidListo => _t(
+        'Add a photo to finish your profile. Kid Listo is next.',
+        'Magdagdag ng litrato para makumpleto ang profile. Si Kid Listo ang susunod.',
+      );
   String get learnerStatus => _t('Learner', 'Learner');
   String get streakCalendarHint => _t(
         'Keep journaling to grow your streak.',

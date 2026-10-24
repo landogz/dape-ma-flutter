@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/accessibility/accessibility_scope.dart';
+import '../../core/auth/app_entry.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
@@ -13,7 +14,6 @@ import '../../core/network/server_status.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/brand_launch_backdrop.dart';
 import '../auth/login_screen.dart';
-import '../kid_listo/kid_listo_welcome_screen.dart';
 import '../maintenance/under_maintenance_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -139,7 +139,7 @@ class _SplashScreenState extends State<SplashScreen>
     if (!mounted) return;
 
     if (loggedIn) {
-      await _openNext(KidListoWelcomeScreen(initialPosts: posts));
+      await _openNext(await AppEntry.screen(posts: posts));
     } else {
       await _openNext(
         LoginScreen(

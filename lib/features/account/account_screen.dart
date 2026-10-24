@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
@@ -21,15 +22,23 @@ import '../post_detail/post_detail_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
 import '../settings/settings_hub_screen.dart';
 import 'edit_profile_screen.dart';
+import 'profile/profile_completeness.dart';
 import 'profile/profile_lists_screen.dart';
 import 'profile/profile_models.dart';
 import 'profile/profile_stats_service.dart';
 import 'widgets/profile_cards.dart';
 
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key, this.embeddedInShell = false});
+  const AccountScreen({
+    super.key,
+    this.embeddedInShell = false,
+    this.completeSetupOnOpen = false,
+    this.onProfileSetupComplete,
+  });
 
   final bool embeddedInShell;
+  final bool completeSetupOnOpen;
+  final VoidCallback? onProfileSetupComplete;
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -56,6 +65,7 @@ class _AccountScreenState extends State<AccountScreen> {
   List<ProfileActivityItem> _articleActivity = const [];
   List<ProfileActivityItem> _eventActivity = const [];
   File? _pickedFile;
+  bool _openingKidListo = false;
 
   @override
   void initState() {
@@ -119,6 +129,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _eventActivity = summary.eventActivity;
         _loading = false;
       });
+      await _maybeContinueToKidListo();
     } catch (_) {
       if (!mounted) return;
       setState(() {
@@ -126,6 +137,26 @@ class _AccountScreenState extends State<AccountScreen> {
         _loading = false;
       });
     }
+  }
+
+  Future<bool> _maybeContinueToKidListo() async {
+    if (_openingKidListo) return true;
+    if (!AuthNavigator.pendingKidListoAfterProfile) {
+      return false;
+    }
+    if (!_loggedIn || !_profileIsCompleteOnServer) {
+      return false;
+    }
+    if (!mounted || widget.onProfileSetupComplete == null) {
+      return false;
+    }
+
+    _openingKidListo = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      widget.onProfileSetupComplete?.call();
+    });
+    return true;
   }
 
   Future<void> _open(Widget screen) async {
@@ -234,7 +265,7 @@ class _AccountScreenState extends State<AccountScreen> {
         if (uploadedUrl != null) _photoUrl = uploadedUrl;
       });
       await _load();
-      if (!mounted) return;
+      if (!mounted || _openingKidListo) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(context.l10n.profileUpdated),
@@ -267,17 +298,26 @@ class _AccountScreenState extends State<AccountScreen> {
     return '@$base';
   }
 
-  /// Setup prompt for new accounts: photo, name, learning activity, badge/streak.
+  /// Name + photo only, so a new account can finish setup on Profile.
   double get _profileCompleteness {
     if (!_loggedIn) return 0;
-    var score = 0.0;
-    if (_name.trim().isNotEmpty) score += 0.25;
-    if (_photoUrl != null || _pickedFile != null) score += 0.30;
-    if (_lessons + _articles + _events > 0) score += 0.25;
-    if (_streak > 0 || (!_badgesPhase2Locked && _badges.any((b) => b.earned))) {
-      score += 0.20;
-    }
-    return score.clamp(0.0, 1.0);
+    return ProfileCompleteness.score(
+      name: _name,
+      photoUrl: _photoUrl,
+      hasLocalPhoto: _pickedFile != null,
+    );
+  }
+
+  bool get _profileIsCompleteOnServer {
+    return ProfileCompleteness.isComplete(
+      name: _name,
+      photoUrl: _photoUrl,
+    );
+  }
+
+  bool get _needsKidListoSetup {
+    return widget.completeSetupOnOpen ||
+        AuthNavigator.pendingKidListoAfterProfile;
   }
 
   /// Badges unlock in Phase 2 — keep UI visible but fully locked for now.
@@ -664,6 +704,27 @@ class _AccountScreenState extends State<AccountScreen> {
                                           const EditProfileScreen(),
                                         ),
                                       ),
+                                      if (_needsKidListoSetup &&
+                                          completenessPct < 100) ...[
+                                        const SizedBox(height: 12),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 12,
+                                          ),
+                                          child: Text(
+                                            l10n.profileSetupBeforeKidListo,
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.92,
+                                              ),
+                                              fontSize: 13,
+                                              height: 1.35,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ] else ...[
                                       Text(
                                         l10n.welcomeTitle,

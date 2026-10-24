@@ -8,6 +8,7 @@ import '../care/care_hub_screen.dart';
 import '../chat/tawk_chat_screen.dart';
 import '../home/home_screen.dart';
 import '../hope/hope_hub_screen.dart';
+import '../kid_listo/kid_listo_welcome_screen.dart';
 import 'widgets/main_bottom_nav.dart';
 
 /// Root shell that keeps the floating bottom nav visible across the
@@ -17,10 +18,12 @@ class MainShellScreen extends StatefulWidget {
     super.key,
     required this.initialPosts,
     this.initialTab = 0,
+    this.completeProfileFirst = false,
   });
 
   final List<Post> initialPosts;
   final int initialTab;
+  final bool completeProfileFirst;
 
   @override
   State<MainShellScreen> createState() => _MainShellScreenState();
@@ -52,6 +55,18 @@ class _MainShellScreenState extends State<MainShellScreen> {
     setState(() => _currentIndex = index);
   }
 
+  void _openKidListoAfterProfile() {
+    if (!AuthNavigator.pendingKidListoAfterProfile) return;
+    final posts = AuthNavigator.pendingPosts;
+    AuthNavigator.clearProfileSetup();
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (_) => KidListoWelcomeScreen(initialPosts: posts),
+      ),
+      (_) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!_authReady) {
@@ -72,7 +87,11 @@ class _MainShellScreenState extends State<MainShellScreen> {
           const HopeHubScreen(),
           const TawkChatScreen(embeddedInShell: true),
           const CareHubScreen(),
-          const AccountScreen(embeddedInShell: true),
+          AccountScreen(
+            embeddedInShell: true,
+            completeSetupOnOpen: widget.completeProfileFirst,
+            onProfileSetupComplete: _openKidListoAfterProfile,
+          ),
         ],
       ),
       bottomNavigationBar: MainBottomNav(

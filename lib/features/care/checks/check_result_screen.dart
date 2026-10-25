@@ -10,6 +10,8 @@ import '../care_colors.dart';
 import '../get_support_screen.dart';
 import 'check_flow_screen.dart';
 import 'check_gauge.dart';
+import 'widgets/check_brand_button.dart';
+import 'widgets/check_disclaimer_row.dart';
 
 class CheckResultScreen extends StatefulWidget {
   const CheckResultScreen({
@@ -101,6 +103,9 @@ class _CheckResultScreenState extends State<CheckResultScreen> {
     final l10n = context.l10n;
     final high = _result.isHighTier;
     final bandColor = high ? AppColors.fireEngineRed : CareColors.headingOf(context);
+    final bandFill = high
+        ? AppColors.fireEngineRed.withValues(alpha: context.isDarkMode ? 0.22 : 0.10)
+        : CareColors.mintOf(context);
     final isSleep = _result.checkType == 'sleep';
     final primaryLabel = high
         ? l10n.careGetSupportTitle
@@ -109,9 +114,10 @@ class _CheckResultScreenState extends State<CheckResultScreen> {
     return Scaffold(
       backgroundColor: CareColors.pageBgOf(context),
       appBar: AppBar(
-        backgroundColor: CareColors.pageBgOf(context),
+        backgroundColor: Colors.transparent,
         foregroundColor: CareColors.headingOf(context),
         elevation: 0,
+        scrolledUnderElevation: 0,
         centerTitle: true,
         title: Text(
           _title(l10n),
@@ -121,149 +127,157 @@ class _CheckResultScreenState extends State<CheckResultScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-          children: [
-            Center(
-              child: isSleep
-                  ? Text(
-                      high ? '😥' : '😄',
-                      style: const TextStyle(fontSize: 88),
-                    )
-                  : CheckGauge(highTier: high),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              children: [
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 20),
+                  decoration: BoxDecoration(
+                    color: context.cardBackground,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: CareColors.cardBorderOf(context)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.nileBlue.withValues(alpha: 0.06),
+                        blurRadius: 18,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 200,
+                        height: 200,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: CareColors.mintOf(context),
+                        ),
+                        child: isSleep
+                            ? Text(
+                                high ? '😥' : '😄',
+                                style: const TextStyle(fontSize: 72),
+                              )
+                            : FittedBox(
+                                child: CheckGauge(highTier: high),
+                              ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _levelLabel(l10n),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: context.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: bandFill,
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: high
+                                ? AppColors.fireEngineRedBorder
+                                : CareColors.cardBorderOf(context),
+                          ),
+                        ),
+                        child: Text(
+                          _band(l10n),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: bandColor,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+                  decoration: BoxDecoration(
+                    color: context.cardBackground,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: CareColors.cardBorderOf(context)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _headline(l10n),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: CareColors.headingOf(context),
+                          fontSize: 17,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _body(l10n),
+                        style: TextStyle(
+                          color: context.textSecondary,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                CheckDisclaimerRow(text: l10n.careCheckDisclaimer),
+              ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              _levelLabel(l10n),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: CareColors.headingOf(context),
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              _band(l10n),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: bandColor,
-                fontSize: 26,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              _headline(l10n),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: CareColors.textOf(context),
-                fontSize: 16,
-                height: 1.35,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              _body(l10n),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.textSecondary,
-                fontSize: 14,
-                height: 1.45,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: CareColors.mintOf(context),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+              child: Column(
                 children: [
-                  Icon(Icons.eco_rounded, color: CareColors.headingOf(context)),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      l10n.careCheckDisclaimer,
-                      style: TextStyle(
-                        color: CareColors.textOf(context),
-                        fontSize: 13,
-                        height: 1.35,
+                  CheckBrandButton(label: primaryLabel, onPressed: _primary),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 48,
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: _retake,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size.fromHeight(48),
+                        foregroundColor: CareColors.headingOf(context),
+                        side: BorderSide(
+                          color: CareColors.headingOf(context),
+                          width: 1.4,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.careRetakeAssessment,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
-            _BrandButton(label: primaryLabel, onPressed: _primary),
-            const SizedBox(height: 10),
-            SizedBox(
-              height: 48,
-              child: OutlinedButton(
-                onPressed: _retake,
-                style: OutlinedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(48),
-                  foregroundColor: CareColors.headingOf(context),
-                  side: BorderSide(color: CareColors.headingOf(context), width: 1.4),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-                child: Text(
-                  l10n.careRetakeAssessment,
-                  style: const TextStyle(fontWeight: FontWeight.w800),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _BrandButton extends StatelessWidget {
-  const _BrandButton({required this.label, required this.onPressed});
-
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(999),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
-                ),
-              ),
-            ),
           ),
-        ),
+        ],
       ),
     );
   }

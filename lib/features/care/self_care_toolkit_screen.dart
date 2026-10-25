@@ -4,7 +4,9 @@ import '../../core/l10n/locale_scope.dart';
 import 'care_colors.dart';
 import 'checks/check_launch.dart';
 import 'mood_tracker_screen.dart';
-import '../../core/theme/app_theme_colors.dart';
+import 'self_care_toolkit/widgets/toolkit_check_tile.dart';
+import 'self_care_toolkit/widgets/toolkit_disclaimer.dart';
+import 'self_care_toolkit/widgets/toolkit_hero_card.dart';
 
 class SelfCareToolkitScreen extends StatelessWidget {
   const SelfCareToolkitScreen({super.key});
@@ -14,171 +16,55 @@ class SelfCareToolkitScreen extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: CareColors.mintSoftOf(context),
+      backgroundColor: CareColors.pageBgOf(context),
       appBar: AppBar(
-        backgroundColor: CareColors.mintSoftOf(context),
-        foregroundColor: CareColors.textOf(context),
+        backgroundColor: Colors.transparent,
+        foregroundColor: CareColors.headingOf(context),
         elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
         title: Text(
           l10n.careToolkitTitle,
-          style: const TextStyle(fontWeight: FontWeight.w800),
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: CareColors.headingOf(context),
+          ),
         ),
-        centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
         children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: CareColors.mintOf(context),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.careToolkitHero,
-                    style: TextStyle(
-                      color: CareColors.textOf(context),
-                      fontWeight: FontWeight.w600,
-                      height: 1.4,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Icon(
-                  Icons.volunteer_activism_rounded,
-                  size: 48,
-                  color: CareColors.headingOf(context),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          _ToolkitTile(
+          ToolkitHeroCard(body: l10n.careToolkitHero),
+          const SizedBox(height: 18),
+          ToolkitCheckTile(
             title: l10n.careStressCheck,
             subtitle: l10n.careStressCheckBody,
-            icon: Icons.cloud_outlined,
+            emoji: '😟',
             onTap: () => openCareCheck(context, 'stress'),
           ),
-          _ToolkitTile(
+          ToolkitCheckTile(
             title: l10n.careAnxietyCheck,
             subtitle: l10n.careAnxietyCheckBody,
-            icon: Icons.sentiment_dissatisfied_outlined,
+            emoji: '😐',
             onTap: () => openCareCheck(context, 'anxiety'),
           ),
-          _ToolkitTile(
+          ToolkitCheckTile(
             title: l10n.careSleepQuality,
             subtitle: l10n.careSleepQualityBody,
-            icon: Icons.bedtime_outlined,
+            emoji: '😴',
             onTap: () => openCareCheck(context, 'sleep'),
           ),
-          _ToolkitTile(
+          ToolkitCheckTile(
             title: l10n.careMoodTracker,
             subtitle: l10n.careMoodTrackerBody,
-            icon: Icons.mood_outlined,
+            emoji: '😊',
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const MoodTrackerScreen()),
             ),
           ),
           const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: CareColors.mintOf(context),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.eco_rounded, color: CareColors.headingOf(context)),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    l10n.careToolkitDisclaimer,
-                    style: TextStyle(
-                      color: CareColors.textOf(context),
-                      fontSize: 13,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          ToolkitDisclaimer(text: l10n.careToolkitDisclaimer),
         ],
-      ),
-    );
-  }
-}
-
-class _ToolkitTile extends StatelessWidget {
-  const _ToolkitTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-  });
-
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: Material(
-        color: context.cardBackground,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: CareColors.mintOf(context),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(icon, color: CareColors.headingOf(context)),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: CareColors.textOf(context),
-                          fontSize: 15,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: context.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: context.textSecondary),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

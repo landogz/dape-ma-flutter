@@ -1,3 +1,4 @@
+import '../moderation/word_masker.dart';
 import '../utils/json_parsers.dart';
 import '../utils/api_url.dart';
 
@@ -23,6 +24,10 @@ class PostComment {
     required this.createdAt,
     this.replies = const [],
   });
+
+  String get displayBody => WordMasker.mask(body);
+
+  String get displayAuthorName => WordMasker.mask(authorName);
 
   PostComment copyWith({
     String? body,

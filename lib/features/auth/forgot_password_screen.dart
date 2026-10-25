@@ -5,6 +5,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/validation/email_address.dart';
 import 'reset_code_screen.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
@@ -120,8 +121,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   if (!_loading) _submit();
                 },
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return l10n.emailRequired;
+                  }
+                  if (!EmailAddress.isValid(value)) {
+                    return l10n.emailInvalid;
                   }
                   return null;
                 },

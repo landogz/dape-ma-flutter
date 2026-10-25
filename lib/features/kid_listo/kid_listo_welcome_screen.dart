@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../shell/main_shell_screen.dart';
 import 'kid_listo_quote_service.dart';
+import 'widgets/kid_listo_portrait.dart';
 
 class KidListoWelcomeScreen extends StatefulWidget {
   const KidListoWelcomeScreen({
@@ -254,7 +255,7 @@ class _KidListoWelcomeScreenState extends State<KidListoWelcomeScreen> {
                             ),
                     ),
                     Semantics(
-                      label: 'Kid Listo',
+                      label: context.l10n.kidListoLogo,
                       image: true,
                       child: Container(
                         width: 112,
@@ -270,8 +271,9 @@ class _KidListoWelcomeScreenState extends State<KidListoWelcomeScreen> {
                           ],
                         ),
                         clipBehavior: Clip.antiAlias,
-                        child: Image.asset(
-                          'assets/kid_listo/kid_listo_logo.png',
+                        child: const KidListoPortrait(
+                          width: 112,
+                          height: 112,
                           fit: BoxFit.cover,
                         ),
                       ),

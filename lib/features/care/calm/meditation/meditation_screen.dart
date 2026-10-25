@@ -4,11 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/locale_scope.dart';
+import '../../../../core/theme/app_theme_colors.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
 import '../widgets/calm_benefit_card.dart';
-import '../../../../core/theme/app_theme_colors.dart';
+import '../widgets/calm_complete_page.dart';
+import '../widgets/calm_info_sheet.dart';
 
 class MeditationScreen extends StatelessWidget {
   const MeditationScreen({super.key});
@@ -21,10 +24,16 @@ class MeditationScreen extends StatelessWidget {
       backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: l10n.careMeditationTitle,
-        onInfo: () => showCalmInfoDialog(
+        onInfo: () => showCalmInfoSheet(
           context,
-          title: l10n.careCalmInfoTitle,
-          body: l10n.careCalmInfoBody,
+          CalmInfoCopy(
+            whyTitle: l10n.careWhyMeditation,
+            whyBody: l10n.careWhyMeditationBody,
+            howTitle: l10n.careHowToUse,
+            howBody: l10n.careHowMeditationBody,
+            tipTitle: l10n.careQuickTip,
+            tipBody: l10n.careMeditationTip,
+          ),
         ),
       ),
       body: SafeArea(
@@ -41,11 +50,9 @@ class MeditationScreen extends StatelessWidget {
                 child: const Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.self_improvement_rounded,
-                        size: 96, color: Colors.white),
+                    Icon(Icons.self_improvement_rounded, size: 96, color: Colors.white),
                     SizedBox(height: 8),
-                    Icon(Icons.wb_sunny_rounded,
-                        size: 36, color: CareColors.accentGold),
+                    Icon(Icons.wb_sunny_rounded, size: 36, color: CareColors.accentGold),
                   ],
                 ),
               ),
@@ -100,8 +107,7 @@ class GuidedSessionLauncher {
   static void openMeditation(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) =>
-            const GuidedSessionPlayer(mode: GuidedSessionMode.meditation),
+        builder: (_) => const GuidedSessionPlayer(mode: GuidedSessionMode.meditation),
       ),
     );
   }
@@ -129,35 +135,29 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
   final _tts = FlutterTts();
   Timer? _ticker;
   int _seconds = 0;
-  bool _playing = true;
-  static const _totalSeconds = 90;
+  int _stepIndex = 0;
+  bool _playing = false;
+  bool _finished = false;
+  static const _stepSeconds = 20;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _prepareAndSpeak());
-    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!_playing || !mounted) return;
-      setState(() {
-        _seconds++;
-        if (_seconds >= _totalSeconds) {
-          _playing = false;
-          _tts.stop();
-        }
-      });
-    });
+  List<String> _stepsFor(AppStrings l10n) {
+    if (widget.mode == GuidedSessionMode.meditation) {
+      return [
+        l10n.careMedStep1,
+        l10n.careMedStep2,
+        l10n.careMedStep3,
+        l10n.careMedStep4,
+      ];
+    }
+    return [
+      l10n.careVizStep1,
+      l10n.careVizStep2,
+      l10n.careVizStep3,
+      l10n.careVizStep4,
+    ];
   }
 
-  Future<void> _prepareAndSpeak() async {
-    if (!mounted) return;
-    final l10n = context.l10n;
-    final script = widget.mode == GuidedSessionMode.meditation
-        ? '${l10n.careCalmMindBody} ${l10n.careStayCalmBreath}'
-        : '${l10n.carePeacefulPlaceBody} ${l10n.careVizImagine}. ${l10n.careVizSenses}. ${l10n.careVizFeelRelaxed}.';
-    await _tts.setSpeechRate(0.42);
-    await _tts.setPitch(1.0);
-    if (_playing) await _tts.speak(script);
-  }
+  int get _totalSeconds => _stepSeconds * 4;
 
   @override
   void dispose() {
@@ -166,9 +166,67 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
     super.dispose();
   }
 
+  Future<void> _speakCurrent(List<String> steps) async {
+    await _tts.setSpeechRate(0.42);
+    await _tts.setPitch(1.0);
+    if (!_playing || !mounted) return;
+    await _tts.speak(steps[_stepIndex]);
+  }
+
+  void _startTicker(List<String> steps) {
+    _ticker?.cancel();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) async {
+      if (!_playing || !mounted || _finished) return;
+      setState(() => _seconds++);
+      final nextStep = (_seconds ~/ _stepSeconds).clamp(0, steps.length - 1);
+      if (nextStep != _stepIndex) {
+        _stepIndex = nextStep;
+        await _speakCurrent(steps);
+      }
+      if (_seconds >= _totalSeconds) {
+        await _finish();
+      }
+    });
+  }
+
+  Future<void> _finish() async {
+    if (_finished) return;
+    _finished = true;
+    _ticker?.cancel();
+    _playing = false;
+    await _tts.stop();
+    if (!mounted) return;
+    final l10n = context.l10n;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => CalmCompletePage(
+          title: l10n.careWellDone,
+          body: widget.mode == GuidedSessionMode.meditation
+              ? l10n.careBreathingDoneBody
+              : l10n.careAudioDoneBody,
+          hint: l10n.careNoticeBody,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggle(List<String> steps) async {
+    HapticFeedback.selectionClick();
+    if (_playing) {
+      await _tts.stop();
+      _ticker?.cancel();
+      setState(() => _playing = false);
+      return;
+    }
+    setState(() => _playing = true);
+    await _speakCurrent(steps);
+    _startTicker(steps);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final steps = _stepsFor(l10n);
     final title = widget.mode == GuidedSessionMode.meditation
         ? l10n.careCalmMind
         : l10n.carePeacefulPlace;
@@ -182,31 +240,42 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              const Spacer(),
-              Icon(
-                widget.mode == GuidedSessionMode.meditation
-                    ? Icons.self_improvement_rounded
-                    : Icons.spa_rounded,
-                size: 96,
-                color: CareColors.headingOf(context),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                l10n.careStayCalmBreath,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: CareColors.headingOf(context),
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 28),
               LinearProgressIndicator(
                 value: progress,
                 minHeight: 8,
                 borderRadius: BorderRadius.circular(999),
                 backgroundColor: CareColors.calmRing,
                 color: CareColors.headingOf(context),
+              ),
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  '${_stepIndex + 1} / ${steps.length}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                    color: CareColors.mutedOf(context),
+                  ),
+                ),
+              ),
+              const Spacer(),
+              Icon(
+                widget.mode == GuidedSessionMode.meditation
+                    ? Icons.self_improvement_rounded
+                    : Icons.spa_rounded,
+                size: 88,
+                color: CareColors.headingOf(context),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                steps[_stepIndex],
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: CareColors.headingOf(context),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  height: 1.4,
+                ),
               ),
               const Spacer(),
               Row(
@@ -216,21 +285,12 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
                     shape: const CircleBorder(),
                     child: InkWell(
                       customBorder: const CircleBorder(),
-                      onTap: () async {
-                        setState(() => _playing = !_playing);
-                        if (_playing) {
-                          await _prepareAndSpeak();
-                        } else {
-                          await _tts.stop();
-                        }
-                      },
+                      onTap: () => _toggle(steps),
                       child: SizedBox(
                         width: 56,
                         height: 56,
                         child: Icon(
-                          _playing
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
+                          _playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
                           color: Colors.white,
                         ),
                       ),
@@ -241,8 +301,8 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).maybePop(),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: CareColors.calmForest,
-                        side: const BorderSide(color: CareColors.calmRing),
+                        foregroundColor: CareColors.headingOf(context),
+                        side: BorderSide(color: CareColors.cardBorderOf(context)),
                         minimumSize: const Size(0, 56),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(28),

@@ -15,6 +15,7 @@ class TermsOfUseScreen extends StatelessWidget {
       fallbackTitle: l10n.termsOfUse,
       fallbackIntro: '${l10n.termsIntro}\n${l10n.termsSubtitle}',
       fallbackBody: l10n.termsBody,
+      translationKey: 'termsOfUse',
       icon: Icons.description_rounded,
       iconBackground: const Color(0xFFE0F2FE),
     );

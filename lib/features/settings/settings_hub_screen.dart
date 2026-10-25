@@ -85,6 +85,7 @@ class _SettingsHubScreenState extends State<SettingsHubScreen> {
                 children: [
                   SettingsHeroHeader(
                     showBack: true,
+                    translationKey: 'settingsTitle',
                     icon: Icons.settings_rounded,
                     title: l10n.settingsTitle,
                     subtitle: l10n.settingsSubtitle,

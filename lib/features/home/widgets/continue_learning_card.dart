@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/l10n/widgets/translation_art.dart';
 import 'home_header.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -117,16 +118,13 @@ class ContinueLearningCard extends StatelessWidget {
                   bottom: -8,
                   child: SizedBox(
                     width: 130,
-                    child: Image.asset(
-                      HomeAssets.continueArt,
+                    child: TranslationArt(
+                      translationKey: 'homeContinueLearning',
+                      assetFallback: HomeAssets.continueArt,
+                      iconFallback: Icons.menu_book_rounded,
                       fit: BoxFit.contain,
                       alignment: Alignment.centerRight,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(
-                        Icons.menu_book_rounded,
-                        color: context.iconOnSurface,
-                        size: 56,
-                      ),
+                      color: context.iconOnSurface,
                     ),
                   ),
                 ),

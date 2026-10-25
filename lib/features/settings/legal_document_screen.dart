@@ -16,6 +16,7 @@ class LegalDocumentScreen extends StatefulWidget {
     required this.icon,
     required this.iconBackground,
     this.iconColor = Colors.white,
+    this.translationKey,
   });
 
   final String slug;
@@ -25,6 +26,7 @@ class LegalDocumentScreen extends StatefulWidget {
   final IconData icon;
   final Color iconBackground;
   final Color iconColor;
+  final String? translationKey;
 
   @override
   State<LegalDocumentScreen> createState() => _LegalDocumentScreenState();
@@ -79,6 +81,7 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
                 children: [
                   SettingsHeroHeader(
                     showBack: true,
+                    translationKey: widget.translationKey,
                     icon: widget.icon,
                     title: _title,
                     subtitle: _intro,

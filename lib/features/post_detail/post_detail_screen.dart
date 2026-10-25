@@ -958,7 +958,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             children: [
                               Expanded(
                                 child: Text(
-                                  '${l10n.replyingTo} ${_replyingTo!.authorName}',
+                                  '${l10n.replyingTo} ${_replyingTo!.displayAuthorName}',
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall

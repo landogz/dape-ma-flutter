@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/moderation/word_masker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../models/app_notification.dart';
@@ -26,9 +27,11 @@ class NotificationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = (item.body != null && item.body!.trim().isNotEmpty)
-        ? item.body!.trim()
-        : item.title;
+    final title = WordMasker.mask(
+      (item.body != null && item.body!.trim().isNotEmpty)
+          ? item.body!.trim()
+          : item.title,
+    );
 
     return Material(
       color: context.cardBackground,

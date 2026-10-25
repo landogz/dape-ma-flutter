@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/l10n/locale_scope.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
+import '../widgets/calm_info_sheet.dart';
 import '../../../../core/theme/app_theme_colors.dart';
+import 'coloring_canvas_screen.dart';
 
 class ColorFunScreen extends StatefulWidget {
   const ColorFunScreen({super.key});
@@ -72,10 +75,16 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
       backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: '',
-        onInfo: () => showCalmInfoDialog(
+        onInfo: () => showCalmInfoSheet(
           context,
-          title: l10n.careCalmInfoTitle,
-          body: l10n.careCalmInfoBody,
+          CalmInfoCopy(
+            whyTitle: l10n.careWhyMeditation,
+            whyBody: l10n.careColorFunIntro,
+            howTitle: l10n.careHowToUse,
+            howBody: l10n.careColorOnScreen,
+            tipTitle: l10n.careQuickTip,
+            tipBody: l10n.careCalmStudentIntro,
+          ),
         ),
       ),
       body: SafeArea(
@@ -121,7 +130,7 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                               label: Text(filters[i]),
                               selected: _filter == i,
                               onSelected: (_) => setState(() => _filter = i),
-                              selectedColor: CareColors.calmForest,
+                              selectedColor: AppColors.mediumElectricBlue,
                               labelStyle: TextStyle(
                                 color: _filter == i
                                     ? Colors.white
@@ -130,7 +139,7 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                               ),
                               side: BorderSide(
                                 color: _filter == i
-                                    ? CareColors.calmForest
+                                    ? AppColors.mediumElectricBlue
                                     : CareColors.cardBorderOf(context),
                               ),
                               backgroundColor: context.pageBackground,
@@ -162,11 +171,14 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                           final item = items[index];
                           return _WorksheetCard(
                             worksheet: item,
-                            onDownload: () {
+                            onOpen: () {
                               HapticFeedback.lightImpact();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(l10n.careWorksheetDownloaded),
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ColoringCanvasScreen(
+                                    title: item.title,
+                                    icon: item.icon,
+                                  ),
                                 ),
                               );
                             },
@@ -200,66 +212,66 @@ class _Worksheet {
 class _WorksheetCard extends StatelessWidget {
   const _WorksheetCard({
     required this.worksheet,
-    required this.onDownload,
+    required this.onOpen,
   });
 
   final _Worksheet worksheet;
-  final VoidCallback onDownload;
+  final VoidCallback onOpen;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.cardBackground,
+    return Material(
+      color: context.cardBackground,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        onTap: onOpen,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: CareColors.cardBorderOf(context)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Container(
-              color: CareColors.pageBgOf(context),
-              alignment: Alignment.center,
-              child: Icon(
-                worksheet.icon,
-                size: 56,
-                color: CareColors.calmForest.withValues(alpha: 0.55),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: CareColors.cardBorderOf(context)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Container(
+                  color: CareColors.pageBgOf(context),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    worksheet.icon,
+                    size: 56,
+                    color: AppColors.mediumElectricBlue.withValues(alpha: 0.55),
+                  ),
+                ),
               ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 8, 6, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    worksheet.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: CareColors.headingOf(context),
-                      fontSize: 13,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 10, 10, 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        worksheet.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: CareColors.headingOf(context),
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
-                  ),
+                    Icon(
+                      Icons.brush_rounded,
+                      color: CareColors.headingOf(context),
+                      size: 22,
+                    ),
+                  ],
                 ),
-                IconButton(
-                  onPressed: onDownload,
-                  constraints:
-                      const BoxConstraints(minWidth: 44, minHeight: 44),
-                  icon: Icon(
-                    Icons.download_rounded,
-                    color: CareColors.headingOf(context),
-                    size: 22,
-                  ),
-                  tooltip: 'Download',
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

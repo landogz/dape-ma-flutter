@@ -2,6 +2,7 @@ class ProfileSummary {
   const ProfileSummary({
     required this.name,
     required this.photoUrl,
+    required this.about,
     required this.memberSinceRaw,
     required this.interests,
     required this.isChampion,
@@ -20,6 +21,7 @@ class ProfileSummary {
 
   final String name;
   final String? photoUrl;
+  final String? about;
   final String? memberSinceRaw;
   final List<String> interests;
   final bool isChampion;
@@ -44,6 +46,7 @@ class ProfileSummary {
       name: (user['name'] as String?)?.trim() ?? '',
       photoUrl: user['profile_image_url'] as String?,
       memberSinceRaw: user['created_at'] as String?,
+      about: (user['about'] as String?)?.trim(),
       interests: ((user['interests'] as List?) ?? const [])
           .map((value) => value?.toString().trim() ?? '')
           .where((value) => value.isNotEmpty)

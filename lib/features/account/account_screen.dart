@@ -9,8 +9,10 @@ import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/l10n/translation_glyph.dart';
 import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
+import '../../core/moderation/word_masker.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/api_url.dart';
@@ -25,9 +27,11 @@ import '../post_engagement/post_engagement_service.dart';
 import '../settings/settings_hub_screen.dart';
 import 'edit_profile/interests_picker_sheet.dart';
 import 'edit_profile_screen.dart';
+import 'profile/profile_about.dart';
 import 'profile/profile_completeness.dart';
 import 'profile/profile_lists_screen.dart';
 import 'profile/profile_models.dart';
+import 'profile/profile_photo_sheet.dart';
 import 'profile/profile_stats_service.dart';
 import 'widgets/profile_cards.dart';
 
@@ -52,8 +56,11 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _loggedIn = false;
   String _name = '';
   String? _photoUrl;
+  String? _about;
   String? _memberSince;
   List<String> _interests = const [];
+  // Header chip hidden for now; keep loaded so it can return later.
+  // ignore: unused_field
   bool _isChampion = false;
   int _lessons = 0;
   int _articles = 0;
@@ -87,6 +94,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _loading = false;
         _name = '';
         _photoUrl = null;
+        _about = null;
         _memberSince = null;
         _interests = const [];
         _isChampion = false;
@@ -120,6 +128,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _name = summary.name;
         _photoUrl = ApiUrl.resolve(summary.photoUrl);
         _pickedFile = null;
+        _about = ProfileAbout.clamp(summary.about);
         _memberSince = memberSince;
         _interests = summary.interests;
         _isChampion = summary.isChampion;
@@ -228,12 +237,67 @@ class _AccountScreenState extends State<AccountScreen> {
     }
   }
 
-  Future<void> _pickPhoto() async {
+  bool get _hasProfilePhoto =>
+      _pickedFile != null || (_photoUrl != null && _photoUrl!.trim().isNotEmpty);
+
+  Future<void> _onPhotoTap() async {
     if (!_loggedIn) {
       await _open(const LoginScreen());
       return;
     }
 
+    final l10n = context.l10n;
+    final choice = await ProfilePhotoSheet.show(
+      context,
+      title: l10n.profilePhotoTitle,
+      changeLabel: l10n.changePhoto,
+      removeLabel: l10n.removePhoto,
+      cancelLabel: l10n.cancel,
+      canRemove: _hasProfilePhoto,
+    );
+    if (!mounted) return;
+
+    switch (choice) {
+      case ProfilePhotoChoice.change:
+        await _pickPhoto();
+      case ProfilePhotoChoice.remove:
+        await _removePhoto();
+      case null:
+        return;
+    }
+  }
+
+  Future<void> _removePhoto() async {
+    try {
+      await AuthService.authedPut<Map<String, dynamic>>(
+        Endpoints.profileUpdate,
+        data: const {'remove_profile_photo': true},
+      );
+      if (!mounted) return;
+      setState(() {
+        _pickedFile = null;
+        _photoUrl = null;
+      });
+      await _load();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.photoRemoved),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.updateFailed),
+          backgroundColor: AppColors.accentRed,
+        ),
+      );
+    }
+  }
+
+  Future<void> _pickPhoto() async {
     final picker = ImagePicker();
     final xFile = await picker.pickImage(
       source: ImageSource.gallery,
@@ -327,7 +391,10 @@ class _AccountScreenState extends State<AccountScreen> {
             .trim();
         if (label.isEmpty) continue;
         badges.add(
-          _InterestBadgeData(icon: Icons.interests_rounded, label: label),
+          _InterestBadgeData(
+            icon: Icons.interests_rounded,
+            label: WordMasker.mask(label.replaceAll(RegExp(r'\s*,\s*'), ', ')),
+          ),
         );
       }
     }
@@ -335,15 +402,7 @@ class _AccountScreenState extends State<AccountScreen> {
   }
 
   List<_InterestBadgeData> _headerTags(AppStrings l10n) {
-    return [
-      ..._interestBadges(l10n),
-      if (_isChampion)
-        _InterestBadgeData(
-          icon: Icons.emoji_events_rounded,
-          label: l10n.championBadge,
-          featured: true,
-        ),
-    ];
+    return _interestBadges(l10n);
   }
 
   /// Name + photo only, so a new account can finish setup on Profile.
@@ -454,7 +513,7 @@ class _AccountScreenState extends State<AccountScreen> {
     return Color(int.parse('FF$cleaned', radix: 16));
   }
 
-  static const double _avatarRadius = 46;
+  static const double _avatarRadius = 36;
 
   Widget _avatarWidget(BuildContext context) {
     final avatar = CircleAvatar(
@@ -464,7 +523,7 @@ class _AccountScreenState extends State<AccountScreen> {
           ? FileImage(_pickedFile!)
           : (_photoUrl != null ? NetworkImage(_photoUrl!) as ImageProvider : null),
       child: _pickedFile == null && _photoUrl == null
-          ? const Icon(Icons.person_rounded, size: 48, color: Colors.white70)
+          ? const Icon(Icons.person_rounded, size: 36, color: Colors.white70)
           : null,
     );
 
@@ -472,6 +531,8 @@ class _AccountScreenState extends State<AccountScreen> {
         ? ProfileCompletenessAvatar(
             progress: _profileCompleteness,
             radius: _avatarRadius,
+            strokeWidth: 3.5,
+            gap: 3,
             child: avatar,
           )
         : avatar;
@@ -496,7 +557,7 @@ class _AccountScreenState extends State<AccountScreen> {
                 shadowColor: Colors.black.withValues(alpha: 0.28),
                 child: InkWell(
                   customBorder: const CircleBorder(),
-                  onTap: _pickPhoto,
+                  onTap: _onPhotoTap,
                   child: Container(
                     width: 28,
                     height: 28,
@@ -527,12 +588,12 @@ class _AccountScreenState extends State<AccountScreen> {
     final canPop = Navigator.of(context).canPop() && !widget.embeddedInShell;
 
     return SizedBox(
-      height: 48,
+      height: 44,
       child: Row(
         children: [
           SizedBox(
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
             child: canPop
                 ? IconButton(
                     tooltip: MaterialLocalizations.of(context).backButtonTooltip,
@@ -558,13 +619,14 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ),
           SizedBox(
-            width: 48,
-            height: 48,
+            width: 44,
+            height: 44,
             child: IconButton(
               tooltip: l10n.settingsTitle,
               onPressed: () => _open(const SettingsHubScreen()),
-              icon: const Icon(
-                Icons.settings_outlined,
+              icon: const TranslationGlyph(
+                translationKey: 'settingsTitle',
+                fallbackIcon: Icons.settings_outlined,
                 color: Colors.white,
                 size: 22,
               ),
@@ -614,12 +676,12 @@ class _AccountScreenState extends State<AccountScreen> {
                           child: Stack(
                             children: [
                               Positioned(
-                                right: -48,
-                                top: topPad + 8,
+                                right: -40,
+                                top: topPad,
                                 child: IgnorePointer(
                                   child: Container(
-                                    width: 160,
-                                    height: 160,
+                                    width: 120,
+                                    height: 120,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: Colors.white.withValues(
@@ -630,12 +692,12 @@ class _AccountScreenState extends State<AccountScreen> {
                                 ),
                               ),
                               Positioned(
-                                left: -36,
-                                bottom: 12,
+                                left: -28,
+                                bottom: 4,
                                 child: IgnorePointer(
                                   child: Container(
-                                    width: 120,
-                                    height: 120,
+                                    width: 88,
+                                    height: 88,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       color: AppColors.brightGold.withValues(
@@ -648,37 +710,39 @@ class _AccountScreenState extends State<AccountScreen> {
                               Padding(
                                 padding: EdgeInsets.fromLTRB(
                                   12,
-                                  topPad + 4,
+                                  topPad + 2,
                                   12,
-                                  36,
+                                  32,
                                 ),
                                 child: Column(
                                   children: [
                                     _profileNavBar(context),
-                                    const SizedBox(height: 18),
+                                    const SizedBox(height: 8),
                                     _avatarWidget(context),
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: 8),
                                     if (_loggedIn) ...[
                                       GestureDetector(
                                         onTap: () => _open(
                                           const EditProfileScreen(),
                                         ),
                                         child: Text(
-                                          _name.trim().isNotEmpty
-                                              ? _name.trim()
-                                              : _firstName,
+                                          WordMasker.mask(
+                                            _name.trim().isNotEmpty
+                                                ? _name.trim()
+                                                : _firstName,
+                                          ),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(
                                             color: Colors.white,
-                                            fontSize: 22,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.w800,
-                                            height: 1.2,
+                                            height: 1.15,
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
+                                      const SizedBox(height: 4),
                                       Text(
                                         [
                                           _handle,
@@ -693,21 +757,53 @@ class _AccountScreenState extends State<AccountScreen> {
                                           color: Colors.white.withValues(
                                             alpha: 0.92,
                                           ),
-                                          fontSize: 13,
+                                          fontSize: 12,
                                           fontWeight: FontWeight.w600,
-                                          height: 1.3,
+                                          height: 1.25,
                                         ),
                                       ),
+                                      if ((_about ?? '').isNotEmpty) ...[
+                                        const SizedBox(height: 8),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                          ),
+                                          child: GestureDetector(
+                                            onTap: () => _open(
+                                              const EditProfileScreen(),
+                                            ),
+                                            child: Text(
+                                              WordMasker.mask(
+                                                ProfileAbout.clamp(_about),
+                                              ),
+                                              textAlign: TextAlign.center,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.94,
+                                                ),
+                                                fontSize: 13,
+                                                height: 1.35,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                       if (_headerTags(l10n).isNotEmpty) ...[
                                         const SizedBox(height: 10),
                                         Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 20,
+                                          padding: const EdgeInsets.fromLTRB(
+                                            16,
+                                            0,
+                                            16,
+                                            8,
                                           ),
                                           child: Wrap(
                                             alignment: WrapAlignment.center,
-                                            spacing: 6,
-                                            runSpacing: 6,
+                                            spacing: 8,
+                                            runSpacing: 8,
                                             children: [
                                               for (final badge
                                                   in _headerTags(l10n))
@@ -717,7 +813,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                         ),
                                       ],
                                       if (completenessPct < 100) ...[
-                                        const SizedBox(height: 16),
+                                        const SizedBox(height: 10),
                                         ProfileSetupCta(
                                           percent: completenessPct,
                                           completeLabel:
@@ -825,7 +921,7 @@ class _AccountScreenState extends State<AccountScreen> {
                           ),
                         ),
                         Transform.translate(
-                          offset: const Offset(0, -24),
+                          offset: const Offset(0, -16),
                           child: Container(
                             width: double.infinity,
                             padding: EdgeInsets.fromLTRB(
@@ -1116,12 +1212,10 @@ class _InterestBadgeData {
   const _InterestBadgeData({
     required this.icon,
     required this.label,
-    this.featured = false,
   });
 
   final IconData icon;
   final String label;
-  final bool featured;
 }
 
 class _InterestBadge extends StatelessWidget {
@@ -1131,32 +1225,30 @@ class _InterestBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final featured = badge.featured;
-    final fill = featured
-        ? AppColors.brightGold.withValues(alpha: 0.18)
-        : Colors.white.withValues(alpha: 0.10);
-    final stroke = featured
-        ? AppColors.brightGold.withValues(alpha: 0.55)
-        : Colors.white.withValues(alpha: 0.22);
-    final iconColor = featured ? AppColors.brightGold : Colors.white.withValues(alpha: 0.88);
-
     return Container(
-      height: 26,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 28,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: fill,
+        color: Colors.white.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: stroke, width: 1),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.22),
+          width: 1,
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(badge.icon, color: iconColor, size: 12),
+          Icon(
+            badge.icon,
+            color: Colors.white.withValues(alpha: 0.88),
+            size: 12,
+          ),
           const SizedBox(width: 5),
           Text(
             badge.label,
-            style: TextStyle(
-              color: featured ? AppColors.brightGold : Colors.white,
+            style: const TextStyle(
+              color: Colors.white,
               fontWeight: FontWeight.w600,
               fontSize: 11,
               height: 1.1,

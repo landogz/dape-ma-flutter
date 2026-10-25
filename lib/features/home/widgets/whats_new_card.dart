@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/l10n/widgets/translation_art.dart';
 import 'home_header.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -92,15 +93,13 @@ class WhatsNewCard extends StatelessWidget {
                 bottom: -10,
                 child: SizedBox(
                   width: 132,
-                  child: Image.asset(
-                    HomeAssets.whatsNewArt,
+                  child: TranslationArt(
+                    translationKey: 'homeWhatsNew',
+                    assetFallback: HomeAssets.whatsNewArt,
+                    iconFallback: Icons.campaign_rounded,
                     fit: BoxFit.contain,
                     alignment: Alignment.centerRight,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      Icons.campaign_rounded,
-                      color: context.iconOnSurface,
-                      size: 56,
-                    ),
+                    color: context.iconOnSurface,
                   ),
                 ),
               ),

@@ -154,6 +154,20 @@ class AuthService {
     }
   }
 
+  static Future<bool> emailIsAvailable(String email) async {
+    final client = ApiClient();
+    final res = await client.get<Map<String, dynamic>>(
+      Endpoints.checkEmail,
+      query: {'email': email},
+    );
+    final root = res.data ?? <String, dynamic>{};
+    final data = root['data'];
+    if (data is Map && data['available'] == true) {
+      return true;
+    }
+    return false;
+  }
+
   static Future<void> register({
     required String name,
     required String email,

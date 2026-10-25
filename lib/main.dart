@@ -9,6 +9,7 @@ import 'core/options/app_option_catalog.dart';
 import 'core/l10n/locale_controller.dart';
 import 'core/l10n/locale_scope.dart';
 import 'core/l10n/translation_catalog.dart';
+import 'core/moderation/blocked_word_catalog.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/deep_link_service.dart';
 import 'features/push/push_notification_service.dart';
@@ -45,10 +46,45 @@ Future<void> _safeStartup() async {
   await withTimeout(DeepLinkService.init(), 'deep links');
   await withTimeout(AppOptionCatalog.prefetch(), 'app options');
   await withTimeout(TranslationCatalog.prefetch(), 'translations');
+  await withTimeout(BlockedWordCatalog.prefetch(), 'blocked words');
 }
 
-class DapeMaApp extends StatelessWidget {
+class DapeMaApp extends StatefulWidget {
   const DapeMaApp({super.key});
+
+  @override
+  State<DapeMaApp> createState() => _DapeMaAppState();
+}
+
+class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    TranslationCatalog.startLiveSync();
+    BlockedWordCatalog.startLiveSync();
+  }
+
+  @override
+  void dispose() {
+    TranslationCatalog.stopLiveSync();
+    BlockedWordCatalog.stopLiveSync();
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      TranslationCatalog.resumeLiveSync();
+      BlockedWordCatalog.resumeLiveSync();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      TranslationCatalog.pauseLiveSync();
+      BlockedWordCatalog.pauseLiveSync();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +93,7 @@ class DapeMaApp extends StatelessWidget {
         LocaleController.instance,
         AccessibilityController.instance,
         TranslationCatalog.instance,
+        BlockedWordCatalog.instance,
       ]),
       builder: (context, _) {
         final localeController = LocaleController.instance;

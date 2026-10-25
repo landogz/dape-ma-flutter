@@ -5,6 +5,8 @@ import '../../core/accessibility/accessibility_scope.dart';
 import '../../core/auth/app_entry.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/l10n/translation_catalog.dart';
+import '../../core/moderation/blocked_word_catalog.dart';
 import '../../core/models/post.dart';
 import '../../core/navigation/deep_link_service.dart';
 import '../../core/navigation/fade_route.dart';
@@ -113,6 +115,9 @@ class _SplashScreenState extends State<SplashScreen>
       await _openNext(const UnderMaintenanceScreen());
       return;
     }
+
+    await TranslationCatalog.prefetch(force: true);
+    await BlockedWordCatalog.prefetch(force: true);
 
     final loggedIn = await AuthService.ensureValidSession();
 

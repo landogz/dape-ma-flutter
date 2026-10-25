@@ -10,9 +10,12 @@ import '../../core/network/endpoints.dart';
 class DiaryService {
   DiaryService._();
 
-  static Future<List<DiaryEntry>> fetchEntries() async {
+  static Future<List<DiaryEntry>> fetchEntries({
+    Map<String, dynamic>? query,
+  }) async {
     final res = await AuthService.authedGet<Map<String, dynamic>>(
       Endpoints.diaryEntries,
+      query: query,
     );
     final root = res.data ?? <String, dynamic>{};
     final data = root['data'];

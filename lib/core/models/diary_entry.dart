@@ -1,3 +1,5 @@
+import '../moderation/word_masker.dart';
+
 class DiaryEntry {
   final int id;
   final String entryDate;
@@ -71,4 +73,13 @@ class DiaryEntry {
         .trim();
     return plain;
   }
+
+  String get displayNotesPreview => WordMasker.mask(notesPreview);
+
+  String get displayGratitude => WordMasker.mask(gratitude);
+
+  String get displayTitle => WordMasker.mask(title);
+
+  List<String> get displayFeelings =>
+      feelings.map(WordMasker.mask).toList(growable: false);
 }

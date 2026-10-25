@@ -17,6 +17,7 @@ class PrivacyNoticeScreen extends StatelessWidget {
       fallbackTitle: l10n.privacyNotice,
       fallbackIntro: l10n.privacyNoticeIntro,
       fallbackBody: l10n.privacyNoticeBody,
+      translationKey: 'privacyNotice',
       icon: Icons.policy_rounded,
       iconBackground: context.isDarkMode
           ? const Color(0xFF422006)

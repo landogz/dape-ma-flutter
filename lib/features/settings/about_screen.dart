@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../core/l10n/locale_scope.dart';
+import '../../core/l10n/widgets/translation_art.dart';
 import '../../core/theme/app_theme_colors.dart';
 
 class AboutScreen extends StatefulWidget {
@@ -43,8 +43,10 @@ class _AboutScreenState extends State<AboutScreen> {
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
           children: [
             Center(
-              child: SvgPicture.asset(
-                'assets/ddb.svg',
+              child: TranslationArt(
+                translationKey: 'aboutApp',
+                assetFallback: 'assets/ddb.png',
+                iconFallback: Icons.info_rounded,
                 width: 88,
                 height: 88,
               ),

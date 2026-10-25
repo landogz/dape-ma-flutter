@@ -59,6 +59,7 @@ class Endpoints {
   static const sendLoginCode = '/auth/login-code';
   static const verifyLoginCode = '/auth/verify-login-code';
   static const register = '/auth/register';
+  static const checkEmail = '/auth/check-email';
   static const logout = '/auth/logout';
   static const me = '/auth/me';
   static const meProfile = '/me/profile';
@@ -85,10 +86,13 @@ class Endpoints {
   static const moodCheckins = '/mood-checkins';
   static const moodCheckinsToday = '/mood-checkins/today';
   static const careToolkitQuestions = '/care-toolkit/questions';
+  static const careChecks = '/care-checks';
+  static const careChecksLatest = '/care-checks/latest';
   static const careSupportResources = '/care-support/resources';
   static const legalPages = '/legal-pages';
   static const appOptions = '/app-options';
   static const translations = '/translations';
+  static const blockedWords = '/blocked-words';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';

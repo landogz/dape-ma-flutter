@@ -1,3 +1,5 @@
+import '../moderation/word_masker.dart';
+
 class ContestEntry {
   final int id;
   final int? contestId;
@@ -34,6 +36,14 @@ class ContestEntry {
     required this.status,
     this.adminNotes,
   });
+
+  String get displayTitle => WordMasker.mask(title);
+
+  String get displayCreatorName => WordMasker.mask(creatorName);
+
+  String get displayDescription => WordMasker.mask(description);
+
+  String get displayLyrics => WordMasker.mask(lyrics);
 
   bool get hasMedia => mediaUrl != null && mediaUrl!.trim().isNotEmpty;
 

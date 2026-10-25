@@ -131,6 +131,7 @@ class AccessibilitySettingsScreen extends StatelessWidget {
           children: [
             SettingsHeroHeader(
               showBack: true,
+              translationKey: 'accessibility',
               icon: Icons.accessibility_new_rounded,
               title: l10n.accessibility,
               subtitle: l10n.accessibilityIntro,

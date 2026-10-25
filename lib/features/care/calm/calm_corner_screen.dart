@@ -11,6 +11,7 @@ import 'meditation/meditation_screen.dart';
 import 'stretch/stretch_breaks_screen.dart';
 import 'visualization/visualization_screen.dart';
 import 'widgets/calm_app_bar.dart';
+import 'widgets/calm_info_sheet.dart';
 import 'widgets/calm_menu_card.dart';
 
 class CalmCornerScreen extends StatelessWidget {
@@ -24,16 +25,39 @@ class CalmCornerScreen extends StatelessWidget {
       backgroundColor: CareColors.pageBgOf(context),
       appBar: CalmAppBar(
         title: l10n.careCalmCorner,
-        onInfo: () => showCalmInfoDialog(
+        onInfo: () => showCalmInfoSheet(
           context,
-          title: l10n.careCalmInfoTitle,
-          body: l10n.careCalmInfoBody,
+          CalmInfoCopy(
+            whyTitle: l10n.careCalmInfoTitle,
+            whyBody: l10n.careCalmInfoBody,
+            howTitle: l10n.careHowToUse,
+            howBody: l10n.careCalmStudentIntro,
+            tipTitle: l10n.careQuickTip,
+            tipBody: l10n.careBreathingTip,
+          ),
         ),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
+            Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+              decoration: BoxDecoration(
+                gradient: AppColors.primaryGradient,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                l10n.careCalmStudentIntro,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  height: 1.4,
+                  fontSize: 14,
+                ),
+              ),
+            ),
             CalmMenuCard(
               title: l10n.careBreathingExercise,
               subtitle: l10n.careBreathingExerciseBody,

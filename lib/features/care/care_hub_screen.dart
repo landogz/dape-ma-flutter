@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/l10n/translation_catalog.dart';
+import '../../core/l10n/widgets/translation_art.dart';
 import '../../core/models/diary_entry.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
@@ -11,10 +13,12 @@ import '../diary/diary_list_screen.dart';
 import '../diary/diary_service.dart';
 import '../diary/widgets/journal_wizard/journal_wizard_sheet.dart';
 import '../kid_listo/kid_listo_welcome_screen.dart';
+import '../kid_listo/widgets/kid_listo_portrait.dart';
 import 'calm_corner_screen.dart';
 import 'care_colors.dart';
 import 'get_support_screen.dart';
 import 'self_care_toolkit_screen.dart';
+import 'widgets/care_card_visual.dart';
 import 'widgets/daily_reflection_card.dart';
 
 class CareHubScreen extends StatefulWidget {
@@ -82,6 +86,13 @@ class _CareHubScreenState extends State<CareHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: TranslationCatalog.instance,
+      builder: (context, _) => _buildHub(context),
+    );
+  }
+
+  Widget _buildHub(BuildContext context) {
     final l10n = context.l10n;
     final top = MediaQuery.viewPaddingOf(context).top;
     final canPop = Navigator.of(context).canPop();
@@ -105,6 +116,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
         _SpeedCard(
           title: l10n.careSpeedJournal,
           body: l10n.careSpeedJournalBody,
+          translationKey: 'careSpeedJournal',
           logoAsset: CareHubAssets.journal,
           fallbackIcon: Icons.menu_book_rounded,
           onTap: () => Navigator.of(context).push(
@@ -115,6 +127,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
         _SpeedCard(
           title: l10n.careSpeedToolkit,
           body: l10n.careSpeedToolkitBody,
+          translationKey: 'careSpeedToolkit',
           logoAsset: CareHubAssets.selfCare,
           fallbackIcon: Icons.volunteer_activism_rounded,
           onTap: () => Navigator.of(context).push(
@@ -125,6 +138,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
         _SpeedCard(
           title: l10n.careSpeedSupport,
           body: l10n.careSpeedSupportBody,
+          translationKey: 'careSpeedSupport',
           logoAsset: CareHubAssets.support,
           fallbackIcon: Icons.handshake_rounded,
           onTap: () => Navigator.of(context).push(
@@ -220,17 +234,13 @@ class _CareHubScreenState extends State<CareHubScreen> {
                               ),
                               const SizedBox(width: 10),
                             ],
-                            Image.asset(
-                              CareHubAssets.logoWhite,
+                            const TranslationArt(
+                              translationKey: 'careTitle',
+                              assetFallback: CareHubAssets.logoWhite,
+                              iconFallback: Icons.favorite_rounded,
                               width: 36,
                               height: 36,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                Icons.favorite_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
+                              color: Colors.white,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -325,6 +335,7 @@ class _CareHubScreenState extends State<CareHubScreen> {
                   _WideCareCard(
                     title: l10n.careCalmCorner,
                     body: l10n.careCalmCornerBody,
+                    translationKey: 'careCalmCorner',
                     imageAsset: CareHubAssets.calm,
                     fallbackIcon: Icons.self_improvement_rounded,
                     onTap: () => Navigator.of(context).push(
@@ -339,8 +350,14 @@ class _CareHubScreenState extends State<CareHubScreen> {
                   _WideCareCard(
                     title: l10n.careKidListo,
                     body: l10n.careKidListoBody,
+                    translationKey: 'careKidListo',
                     imageAsset: CareHubAssets.kidListo,
                     fallbackIcon: Icons.auto_awesome_rounded,
+                    image: const KidListoPortrait(
+                      width: 80,
+                      height: 72,
+                      fit: BoxFit.contain,
+                    ),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => const KidListoWelcomeScreen(
@@ -374,6 +391,7 @@ class _SpeedCard extends StatelessWidget {
   const _SpeedCard({
     required this.title,
     required this.body,
+    required this.translationKey,
     required this.logoAsset,
     required this.fallbackIcon,
     required this.onTap,
@@ -381,6 +399,7 @@ class _SpeedCard extends StatelessWidget {
 
   final String title;
   final String body;
+  final String translationKey;
   final String logoAsset;
   final IconData fallbackIcon;
   final VoidCallback onTap;
@@ -413,15 +432,11 @@ class _SpeedCard extends StatelessWidget {
               children: [
                 SizedBox(
                   height: 44,
-                  child: Image.asset(
-                    logoAsset,
+                  child: CareCardVisual(
+                    translationKey: translationKey,
+                    assetFallback: logoAsset,
+                    iconFallback: fallbackIcon,
                     height: 42,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      fallbackIcon,
-                      color: CareColors.headingOf(context),
-                      size: 32,
-                    ),
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -459,16 +474,20 @@ class _WideCareCard extends StatelessWidget {
   const _WideCareCard({
     required this.title,
     required this.body,
+    required this.translationKey,
     required this.imageAsset,
     required this.fallbackIcon,
     required this.onTap,
+    this.image,
   });
 
   final String title;
   final String body;
+  final String translationKey;
   final String imageAsset;
   final IconData fallbackIcon;
   final VoidCallback onTap;
+  final Widget? image;
 
   @override
   Widget build(BuildContext context) {
@@ -501,15 +520,14 @@ class _WideCareCard extends StatelessWidget {
                   SizedBox(
                     width: 80,
                     height: 72,
-                    child: Image.asset(
-                      imageAsset,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        fallbackIcon,
-                        color: CareColors.headingOf(context),
-                        size: 40,
-                      ),
-                    ),
+                    child: image ??
+                        CareCardVisual(
+                          translationKey: translationKey,
+                          assetFallback: imageAsset,
+                          iconFallback: fallbackIcon,
+                          height: 72,
+                          width: 80,
+                        ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(

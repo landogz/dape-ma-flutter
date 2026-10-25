@@ -26,6 +26,21 @@ class AppStrings {
     return value;
   }
 
+  String _countPhrase({
+    required int count,
+    required String oneKey,
+    required String manyKey,
+    required String enOne,
+    required String enMany,
+    required String tlOne,
+    required String tlMany,
+  }) {
+    if (count == 1) {
+      return _t(oneKey, enOne, tlOne);
+    }
+    return _t(manyKey, enMany, tlMany, {'count': count.toString()});
+  }
+
   // Navigation
   String get navHome => _t('navHome', 'Home', 'Tahanan');
   String get navRehab => _t('navRehab', 'Services', 'Serbisyo');
@@ -581,6 +596,221 @@ class AppStrings {
         'Sleep is essential for health and learning. Recognizing your sleep patterns is the first step toward improving rest.',
         'Mahalaga ang tulog para sa kalusugan at pag-aaral. Ang pagkilala sa pattern ng tulog ang unang hakbang para mapabuti ito.',
       );
+  String get careCheckStart =>
+      _t('careCheckStart', 'Start assessment', 'Simulan ang assessment');
+  String get careCheckNext => _t('careCheckNext', 'Next', 'Susunod');
+  String get careCheckBack => _t('careCheckBack', 'Back', 'Bumalik');
+  String get careCheckSubmit =>
+      _t('careCheckSubmit', 'See my result', 'Tingnan ang result');
+  String get careCheckMinutes =>
+      _t('careCheckMinutes', 'About 1–2 minutes', 'Mga 1–2 minuto');
+  String get careCheckResultTitle =>
+      _t('careCheckResultTitle', 'Result', 'Resulta');
+  String get careStressResultTitle =>
+      _t('careStressResultTitle', 'Stress Check Result', 'Resulta ng Stress Check');
+  String get careYourStressLevel =>
+      _t('careYourStressLevel', 'Your Stress Level', 'Antas ng Stress Mo');
+  String get careYourAnxietyLevel =>
+      _t('careYourAnxietyLevel', 'Your Anxiety Level', 'Antas ng Anxiety Mo');
+  String get careYourSleepQuality =>
+      _t('careYourSleepQuality', 'Your Sleep Quality', 'Kalidad ng Tulog Mo');
+  String get careBandStressLow =>
+      _t('careBandStressLow', 'Low to Moderate', 'Mababa hanggang Katamtaman');
+  String get careBandStressHigh =>
+      _t('careBandStressHigh', 'Moderate to High', 'Katamtaman hanggang Mataas');
+  String get careBandAnxietyLow =>
+      _t('careBandAnxietyLow', 'Minimal to Low', 'Minimal hanggang Mababa');
+  String get careBandAnxietyHigh =>
+      _t('careBandAnxietyHigh', 'Moderate to Severe', 'Katamtaman hanggang Matindi');
+  String get careBandSleepLow => _t('careBandSleepLow', 'Good', 'Maganda');
+  String get careBandSleepHigh =>
+      _t('careBandSleepHigh', 'Needs Improvement', 'Kailangan pang pagbutihin');
+  String get careStressLowHeadline =>
+      _t('careStressLowHeadline', "You're managing stress well!", 'Naaasikaso mo nang maayos ang stress!');
+  String get careStressLowBody => _t('careStressLowBody', 
+        "Everyone feels stressed sometimes. You're handling things well, but small self-care steps can help you stay balanced.",
+        'Normal ang stress. Hinahawakan mo ito nang maayos, at makakatulong ang maliit na self-care para manatiling balanced.',
+      );
+  String get careStressHighHeadline => _t('careStressHighHeadline', 
+        'Your stress may be affecting your well-being.',
+        'Maaaring naaapektuhan ng stress ang well-being mo.',
+      );
+  String get careStressHighBody => _t('careStressHighBody', 
+        "You're experiencing more stress than is ideal. It is important to take action and build healthier coping strategies.",
+        'Mas mataas sa ideal ang stress mo. Mahalagang gumawa ng hakbang at magtayo ng mas healthy na paraan ng pagcope.',
+      );
+  String get careAnxietyLowHeadline => _t('careAnxietyLowHeadline', 
+        "You may feel worried at times, but you're managing.",
+        'May pag-aalala paminsan-minsan, pero nahahawakan mo.',
+      );
+  String get careAnxietyLowBody => _t('careAnxietyLowBody', 
+        'Keep using the Calm Corner tools to maintain balance and prevent worries from building up.',
+        'Ituloy ang Calm Corner para mapanatili ang balance at maiwasang magtumpok ang pag-aalala.',
+      );
+  String get careAnxietyHighHeadline => _t('careAnxietyHighHeadline', 
+        'Your anxiety level may be affecting your well-being.',
+        'Maaaring naaapektuhan ng anxiety ang well-being mo.',
+      );
+  String get careAnxietyHighBody => _t('careAnxietyHighBody', 
+        'Try relaxation activities daily, journal your feelings, and use guided meditation to ease tension. Consider professional help if worries feel overwhelming.',
+        'Subukan ang relaxation araw-araw, mag-journal, at gumamit ng guided meditation. Humingi ng propesyonal na tulong kung sobrang bigat ng pag-aalala.',
+      );
+  String get careSleepLowHeadline => _t('careSleepLowHeadline', 
+        "You're getting enough quality sleep.",
+        'Sapat at maganda ang tulog mo.',
+      );
+  String get careSleepLowBody => _t('careSleepLowBody', 
+        'You have a consistent sleep routine and good sleep quality. Small improvements can make a big difference!',
+        'Consistent ang routine at maganda ang tulog mo. Malaki ang epekto ng maliliit na pagbabago.',
+      );
+  String get careSleepHighHeadline => _t('careSleepHighHeadline', 
+        'Your sleep quality be better.',
+        'Pwede pang pagbutihin ang tulog mo.',
+      );
+  String get careSleepHighBody => _t('careSleepHighBody', 
+        'You may not be getting enough restful sleep. Poor sleep can affect your mood, focus, and energy levels. Need help? Feel free to reach out.',
+        'Maaaring kulang ang restful sleep mo. Nakakaapekto ito sa mood, focus, at energy. Kung kailangan mo ng tulong, mag-reach out.',
+      );
+  String get careCheckDisclaimer => _t('careCheckDisclaimer', 
+        'This test is for self-reflection only and does not replace professional evaluation.',
+        'Para sa self-reflection lamang ang test na ito at hindi kapalit ng propesyonal na ebalwasyon.',
+      );
+  String get careGoToCalmCorner =>
+      _t('careGoToCalmCorner', 'Go to Calm Corner', 'Pumunta sa Calm Corner');
+  String get careBackToToolkit =>
+      _t('careBackToToolkit', 'Back to Self-Care Toolkit', 'Bumalik sa Self-care Toolkit');
+  String get careRetakeAssessment =>
+      _t('careRetakeAssessment', 'Retake Assessment', 'Ulitin ang Assessment');
+  String get careCheckSaveFailed => _t('careCheckSaveFailed', 
+        'Could not save this check. Please try again.',
+        'Hindi nai-save ang check. Subukan ulit.',
+      );
+  String get careBackToCalmCorner =>
+      _t('careBackToCalmCorner', 'Back to Calm Corner', 'Bumalik sa Calm Corner');
+  String get careCalmStudentIntro => _t('careCalmStudentIntro', 
+        'Need a 2-minute reset? Use these tools before a quiz, after class, or anytime your mind feels busy.',
+        'Kailangan ng 2-minutong pahinga? Gamitin bago ang quiz, pagkatapos ng klase, o kapag magulo ang isip.',
+      );
+  String get careGreatJob => _t('careGreatJob', 'Great job!', 'Magaling!');
+  String get careWellDone => _t('careWellDone', 'Well done!', 'Mahusay!');
+  String get careBreathingDoneBody => _t('careBreathingDoneBody', 
+        'You finished your breathing break.',
+        'Tapos na ang breathing break mo.',
+      );
+  String get careAudioDoneBody => _t('careAudioDoneBody', 
+        "You finished today's calm break.",
+        'Tapos na ang calm break mo ngayon.',
+      );
+  String get careNoticeBody => _t('careNoticeBody', 
+        'Notice how your body feels: lighter, calmer, more focused.',
+        'Pansinin ang katawan: mas magaan, mas kalmado, mas focused.',
+      );
+  String get careWhyBreathing =>
+      _t('careWhyBreathing', 'Why Breathing Helps', 'Bakit nakakatulong ang paghinga');
+  String get careWhyBreathingBody => _t('careWhyBreathingBody', 
+        'Slow breathing helps lower stress, steady your focus, and calm your body — useful before exams or presentations.',
+        'Ang mabagal na paghinga ay nagpapababa ng stress at tumutulong mag-focus — lalo na bago ang exam o recitation.',
+      );
+  String get careHowToUse => _t('careHowToUse', 'How to Use', 'Paano gamitin');
+  String get careHowBreathingBody => _t('careHowBreathingBody', 
+        'Press play. Follow the circle: breathe in as it grows, hold, then breathe out as it shrinks. Four rounds is enough.',
+        'I-play. Huminga papasok habang lumalaki ang circle, pigilin, tapos huminga palabas habang lumiliit. Apat na round ay sapat.',
+      );
+  String get careQuickTip => _t('careQuickTip', 'Quick Tip', 'Quick Tip');
+  String get careBreathingTip => _t('careBreathingTip', 
+        'Try this at your desk. No one needs to notice — just four quiet breaths.',
+        'Pwede sa desk. Hindi kailangang mapansin ng iba — apat na tahimik na hinga.',
+      );
+  String get careWhyMusic => _t('careWhyMusic', 'Why Music Helps', 'Bakit nakakatulong ang musika');
+  String get careWhyMusicBody => _t('careWhyMusicBody', 
+        'A short, steady sound can take your mind off racing thoughts and give you a quiet minute between classes.',
+        'Ang tahimik at steady na tunog ay nakakatulong kalmahin ang isip sa pagitan ng klase.',
+      );
+  String get careHowMusicBody => _t('careHowMusicBody', 
+        'Press play, use earphones if you can, and breathe slowly. You can pause anytime.',
+        'I-play, gumamit ng earphones kung maaari, at huminga nang dahan-dahan. Pwede i-pause anytime.',
+      );
+  String get careMusicTip => _t('careMusicTip', 
+        'Keep the volume low. This is a break, not a playlist.',
+        'Ibaba ang volume. Pahinga ito, hindi playlist.',
+      );
+  String get careWhyMeditation =>
+      _t('careWhyMeditation', 'Why This Helps', 'Bakit nakakatulong ito');
+  String get careWhyMeditationBody => _t('careWhyMeditationBody', 
+        'A short pause helps clear your mind, reduce stress, and return to class with more focus.',
+        'Ang maikling pause ay nakakatulong linawin ang isip at bumalik sa klase nang mas focused.',
+      );
+  String get careHowMeditationBody => _t('careHowMeditationBody', 
+        'Press play, sit comfortably, and follow the words on the screen. You can pause anytime.',
+        'I-play, umupo nang komportable, at sundan ang mga salita sa screen. Pwede i-pause anytime.',
+      );
+  String get careMeditationTip => _t('careMeditationTip', 
+        'If a thought about homework appears, notice it and let it pass. That is normal.',
+        'Kung may naiisip na assignment, pansinin at hayaan itong dumaan. Normal iyon.',
+      );
+  String get careWhyVisualizationBody => _t('careWhyVisualizationBody', 
+        'Picturing a safe place can calm your body when you feel pressure from school, friends, or home.',
+        'Ang pag-isip ng ligtas na lugar ay nakakakalma kapag may pressure sa school, kaibigan, o bahay.',
+      );
+  String get careHowVisualizationBody => _t('careHowVisualizationBody', 
+        'Press play, close your eyes if you like, and follow the guided imagery. Pause anytime.',
+        'I-play, ipikit ang mata kung gusto mo, at sundan ang guided imagery. Pwede i-pause anytime.',
+      );
+  String get careVisualizationTip => _t('careVisualizationTip', 
+        'Pick a real place you know — your room, a court, the sea, or a quiet hallway.',
+        'Pumili ng tunay na lugar na kilala mo — kwarto, court, dagat, o tahimik na hallway.',
+      );
+  String get careColorOnScreen =>
+      _t('careColorOnScreen', 'Color on screen', 'Kulayan sa screen');
+  String get careColorClear => _t('careColorClear', 'Clear', 'Burahin');
+  String get careStretchHold =>
+      _t('careStretchHold', 'Hold this stretch', 'Hawakan ang stretch');
+  String get careMedStep1 => _t('careMedStep1', 
+        'Sit comfortably. Rest your hands. Let your shoulders drop.',
+        'Umupo nang komportable. Ihiga ang kamay. Ibaba ang balikat.',
+      );
+  String get careMedStep2 => _t('careMedStep2', 
+        'Notice your breath. You do not need to change it yet.',
+        'Pansinin ang hinga. Hindi pa kailangang baguhin.',
+      );
+  String get careMedStep3 => _t('careMedStep3', 
+        'If a thought about school appears, name it, then return to your breath.',
+        'Kung may naiisip na school, pangalanan, tapos bumalik sa hinga.',
+      );
+  String get careMedStep4 => _t('careMedStep4', 
+        'Take one slower breath. When you are ready, open your eyes.',
+        'Kumuha ng mas mabagal na hinga. Kapag handa ka na, imulat ang mata.',
+      );
+  String get careVizStep1 => _t('careVizStep1', 
+        'Picture a place that feels safe — your room, a court, the sea, or a quiet hallway.',
+        'Isipin ang lugar na ligtas para sa iyo — kwarto, court, dagat, o hallway.',
+      );
+  String get careVizStep2 => _t('careVizStep2', 
+        'Notice colors, sounds, and temperature. Make the scene feel real.',
+        'Pansinin ang kulay, tunog, at temperatura. Gawing totoo ang eksena.',
+      );
+  String get careVizStep3 => _t('careVizStep3', 
+        'Imagine your body relaxing in that place. Unclench your jaw and hands.',
+        'Isipin na nagre-relax ang katawan mo doon. Bitawan ang panga at kamay.',
+      );
+  String get careVizStep4 => _t('careVizStep4', 
+        'Take that calm with you. You can return here anytime you need a pause.',
+        'Dalhin ang kalmado. Pwede kang bumalik dito anytime kailangan mo ng pause.',
+      );
+  String get careStretchNeck => _t('careStretchNeck', 
+        'Gently tilt your right ear toward your shoulder. Keep breathing.',
+        'Dahan-dahang i-tilt ang kanang tenga patungo sa balikat. Patuloy na huminga.',
+      );
+  String get careStretchShoulders => _t('careStretchShoulders', 
+        'Roll both shoulders back slowly, then let them drop.',
+        'I-roll pabalik ang dalawang balikat, tapos ibaba.',
+      );
+  String get careStretchReach => _t('careStretchReach', 
+        'Reach both arms up, then fold forward over your desk or lap.',
+        'Itaas ang dalawang braso, tapos yumuko pasulong sa desk o kandungan.',
+      );
+  String get careDoneColoring =>
+      _t('careDoneColoring', 'Done coloring', 'Tapos na magkulay');
   String get careInputTimeHint => _t('careInputTimeHint', 'Input the time.', 'Ilagay ang oras.');
   String get careScaleAlmostNever => _t('careScaleAlmostNever', 'Almost Never', 'Halos hindi');
   String get careScaleFairlyOften => _t('careScaleFairlyOften', 'Fairly Often', 'Medyo madalas');
@@ -630,8 +860,6 @@ class AppStrings {
       _t('careCrisisUnsure', 'Unsure? These might help.', 'Hindi sigurado? Maaaring makatulong ito.');
   String get careGoToHotlines =>
       _t('careGoToHotlines', 'Go to 24/7 Hotlines', 'Pumunta sa 24/7 Hotlines');
-  String get careGoToCalmCorner =>
-      _t('careGoToCalmCorner', 'Go to Calm Corner', 'Pumunta sa Calm Corner');
   String get careSupportFooter => _t('careSupportFooter', 
         'You are not alone. Everyone faces challenges; reaching out is a sign of strength.',
         'Hindi ka nag-iisa. Ang paghingi ng tulong ay senyales ng lakas.',
@@ -738,12 +966,24 @@ class AppStrings {
   // Post engagement
   String get like => _t('like', 'Like', 'Like');
   String get comment => _t('comment', 'Comment', 'Komento');
-  String likesCount(int count) =>
-      _t('likesCount', '$count ${count == 1 ? 'like' : 'likes'}', '$count ${count == 1 ? 'like' : 'likes'}', {'count': count.toString()});
-  String commentsCount(int count) => _t('commentsCount', 
-        '$count ${count == 1 ? 'comment' : 'comments'}',
-        '$count ${count == 1 ? 'komento' : 'mga komento'}',
-        {'count': count.toString()});
+  String likesCount(int count) => _countPhrase(
+        count: count,
+        oneKey: 'likesCountOne',
+        manyKey: 'likesCount',
+        enOne: '1 like',
+        enMany: '{count} likes',
+        tlOne: '1 like',
+        tlMany: '{count} likes',
+      );
+  String commentsCount(int count) => _countPhrase(
+        count: count,
+        oneKey: 'commentsCountOne',
+        manyKey: 'commentsCount',
+        enOne: '1 comment',
+        enMany: '{count} comments',
+        tlOne: '1 komento',
+        tlMany: '{count} mga komento',
+      );
   String get savedToBookmarks => _t('savedToBookmarks', 'Saved to bookmarks', 'Nai-save sa mga bookmark');
   String get removedFromBookmarks =>
       _t('removedFromBookmarks', 'Removed from bookmarks', 'Tinanggal sa mga bookmark');
@@ -914,6 +1154,11 @@ class AppStrings {
   String get aboutMeLabel => _t('aboutMeLabel', 'About Me', 'Tungkol sa Akin');
   String get aboutMeHint =>
       _t('aboutMeHint', 'Tell others a little about yourself', 'Magbahagi ng kaunti tungkol sa iyong sarili');
+  String aboutMeLimitHint(int max) => _t('aboutMeLimitHint', 
+        'Up to $max characters so it stays short on your profile.',
+        'Hanggang $max na character para hindi masyadong mahaba sa profile.',
+        {'max': max.toString()},
+      );
   String get interestsLabel => _t('interestsLabel', 'Interests', 'Mga Interes');
   String get interestsHint =>
       _t('interestsHint', 'Select your interests', 'Piliin ang iyong mga interes');
@@ -1085,6 +1330,10 @@ class AppStrings {
   String get updateFailed =>
       _t('updateFailed', 'Update failed. Please try again.', 'Hindi na-update. Subukan muli.');
   String get changePhoto => _t('changePhoto', 'Change photo', 'Palitan ang larawan');
+  String get profilePhotoTitle =>
+      _t('profilePhotoTitle', 'Profile photo', 'Larawan ng profile');
+  String get removePhoto => _t('removePhoto', 'Remove photo', 'Alisin ang larawan');
+  String get photoRemoved => _t('photoRemoved', 'Photo removed', 'Naalis ang larawan');
   String get name => _t('name', 'Name', 'Pangalan');
   String get save => _t('save', 'Save', 'I-save');
   String get currentPasswordRequired =>
@@ -1109,6 +1358,21 @@ class AppStrings {
   String get email => _t('email', 'Email', 'Email');
   String get password => _t('password', 'Password', 'Password');
   String get emailRequired => _t('emailRequired', 'Email is required', 'Kailangan ang email');
+  String get emailInvalid => _t(
+        'emailInvalid',
+        'Enter a valid email address, like name@example.com',
+        'Maglagay ng wastong email, tulad ng name@example.com',
+      );
+  String get emailTaken => _t(
+        'emailTaken',
+        'This email is already registered. Sign in or use another email.',
+        'Nakarehistro na ang email na ito. Mag-sign in o gumamit ng iba.',
+      );
+  String get emailCheckFailed => _t(
+        'emailCheckFailed',
+        'Could not verify that email. Check your connection and try again.',
+        'Hindi ma-verify ang email. Tingnan ang connection at subukan muli.',
+      );
   String get passwordRequired => _t('passwordRequired', 'Password is required', 'Kailangan ang password');
   String get loginFailed =>
       _t('loginFailed', 'Login failed. Please check your credentials.', 'Hindi matagumpay ang login. Suriin ang credentials.');
@@ -1345,10 +1609,15 @@ class AppStrings {
         'Try a different title or category.',
         'Subukan ang ibang pamagat o category.',
       );
-  String activityItemsCount(int count) => _t('activityItemsCount', 
-        '$count ${count == 1 ? 'item' : 'items'}',
-        '$count ${count == 1 ? 'item' : 'mga item'}',
-        {'count': count.toString()});
+  String activityItemsCount(int count) => _countPhrase(
+        count: count,
+        oneKey: 'activityItemsCountOne',
+        manyKey: 'activityItemsCount',
+        enOne: '1 item',
+        enMany: '{count} items',
+        tlOne: '1 item',
+        tlMany: '{count} mga item',
+      );
 
   // Rehab
   String get rehabCentersTitle => _t('rehabCentersTitle', 'Rehab Centers', 'Mga Rehab Center');
@@ -1359,10 +1628,15 @@ class AppStrings {
   String get rateAndReview => _t('rateAndReview', 'Rate & Review', 'Mag-rate at Mag-review');
   String get updateYourRating => _t('updateYourRating', 'Update your rating', 'I-update ang iyong rating');
   String get noRatingsYet => _t('noRatingsYet', 'No ratings yet', 'Wala pang rating');
-  String ratingsCount(int count) => _t('ratingsCount', 
-        '$count ${count == 1 ? 'rating' : 'ratings'}',
-        '$count ${count == 1 ? 'rating' : 'mga rating'}',
-        {'count': count.toString()});
+  String ratingsCount(int count) => _countPhrase(
+        count: count,
+        oneKey: 'ratingsCountOne',
+        manyKey: 'ratingsCount',
+        enOne: '1 rating',
+        enMany: '{count} ratings',
+        tlOne: '1 rating',
+        tlMany: '{count} mga rating',
+      );
   String get ratingSubmitted => _t('ratingSubmitted', 'Rating submitted', 'Naipasa ang rating');
   String get submitRating => _t('submitRating', 'Submit rating', 'Ipasa ang rating');
   String get chooseRating =>
@@ -1433,10 +1707,14 @@ class AppStrings {
   String get tapStarsToRate =>
       _t('tapStarsToRate', 'Tap a star to rate', 'Mag-tap ng bituin para mag-rate');
   String get writeReply => _t('writeReply', 'Write a reply...', 'Sumulat ng tugon...');
-  String youRatedStars(int rating) => _t('youRatedStars', 
-        'You rated this $rating star${rating == 1 ? '' : 's'}',
-        'Ni-rate mo ito ng $rating bituin',
-        {'rating': rating.toString()});
+  String youRatedStars(int rating) => rating == 1
+      ? _t('youRatedStarOne', 'You rated this 1 star', 'Ni-rate mo ito ng 1 bituin')
+      : _t(
+          'youRatedStars',
+          'You rated this {rating} stars',
+          'Ni-rate mo ito ng {rating} bituin',
+          {'rating': rating.toString()},
+      );
 
   // Review sheet
   String get rateThisContent => _t('rateThisContent', 'Rate this content', 'I-rate ang nilalamang ito');
@@ -1491,6 +1769,7 @@ class AppStrings {
   // Kid Listo Says (motivational quotes)
   String get dailyVerseTitle => _t('dailyVerseTitle', 'Kid Listo Says', 'Kid Listo Says');
   String get kidListoSaysTitle => _t('kidListoSaysTitle', 'Kid Listo Says', 'Kid Listo Says');
+  String get kidListoLogo => _t('kidListoLogo', 'Kid Listo', 'Kid Listo');
   String get kidListoMotivationalTagline => _t('kidListoMotivationalTagline', 
         'A daily motivational quote for a drug-free youth',
         'Araw-araw na motivational quote para sa drug-free youth',
@@ -1539,7 +1818,7 @@ class AppStrings {
       isTagalog ? '$count kabanata' : '$count chapters';
 
   // Journal (API/code still use diary-*)
-  String get diaryTitle => _t('diaryTitle', 'Journal', 'Journal');
+  String get diaryTitle => _t('diaryTitle', 'My Journal', 'Aking Journal');
   String get writeToday => _t('writeToday', 'Start Writing', 'Magsimulang sumulat');
   String get diaryLoginRequired => _t('diaryLoginRequired', 
         'Sign in to keep your private daily journal.',
@@ -1566,8 +1845,31 @@ class AppStrings {
       _t('deleteDiaryBody', 'This entry will be removed permanently.', 'Permanenteng mabubura ang entry na ito.');
   String get diaryDeleteFailed =>
       _t('diaryDeleteFailed', 'Could not delete journal entry.', 'Hindi mabura ang journal entry.');
+  String get diaryDeleted =>
+      _t('diaryDeleted', 'Journal entry deleted', 'Nabura ang journal entry');
 
   String get journalYourEntries => _t('journalYourEntries', 'Your Entries', 'Mga Entry Mo');
+  String get journalFilterTitle =>
+      _t('journalFilterTitle', 'Filter entries', 'I-filter ang entries');
+  String get journalFilterAll => _t('journalFilterAll', 'All', 'Lahat');
+  String get journalFilterToday => _t('journalFilterToday', 'Today', 'Ngayon');
+  String get journalFilterThisWeek =>
+      _t('journalFilterThisWeek', 'This week', 'Linggong ito');
+  String get journalFilterThisMonth =>
+      _t('journalFilterThisMonth', 'This month', 'Buwan na ito');
+  String get journalFilterClear => _t('journalFilterClear', 'Clear', 'I-clear');
+  String get journalFilterReset => _t('journalFilterReset', 'Reset', 'I-reset');
+  String get journalFilterApply => _t('journalFilterApply', 'Apply', 'I-apply');
+  String get journalFilterSearchHint => _t(
+        'journalFilterSearchHint',
+        'Search notes or gratitude…',
+        'Maghanap sa notes o pasasalamat…',
+      );
+  String get journalFilterEmpty => _t(
+        'journalFilterEmpty',
+        'No entries match these filters.',
+        'Walang entry na tumutugma sa filter.',
+      );
   String get journalDailyReflection =>
       _t('journalDailyReflection', 'Daily Reflection', 'Araw-araw na Refleksiyon');
   String get journalNoWrittenNotes =>

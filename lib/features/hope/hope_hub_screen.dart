@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/l10n/locale_scope.dart';
+import '../../core/l10n/widgets/translation_art.dart';
 import '../../core/share/app_share.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
@@ -160,23 +161,13 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.asset(
-                      HopeHubAssets.headerBanner,
+                    child: TranslationArt(
+                      translationKey: 'hopeTitle',
+                      assetFallback: HopeHubAssets.headerBanner,
+                      iconFallback: Icons.groups_rounded,
                       fit: BoxFit.cover,
                       alignment: Alignment.center,
-                      errorBuilder: (_, _, _) => Container(
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              HopeColors.purpleMid,
-                              HopeColors.purple,
-                              HopeColors.purpleDark,
-                            ],
-                          ),
-                        ),
-                      ),
+                      color: Colors.white,
                     ),
                   ),
                   Positioned.fill(
@@ -220,15 +211,13 @@ class _HopeHubScreenState extends State<HopeHubScreen> {
                               ),
                               const SizedBox(width: 10),
                             ],
-                            Image.asset(
-                              'assets/bida/bida_hope_icon.png',
+                            const TranslationArt(
+                              translationKey: 'bidaHopeTitle',
+                              assetFallback: 'assets/bida/bida_hope_icon.png',
+                              iconFallback: Icons.groups_rounded,
                               width: 36,
                               height: 36,
-                              errorBuilder: (_, _, _) => const Icon(
-                                Icons.groups_rounded,
-                                color: Colors.white,
-                                size: 28,
-                              ),
+                              color: Colors.white,
                             ),
                             const SizedBox(width: 10),
                             Expanded(

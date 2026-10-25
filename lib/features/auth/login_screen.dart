@@ -11,6 +11,7 @@ import 'verification_code_screen.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../../core/validation/email_address.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -128,8 +129,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 textInputAction: TextInputAction.next,
                 enabled: !_loading,
                 validator: (value) {
-                  if (value == null || value.isEmpty) {
+                  if (value == null || value.trim().isEmpty) {
                     return l10n.emailRequired;
+                  }
+                  if (!EmailAddress.isValid(value)) {
+                    return l10n.emailInvalid;
                   }
                   return null;
                 },

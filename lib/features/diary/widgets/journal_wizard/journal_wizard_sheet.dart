@@ -64,6 +64,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
   bool _saving = false;
   String? _sky;
   final Set<String> _feelings = {};
+  final List<String> _customFeelingOptions = [];
   String? _impact;
   late final TextEditingController _notesController;
   late final TextEditingController _gratitudeController;
@@ -83,9 +84,9 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
     _entryDate = widget.existing?.entryDate ??
         DateFormat('yyyy-MM-dd').format(DateTime.now());
     _sky = widget.existing?.sky ?? widget.initialSky;
-    _feelings.addAll(widget.existing?.feelings ?? const []);
-    if (_feelings.isEmpty && widget.initialFeelings != null) {
-      _feelings.addAll(widget.initialFeelings!);
+    if (_isEditing) {
+      _feelings.addAll(widget.existing?.feelings ?? const []);
+      _mergeCustomFeelingOptions(_feelings);
     }
     _impact = widget.existing?.impact;
     _existingImageUrl = ApiUrl.resolve(widget.existing?.imageUrl);
@@ -99,15 +100,13 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
     );
     _customFeelingController = TextEditingController();
     _resolvedFirstName = widget.firstName;
-    if (_resolvedFirstName == null || _resolvedFirstName!.trim().isEmpty) {
-      _loadFirstName();
-    }
+    _loadProfile();
     AppOptionCatalog.prefetch().then((_) {
       if (mounted) setState(() {});
     });
   }
 
-  Future<void> _loadFirstName() async {
+  Future<void> _loadProfile() async {
     try {
       final res = await AuthService.authedGet<Map<String, dynamic>>(
         Endpoints.me,
@@ -117,9 +116,30 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
           ? data['data'] as Map<String, dynamic>
           : data;
       final name = (user['name'] as String?)?.trim() ?? '';
-      if (name.isEmpty || !mounted) return;
-      setState(() => _resolvedFirstName = name.split(RegExp(r'\s+')).first);
+      final custom = (user['journal_custom_feelings'] as List?)
+              ?.map((item) => item.toString().trim())
+              .where((item) => item.isNotEmpty)
+              .toList() ??
+          const <String>[];
+      if (!mounted) return;
+      setState(() {
+        if ((_resolvedFirstName == null || _resolvedFirstName!.trim().isEmpty) &&
+            name.isNotEmpty) {
+          _resolvedFirstName = name.split(RegExp(r'\s+')).first;
+        }
+        _mergeCustomFeelingOptions(custom);
+      });
     } catch (_) {}
+  }
+
+  void _mergeCustomFeelingOptions(Iterable<String> values) {
+    final presets = AppOptionCatalog.feelings().map((item) => item.key).toSet();
+    for (final value in values) {
+      if (value.isEmpty || presets.contains(value)) continue;
+      if (!_customFeelingOptions.contains(value)) {
+        _customFeelingOptions.add(value);
+      }
+    }
   }
 
   @override
@@ -280,13 +300,24 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
     return AppOptionCatalog.feelingLabel(key, isTagalog: _isTagalog);
   }
 
-  void _addCustomFeeling() {
+  Future<void> _addCustomFeeling() async {
     final value = _customFeelingController.text.trim();
     if (value.isEmpty) return;
     setState(() {
       _feelings.add(value);
+      _mergeCustomFeelingOptions([value]);
       _customFeelingController.clear();
     });
+    try {
+      await AuthService.authedPut<Map<String, dynamic>>(
+        Endpoints.profileUpdate,
+        data: {
+          'journal_custom_feelings': List<String>.from(_customFeelingOptions),
+        },
+      );
+    } catch (_) {
+      // Keep the chip locally even if the profile save fails.
+    }
   }
 
   @override
@@ -431,6 +462,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
       1 => _FeelingsStep(
           selected: _feelings,
           options: AppOptionCatalog.feelings(),
+          customOptions: _customFeelingOptions,
           onToggle: (key) {
             setState(() {
               if (_feelings.contains(key)) {
@@ -624,6 +656,7 @@ class _FeelingsStep extends StatelessWidget {
   const _FeelingsStep({
     required this.selected,
     required this.options,
+    required this.customOptions,
     required this.onToggle,
     required this.labelOf,
     required this.customController,
@@ -632,6 +665,7 @@ class _FeelingsStep extends StatelessWidget {
 
   final Set<String> selected;
   final List<JournalFeelingOption> options;
+  final List<String> customOptions;
   final ValueChanged<String> onToggle;
   final String Function(JournalFeelingOption) labelOf;
   final TextEditingController customController;
@@ -641,7 +675,13 @@ class _FeelingsStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final presetKeys = options.map((e) => e.key).toSet();
-    final custom = selected.where((f) => !presetKeys.contains(f)).toList();
+    final extras = <String>[];
+    for (final feeling in [...customOptions, ...selected]) {
+      if (presetKeys.contains(feeling) || extras.contains(feeling)) {
+        continue;
+      }
+      extras.add(feeling);
+    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -670,40 +710,17 @@ class _FeelingsStep extends StatelessWidget {
           runSpacing: 8,
           children: [
             ...options.map((opt) {
-              final isOn = selected.contains(opt.key);
-              return FilterChip(
-                label: Text(labelOf(opt)),
-                selected: isOn,
-                onSelected: (_) => onToggle(opt.key),
-                showCheckmark: false,
-                selectedColor: AppColors.accentYellow,
-                backgroundColor: context.chipBackground,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: isOn
-                      ? AppColors.nileBlue
-                      : context.textPrimary,
-                ),
-                side: BorderSide(
-                  color: isOn
-                      ? AppColors.accentYellow
-                      : context.borderSubtle,
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+              return _feelingChip(
+                context,
+                label: labelOf(opt),
+                value: opt.key,
               );
             }),
-            ...custom.map((feeling) {
-              return FilterChip(
-                label: Text(feeling),
-                selected: true,
-                onSelected: (_) => onToggle(feeling),
-                showCheckmark: false,
-                selectedColor: AppColors.accentYellow,
-                labelStyle: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: context.textPrimary,
-                ),
-                side: const BorderSide(color: AppColors.accentYellow),
+            ...extras.map((feeling) {
+              return _feelingChip(
+                context,
+                label: feeling,
+                value: feeling,
               );
             }),
           ],
@@ -751,6 +768,30 @@ class _FeelingsStep extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _feelingChip(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    final isOn = selected.contains(value);
+    return FilterChip(
+      label: Text(label),
+      selected: isOn,
+      onSelected: (_) => onToggle(value),
+      showCheckmark: false,
+      selectedColor: AppColors.accentYellow,
+      backgroundColor: context.chipBackground,
+      labelStyle: TextStyle(
+        fontWeight: FontWeight.w600,
+        color: isOn ? AppColors.nileBlue : context.textPrimary,
+      ),
+      side: BorderSide(
+        color: isOn ? AppColors.accentYellow : context.borderSubtle,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
     );
   }
 }

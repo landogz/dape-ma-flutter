@@ -1,10 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/locale_scope.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
+import '../widgets/calm_complete_page.dart';
+import '../widgets/calm_info_sheet.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 
 class StretchBreaksScreen extends StatefulWidget {
@@ -61,10 +67,16 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
       backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: '',
-        onInfo: () => showCalmInfoDialog(
+        onInfo: () => showCalmInfoSheet(
           context,
-          title: l10n.careCalmInfoTitle,
-          body: l10n.careCalmInfoBody,
+          CalmInfoCopy(
+            whyTitle: l10n.careWhyMeditation,
+            whyBody: l10n.careStretchSessionHint,
+            howTitle: l10n.careHowToUse,
+            howBody: l10n.careCalmStudentIntro,
+            tipTitle: l10n.careQuickTip,
+            tipBody: l10n.careStretchHold,
+          ),
         ),
       ),
       body: SafeArea(
@@ -201,7 +213,7 @@ class _StretchBreaksScreenState extends State<StretchBreaksScreen> {
                   ),
                   Switch.adaptive(
                     value: _reminderOn,
-                    activeThumbColor: CareColors.calmForest,
+                    activeThumbColor: AppColors.mediumElectricBlue,
                     onChanged: _setReminder,
                   ),
                 ],
@@ -287,7 +299,7 @@ class _StretchCard extends StatelessWidget {
   }
 }
 
-class _StretchSessionScreen extends StatelessWidget {
+class _StretchSessionScreen extends StatefulWidget {
   const _StretchSessionScreen({
     required this.title,
     required this.body,
@@ -299,67 +311,169 @@ class _StretchSessionScreen extends StatelessWidget {
   final IconData icon;
 
   @override
+  State<_StretchSessionScreen> createState() => _StretchSessionScreenState();
+}
+
+class _StretchSessionScreenState extends State<_StretchSessionScreen> {
+  static const _holdSeconds = 20;
+  Timer? _ticker;
+  bool _running = false;
+  bool _finished = false;
+  int _step = 0;
+  int _secondsLeft = _holdSeconds;
+
+  List<String> _cues(AppStrings l10n) => [
+        widget.body,
+        l10n.careStretchNeck,
+        l10n.careStretchShoulders,
+        l10n.careStretchReach,
+      ];
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  void _toggle() {
+    HapticFeedback.selectionClick();
+    setState(() => _running = !_running);
+    if (_running) {
+      _ticker?.cancel();
+      _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+        if (!_running || !mounted || _finished) return;
+        setState(() {
+          if (_secondsLeft > 1) {
+            _secondsLeft--;
+            return;
+          }
+          final cues = _cues(context.l10n);
+          if (_step >= cues.length - 1) {
+            _complete();
+            return;
+          }
+          _step++;
+          _secondsLeft = _holdSeconds;
+        });
+      });
+    } else {
+      _ticker?.cancel();
+    }
+  }
+
+  void _complete() {
+    if (_finished) return;
+    _finished = true;
+    _ticker?.cancel();
+    _running = false;
+    final l10n = context.l10n;
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => CalmCompletePage(
+          title: l10n.careWellDone,
+          body: l10n.careSessionComplete,
+          hint: l10n.careNoticeBody,
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final cues = _cues(l10n);
     return Scaffold(
       backgroundColor: CareColors.pageBgOf(context),
-      appBar: CalmAppBar(title: title),
+      appBar: CalmAppBar(title: widget.title),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
+              Text(
+                '${_step + 1} / ${cues.length}',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: CareColors.mutedOf(context),
+                ),
+              ),
               const Spacer(),
               Container(
-                width: 120,
-                height: 120,
+                width: 140,
+                height: 140,
                 decoration: BoxDecoration(
                   color: CareColors.calmCardOf(context),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, size: 56, color: CareColors.headingOf(context)),
+                alignment: Alignment.center,
+                child: Text(
+                  '$_secondsLeft',
+                  style: TextStyle(
+                    fontSize: 52,
+                    fontWeight: FontWeight.w800,
+                    color: CareColors.headingOf(context),
+                  ),
+                ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+              Icon(widget.icon, size: 40, color: CareColors.headingOf(context)),
+              const SizedBox(height: 16),
               Text(
-                body,
-                textAlign: TextAlign.center,
+                l10n.careStretchHold,
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: FontWeight.w800,
                   color: CareColors.headingOf(context),
                 ),
               ),
               const SizedBox(height: 10),
               Text(
-                l10n.careStretchSessionHint,
+                cues[_step],
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: CareColors.mutedOf(context),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                   height: 1.4,
+                  color: CareColors.headingOf(context),
                 ),
               ),
               const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: FilledButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(l10n.careSessionComplete)),
-                    );
-                    Navigator.of(context).maybePop();
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: CareColors.calmForest,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+              Row(
+                children: [
+                  Material(
+                    color: AppColors.mediumElectricBlue,
+                    shape: const CircleBorder(),
+                    child: InkWell(
+                      customBorder: const CircleBorder(),
+                      onTap: _toggle,
+                      child: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: Icon(
+                          _running ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
-                  child: Text(
-                    l10n.careStartStretch,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: CareColors.headingOf(context),
+                        side: BorderSide(color: CareColors.cardBorderOf(context)),
+                        minimumSize: const Size(0, 56),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.careEndSession,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),

@@ -32,7 +32,7 @@ class CommentBubble extends StatelessWidget {
     final l10n = context.l10n;
     final metaLabel = timeAgo.isNotEmpty ? timeAgo : 'Just now';
     final isReply = depth > 0;
-    final hasBody = comment.body.trim().isNotEmpty;
+    final hasBody = comment.displayBody.trim().isNotEmpty;
     final hasImage =
         comment.imageUrl != null && comment.imageUrl!.trim().isNotEmpty;
 
@@ -74,7 +74,7 @@ class CommentBubble extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       UserAvatar(
-                        name: comment.authorName,
+                        name: comment.displayAuthorName,
                         imageUrl: comment.authorAvatarUrl,
                         radius: isReply ? 16 : 18,
                       ),
@@ -92,7 +92,7 @@ class CommentBubble extends StatelessWidget {
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        comment.authorName,
+                                        comment.displayAuthorName,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: AppTypography.body(
@@ -181,7 +181,7 @@ class CommentBubble extends StatelessWidget {
                             if (hasBody) ...[
                               const SizedBox(height: 8),
                               Text(
-                                comment.body,
+                                comment.displayBody,
                                 style: AppTypography.body(
                                   color: context.textPrimary,
                                   fontSize: 14,

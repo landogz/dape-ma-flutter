@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/l10n/translation_catalog.dart';
+import '../../../core/l10n/translation_glyph.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -16,6 +18,13 @@ class MainBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: TranslationCatalog.instance,
+      builder: (context, _) => _buildBar(context),
+    );
+  }
+
+  Widget _buildBar(BuildContext context) {
     final l10n = context.l10n;
 
     return SafeArea(
@@ -38,6 +47,7 @@ class MainBottomNav extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _NavItem(
+              translationKey: 'navHome',
               icon: Icons.home_outlined,
               activeIcon: Icons.home_rounded,
               label: l10n.navHome,
@@ -45,6 +55,7 @@ class MainBottomNav extends StatelessWidget {
               onTap: () => onTap(0),
             ),
             _NavItem(
+              translationKey: 'navHope',
               icon: Icons.groups_outlined,
               activeIcon: Icons.groups_rounded,
               label: l10n.navHope,
@@ -52,6 +63,7 @@ class MainBottomNav extends StatelessWidget {
               onTap: () => onTap(1),
             ),
             _NavItem(
+              translationKey: 'navFaq',
               icon: Icons.help_outline_rounded,
               activeIcon: Icons.help_rounded,
               label: l10n.navFaq,
@@ -59,6 +71,7 @@ class MainBottomNav extends StatelessWidget {
               onTap: () => onTap(2),
             ),
             _NavItem(
+              translationKey: 'navCare',
               icon: Icons.volunteer_activism_outlined,
               activeIcon: Icons.volunteer_activism_rounded,
               label: l10n.navCare,
@@ -66,6 +79,7 @@ class MainBottomNav extends StatelessWidget {
               onTap: () => onTap(3),
             ),
             _NavItem(
+              translationKey: 'navAccount',
               icon: Icons.person_outline,
               activeIcon: Icons.person_rounded,
               label: l10n.navAccount,
@@ -81,6 +95,7 @@ class MainBottomNav extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   const _NavItem({
+    required this.translationKey,
     required this.icon,
     required this.activeIcon,
     required this.label,
@@ -88,6 +103,7 @@ class _NavItem extends StatelessWidget {
     required this.onTap,
   });
 
+  final String translationKey;
   final IconData icon;
   final IconData activeIcon;
   final String label;
@@ -111,6 +127,7 @@ class _NavItem extends StatelessWidget {
       borderRadius: BorderRadius.circular(24),
       child: SizedBox(
         width: 60,
+        height: 68,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -125,8 +142,9 @@ class _NavItem extends StatelessWidget {
                     : Colors.transparent,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                selected ? activeIcon : icon,
+              child: TranslationGlyph(
+                translationKey: translationKey,
+                fallbackIcon: selected ? activeIcon : icon,
                 color: iconColor,
                 size: 22,
               ),

@@ -12,6 +12,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/api_url.dart';
 import 'edit_profile/interests_picker_sheet.dart';
+import 'profile/profile_about.dart';
+import 'profile/profile_photo_sheet.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -86,6 +88,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
     if (saved == null || !mounted) return;
     await _saveProfile(name: _name, interests: saved);
+  }
+
+  bool get _hasProfilePhoto =>
+      _pickedFile != null || (_photoUrl != null && _photoUrl!.trim().isNotEmpty);
+
+  Future<void> _onPhotoTap() async {
+    if (_saving) return;
+    final l10n = context.l10n;
+    final choice = await ProfilePhotoSheet.show(
+      context,
+      title: l10n.profilePhotoTitle,
+      changeLabel: l10n.changePhoto,
+      removeLabel: l10n.removePhoto,
+      cancelLabel: l10n.cancel,
+      canRemove: _hasProfilePhoto,
+    );
+    if (!mounted) return;
+
+    switch (choice) {
+      case ProfilePhotoChoice.change:
+        await _pickImage();
+      case ProfilePhotoChoice.remove:
+        await _saveProfile(name: _name, removePhoto: true);
+      case null:
+        return;
+    }
   }
 
   Future<void> _pickImage() async {
@@ -169,7 +197,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _editAbout() async {
-    final controller = TextEditingController(text: _about ?? '');
     final saved = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
@@ -177,70 +204,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (ctx) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 20,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                context.l10n.aboutMeLabel,
-                style: TextStyle(
-                  color: context.heading,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 14),
-              TextField(
-                controller: controller,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: context.l10n.aboutMeHint,
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: Text(context.l10n.save),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      builder: (ctx) => _AboutMeSheet(initialValue: _about),
     );
 
     if (saved != null) {
-      setState(() => _about = saved.isEmpty ? null : saved);
-      // Local-only bio for now if API has no about field.
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.profileUpdated),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
+      final about = ProfileAbout.clamp(saved);
+      await _saveProfile(
+        name: _name,
+        about: about.isEmpty ? null : about,
+        updateAbout: true,
+      );
     }
   }
 
@@ -257,14 +230,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String name,
     File? photoFile,
     List<String>? interests,
+    bool removePhoto = false,
+    String? about,
+    bool updateAbout = false,
   }) async {
     setState(() => _saving = true);
     try {
-      if (photoFile != null) {
+      if (removePhoto) {
+        await AuthService.authedPut<Map<String, dynamic>>(
+          Endpoints.profileUpdate,
+          data: const {'remove_profile_photo': true},
+        );
+        if (mounted) {
+          setState(() {
+            _photoUrl = null;
+            _pickedFile = null;
+          });
+        }
+      } else if (photoFile != null) {
         // POST multipart — PHP does not reliably parse files on PUT.
         final formData = FormData.fromMap({
           'name': name,
           'interests': ?interests,
+          if (updateAbout) 'about': about ?? '',
           'profile_photo': await MultipartFile.fromFile(
             photoFile.path,
             filename: photoFile.path.split(RegExp(r'[/\\]')).last,
@@ -290,8 +278,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await AuthService.authedPut<Map<String, dynamic>>(
           Endpoints.profileUpdate,
           data: <String, dynamic>{
-            'name': name,
+            if (!updateAbout) 'name': name,
             'interests': ?interests,
+            if (updateAbout) 'about': about ?? '',
           },
         );
       }
@@ -302,12 +291,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (interests != null) {
           _interests = List<String>.from(interests);
         }
+        if (updateAbout) {
+          _about = about;
+        }
         _saving = false;
         _pickedFile = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.profileUpdated),
+          content: Text(
+            removePhoto
+                ? context.l10n.photoRemoved
+                : context.l10n.profileUpdated,
+          ),
           backgroundColor: Colors.green,
         ),
       );
@@ -376,7 +372,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             elevation: 2,
                             child: InkWell(
                               customBorder: const CircleBorder(),
-                              onTap: _saving ? null : _pickImage,
+                              onTap: _saving ? null : _onPhotoTap,
                               child: Padding(
                                 padding: EdgeInsets.all(8),
                                 child: Icon(
@@ -437,7 +433,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   icon: Icons.star_outline_rounded,
                   value: (_about == null || _about!.isEmpty)
                       ? l10n.aboutMeHint
-                      : _about!,
+                      : ProfileAbout.clamp(_about),
                   label: l10n.aboutMeLabel,
                   onTap: _editAbout,
                 ),
@@ -723,6 +719,104 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _AboutMeSheet extends StatefulWidget {
+  const _AboutMeSheet({this.initialValue});
+
+  final String? initialValue;
+
+  @override
+  State<_AboutMeSheet> createState() => _AboutMeSheetState();
+}
+
+class _AboutMeSheetState extends State<_AboutMeSheet> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: ProfileAbout.clamp(widget.initialValue),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            l10n.aboutMeLabel,
+            style: TextStyle(
+              color: context.heading,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.aboutMeLimitHint(ProfileAbout.maxLength),
+            style: TextStyle(
+              color: context.textSecondary,
+              fontSize: 13,
+              height: 1.35,
+            ),
+          ),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            maxLines: 2,
+            maxLength: ProfileAbout.maxLength,
+            decoration: InputDecoration(
+              hintText: l10n.aboutMeHint,
+              filled: true,
+              counterStyle: TextStyle(
+                color: context.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 48,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(
+                ProfileAbout.clamp(_controller.text),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primaryBlue,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: Text(l10n.save),
+            ),
+          ),
+        ],
       ),
     );
   }

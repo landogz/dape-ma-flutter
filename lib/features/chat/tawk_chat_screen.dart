@@ -82,13 +82,6 @@ class _TawkChatScreenState extends State<TawkChatScreen> {
       appBar: BrandAppBar(
         title: title,
         automaticallyImplyLeading: !widget.embeddedInShell,
-        actions: [
-          IconButton(
-            onPressed: _openInBrowser,
-            tooltip: 'Open in browser',
-            icon: const Icon(Icons.open_in_browser),
-          ),
-        ],
       ),
       body: SafeArea(
         bottom: !widget.embeddedInShell,

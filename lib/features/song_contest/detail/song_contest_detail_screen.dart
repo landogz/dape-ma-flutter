@@ -4,6 +4,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/moderation/word_masker.dart';
 import '../../../core/models/song_contest.dart';
 import '../../../core/models/song_contest_entry.dart';
 import '../../../core/network/api_client.dart';
@@ -358,7 +359,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
               children: [
                 Expanded(
                   child: Text(
-                    entry.title,
+                    WordMasker.mask(entry.title),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
@@ -400,7 +401,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
             if (entry.lyrics != null && entry.lyrics!.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                entry.lyrics!,
+                WordMasker.mask(entry.lyrics),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ],

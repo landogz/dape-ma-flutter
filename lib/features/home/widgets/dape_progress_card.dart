@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/l10n/widgets/translation_art.dart';
 import 'home_header.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -71,14 +72,13 @@ class DapeProgressCard extends StatelessWidget {
               SizedBox(
                 width: 96,
                 height: 72,
-                child: Image.asset(
-                  HomeAssets.progressArt,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => Icon(
-                    Icons.auto_stories_rounded,
-                    color: context.iconOnSurface,
-                    size: 48,
-                  ),
+                child: TranslationArt(
+                  translationKey: 'homeDapeProgress',
+                  assetFallback: HomeAssets.progressArt,
+                  iconFallback: Icons.auto_stories_rounded,
+                  width: 96,
+                  height: 72,
+                  color: context.iconOnSurface,
                 ),
               ),
             ],

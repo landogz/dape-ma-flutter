@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../care_colors.dart';
 
 class CalmBenefitCard extends StatelessWidget {
@@ -26,9 +27,9 @@ class CalmBenefitCard extends StatelessWidget {
         children: [
           Text(
             heading,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: CareColors.calmForestMid,
+              color: CareColors.headingOf(context),
               fontSize: 14,
             ),
           ),
@@ -95,7 +96,7 @@ class CalmPrimaryButton extends StatelessWidget {
           ),
         ),
         style: FilledButton.styleFrom(
-          backgroundColor: CareColors.calmForest,
+          backgroundColor: AppColors.mediumElectricBlue,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),

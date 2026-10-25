@@ -6,6 +6,7 @@ import '../../care_colors.dart';
 import '../meditation/meditation_screen.dart' show GuidedSessionLauncher;
 import '../widgets/calm_app_bar.dart';
 import '../widgets/calm_benefit_card.dart';
+import '../widgets/calm_info_sheet.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 
 class VisualizationScreen extends StatelessWidget {
@@ -19,10 +20,16 @@ class VisualizationScreen extends StatelessWidget {
       backgroundColor: context.pageBackground,
       appBar: CalmAppBar(
         title: l10n.careVisualizationTitle,
-        onInfo: () => showCalmInfoDialog(
+        onInfo: () => showCalmInfoSheet(
           context,
-          title: l10n.careCalmInfoTitle,
-          body: l10n.careCalmInfoBody,
+          CalmInfoCopy(
+            whyTitle: l10n.careWhyMeditation,
+            whyBody: l10n.careWhyVisualizationBody,
+            howTitle: l10n.careHowToUse,
+            howBody: l10n.careHowVisualizationBody,
+            tipTitle: l10n.careQuickTip,
+            tipBody: l10n.careVisualizationTip,
+          ),
         ),
       ),
       body: SafeArea(

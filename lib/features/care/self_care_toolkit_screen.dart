@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_scope.dart';
 import 'care_colors.dart';
-import 'checks/stress_check_screen.dart';
+import 'checks/check_launch.dart';
 import 'mood_tracker_screen.dart';
 import '../../core/theme/app_theme_colors.dart';
 
@@ -61,25 +61,19 @@ class SelfCareToolkitScreen extends StatelessWidget {
             title: l10n.careStressCheck,
             subtitle: l10n.careStressCheckBody,
             icon: Icons.cloud_outlined,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const StressCheckScreen()),
-            ),
+            onTap: () => openCareCheck(context, 'stress'),
           ),
           _ToolkitTile(
             title: l10n.careAnxietyCheck,
             subtitle: l10n.careAnxietyCheckBody,
             icon: Icons.sentiment_dissatisfied_outlined,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const AnxietyCheckScreen()),
-            ),
+            onTap: () => openCareCheck(context, 'anxiety'),
           ),
           _ToolkitTile(
             title: l10n.careSleepQuality,
             subtitle: l10n.careSleepQualityBody,
             icon: Icons.bedtime_outlined,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SleepQualityScreen()),
-            ),
+            onTap: () => openCareCheck(context, 'sleep'),
           ),
           _ToolkitTile(
             title: l10n.careMoodTracker,

@@ -6,6 +6,7 @@ class CareToolkitQuestion {
     required this.question,
     required this.options,
     required this.sortOrder,
+    this.isReverse = false,
   });
 
   final int id;
@@ -14,6 +15,7 @@ class CareToolkitQuestion {
   final String question;
   final List<String> options;
   final int sortOrder;
+  final bool isReverse;
 
   factory CareToolkitQuestion.fromJson(Map<String, dynamic> json) {
     final rawOptions = json['options'];
@@ -26,6 +28,7 @@ class CareToolkitQuestion {
           ? rawOptions.map((e) => e.toString()).toList()
           : const [],
       sortOrder: (json['sort_order'] as num?)?.toInt() ?? 0,
+      isReverse: json['is_reverse'] == true || json['is_reverse'] == 1,
     );
   }
 }

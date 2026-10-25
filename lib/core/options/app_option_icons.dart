@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 
+import 'heroicon_material.dart';
+
 IconData appOptionIcon(String? name, {required IconData fallback}) {
-  return switch (name) {
+  if (name == null || name.trim().isEmpty) {
+    return fallback;
+  }
+  var key = name.trim();
+  if (key.startsWith('solid/')) {
+    key = key.substring(6);
+  }
+  final heroicon = heroiconMaterialIcon(key);
+  if (heroicon != null) {
+    return heroicon;
+  }
+  return switch (key) {
     'school_outlined' => Icons.school_outlined,
     'family_restroom_outlined' => Icons.family_restroom_outlined,
     'menu_book_outlined' => Icons.menu_book_outlined,
@@ -10,6 +23,12 @@ IconData appOptionIcon(String? name, {required IconData fallback}) {
     'flag_outlined' => Icons.flag_outlined,
     'work_outline' => Icons.work_outline,
     'volunteer_activism_outlined' => Icons.volunteer_activism_outlined,
+    'volunteer_activism_rounded' => Icons.volunteer_activism_rounded,
+    'handshake_outlined' => Icons.handshake_outlined,
+    'handshake_rounded' => Icons.handshake_rounded,
+    'spa_outlined' => Icons.spa_outlined,
+    'auto_awesome_outlined' => Icons.auto_awesome_outlined,
+    'menu_book_rounded' => Icons.menu_book_rounded,
     'medical_services_outlined' => Icons.medical_services_outlined,
     'wb_sunny_outlined' => Icons.wb_sunny_outlined,
     'cloud_queue_outlined' => Icons.cloud_queue_outlined,
@@ -23,6 +42,11 @@ IconData appOptionIcon(String? name, {required IconData fallback}) {
     'place_outlined' => Icons.place_outlined,
     'self_improvement_outlined' => Icons.self_improvement_outlined,
     'home_outlined' => Icons.home_outlined,
+    'home_rounded' => Icons.home_rounded,
+    'groups_rounded' => Icons.groups_rounded,
+    'help_outline_rounded' => Icons.help_outline_rounded,
+    'help_rounded' => Icons.help_rounded,
+    'person_rounded' => Icons.person_rounded,
     'fitness_center_outlined' => Icons.fitness_center_outlined,
     'restaurant_outlined' => Icons.restaurant_outlined,
     'label_outline' => Icons.label_outline,

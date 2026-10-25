@@ -53,6 +53,7 @@ dependencies:
   package_info_plus: ^9.0.1
   shared_preferences: ^2.5.5
   flutter_tts: ^4.2.5
+  audioplayers: ^6.5.0
   image: ^4.10.1
   path_provider: ^2.1.6
   path: ^1.9.1
@@ -97,6 +98,7 @@ flutter:
     - assets/ddb.png
     - assets/bida/
     - assets/care/
+    - assets/care/calm/
     - assets/home/
     - assets/hope/
     - assets/kid_listo/

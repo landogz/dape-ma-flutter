@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/moderation/word_masker.dart';
 import '../../../core/models/poster_contest.dart';
 import '../../../core/models/poster_contest_entry.dart';
 import '../../../core/network/api_client.dart';
@@ -313,7 +314,7 @@ class _PublishedPosterTile extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    entry.title,
+                    WordMasker.mask(entry.title),
                     style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),

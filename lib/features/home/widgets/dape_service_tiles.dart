@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/l10n/widgets/translation_art.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 
@@ -34,6 +35,7 @@ class DapeServiceTiles extends StatelessWidget {
           Expanded(
             child: _ServiceTile(
               label: l10n.bidaLearnTitle,
+              translationKey: 'bidaLearnTitle',
               logoAsset: learnLogo,
               fallbackIcon: Icons.menu_book_rounded,
               background: AppColors.softBlue,
@@ -47,6 +49,7 @@ class DapeServiceTiles extends StatelessWidget {
           Expanded(
             child: _ServiceTile(
               label: l10n.bidaHopeTitle,
+              translationKey: 'bidaHopeTitle',
               logoAsset: hopeLogo,
               fallbackIcon: Icons.groups_rounded,
               background: AppColors.softPurple,
@@ -59,6 +62,7 @@ class DapeServiceTiles extends StatelessWidget {
           Expanded(
             child: _ServiceTile(
               label: l10n.bidaCareTitle,
+              translationKey: 'bidaCareTitle',
               logoAsset: careLogo,
               fallbackIcon: Icons.favorite_rounded,
               background: AppColors.softGold,
@@ -76,6 +80,7 @@ class DapeServiceTiles extends StatelessWidget {
 class _ServiceTile extends StatefulWidget {
   const _ServiceTile({
     required this.label,
+    required this.translationKey,
     required this.logoAsset,
     required this.fallbackIcon,
     required this.background,
@@ -86,6 +91,7 @@ class _ServiceTile extends StatefulWidget {
   });
 
   final String label;
+  final String translationKey;
   final String logoAsset;
   final IconData fallbackIcon;
   final Color background;
@@ -137,16 +143,15 @@ class _ServiceTileState extends State<_ServiceTile> {
                 SizedBox(
                   height: 46,
                   width: 46,
-                  child: Image.asset(
-                    widget.logoAsset,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Icon(
-                      widget.fallbackIcon,
-                      color: context.isDarkMode
-                          ? context.textPrimary
-                          : widget.foreground,
-                      size: 36,
-                    ),
+                  child: TranslationArt(
+                    translationKey: widget.translationKey,
+                    assetFallback: widget.logoAsset,
+                    iconFallback: widget.fallbackIcon,
+                    width: 46,
+                    height: 46,
+                    color: context.isDarkMode
+                        ? context.textPrimary
+                        : widget.foreground,
                   ),
                 ),
                 const SizedBox(height: 10),

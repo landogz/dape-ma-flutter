@@ -446,7 +446,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
             children: [
               Expanded(
                 child: Text(
-                  entry.title,
+                  entry.displayTitle,
                   style: TextStyle(
                     color: HopeColors.headingOf(context),
                     fontWeight: FontWeight.w800,
@@ -459,7 +459,7 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
           ),
           const SizedBox(height: 4),
           Text(
-            entry.creatorName,
+            entry.displayCreatorName,
             style: TextStyle(color: HopeColors.mutedOf(context), fontSize: 12),
           ),
           if (_isPoster && posterUrl != null && posterUrl.isNotEmpty) ...[
@@ -504,17 +504,17 @@ class _PublishedEntryTileState extends State<_PublishedEntryTile> {
               style: TextButton.styleFrom(foregroundColor: HopeColors.purple),
             ),
           ],
-          if (entry.lyrics != null && entry.lyrics!.isNotEmpty) ...[
+          if (entry.displayLyrics.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              entry.lyrics!,
+              entry.displayLyrics,
               style: TextStyle(color: HopeColors.bodyOf(context), fontSize: 13),
             ),
           ],
-          if (entry.description != null && entry.description!.isNotEmpty) ...[
+          if (entry.displayDescription.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
-              entry.description!,
+              entry.displayDescription,
               style: TextStyle(color: HopeColors.mutedOf(context), fontSize: 13),
             ),
           ],

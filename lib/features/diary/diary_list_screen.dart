@@ -11,6 +11,9 @@ import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/api_url.dart';
 import '../auth/login_screen.dart';
 import 'diary_service.dart';
+import 'widgets/journal_filter/journal_entry_filters.dart';
+import 'widgets/journal_filter/journal_filter_bar.dart';
+import 'widgets/journal_filter/journal_filter_sheet.dart';
 import 'widgets/journal_wizard/journal_prompts.dart';
 import 'widgets/journal_wizard/journal_wizard_sheet.dart';
 
@@ -27,6 +30,8 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
   bool _loading = false;
   bool _isLoggedIn = false;
   String? _firstName;
+  List<String> _customFeelings = [];
+  JournalEntryFilters _filters = const JournalEntryFilters();
 
   @override
   void initState() {
@@ -59,8 +64,18 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
           ? data['data'] as Map<String, dynamic>
           : data;
       final name = (user['name'] as String?)?.trim() ?? '';
-      if (!mounted || name.isEmpty) return;
-      setState(() => _firstName = name.split(RegExp(r'\s+')).first);
+      final custom = (user['journal_custom_feelings'] as List?)
+              ?.map((item) => item.toString().trim())
+              .where((item) => item.isNotEmpty)
+              .toList() ??
+          const <String>[];
+      if (!mounted) return;
+      setState(() {
+        if (name.isNotEmpty) {
+          _firstName = name.split(RegExp(r'\s+')).first;
+        }
+        _customFeelings = custom;
+      });
     } catch (_) {}
   }
 
@@ -68,7 +83,7 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
     setState(() => _loading = true);
     try {
       final results = await Future.wait([
-        DiaryService.fetchEntries(),
+        DiaryService.fetchEntries(query: _filters.toQuery()),
         DiaryService.fetchToday(),
       ]);
       if (!mounted) return;
@@ -115,19 +130,90 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
     }
   }
 
+  Future<void> _setPeriod(String period) async {
+    if (_filters.period == period) return;
+    setState(() => _filters = _filters.copyWith(period: period));
+    await _loadEntries();
+  }
+
+  Future<void> _clearFilters() async {
+    setState(() => _filters = const JournalEntryFilters());
+    await _loadEntries();
+  }
+
+  Future<void> _openFilters() async {
+    final next = await showJournalFilterSheet(
+      context,
+      current: _filters,
+      customFeelings: {
+        ..._customFeelings,
+        ..._entries.expand((entry) => entry.feelings),
+      }.toList(),
+    );
+    if (next == null || !mounted) return;
+    setState(() => _filters = next);
+    await _loadEntries();
+  }
+
   Future<void> _writeToday() async {
     if (!_isLoggedIn) {
       await _requireLogin();
       return;
     }
 
+    await _openWizard();
+  }
+
+  Future<void> _editEntry(DiaryEntry entry) async {
+    if (!mounted) return;
+    await _openWizard(entry: entry);
+  }
+
+  Future<void> _deleteEntry(DiaryEntry entry) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.deleteDiaryTitle),
+          content: Text(l10n.deleteDiaryBody),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.accentRed,
+              ),
+              child: Text(l10n.deleteAction),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !mounted) return;
+
     try {
-      final today = await DiaryService.fetchToday();
+      await DiaryService.delete(entry.id);
       if (!mounted) return;
-      await _openWizard(entry: today);
+      await _loadEntries();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.diaryDeleted),
+          backgroundColor: Colors.green,
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
-      await _openWizard();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.diaryDeleteFailed),
+          backgroundColor: AppColors.accentRed,
+        ),
+      );
     }
   }
 
@@ -135,10 +221,14 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
     return DateFormat('EEEE, MMM d').format(date).toUpperCase();
   }
 
-  String _formatEntryDate(String value) {
-    final parsed = DateTime.tryParse(value);
-    if (parsed == null) return value;
-    return DateFormat('MMM d, yyyy').format(parsed);
+  String _formatEntryDate(DiaryEntry entry) {
+    final parsed = DateTime.tryParse(entry.entryDate);
+    final datePart = parsed == null
+        ? entry.entryDate
+        : DateFormat('MMM d, yyyy').format(parsed);
+    final created = DateTime.tryParse(entry.createdAt ?? '');
+    if (created == null) return datePart;
+    return '$datePart · ${DateFormat.jm().format(created.toLocal())}';
   }
 
   String _skyDisplayLabel(String? skyKey) {
@@ -155,8 +245,16 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => _JournalEntrySummarySheet(
         entry: entry,
-        dateLabel: _formatEntryDate(entry.entryDate),
+        dateLabel: _formatEntryDate(entry),
         skyLabel: _skyDisplayLabel(entry.sky),
+        onEdit: () {
+          Navigator.of(ctx).pop();
+          _editEntry(entry);
+        },
+        onDelete: () {
+          Navigator.of(ctx).pop();
+          _deleteEntry(entry);
+        },
       ),
     );
   }
@@ -273,13 +371,11 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
                                 onStart: _writeToday,
                               ),
                               const SizedBox(height: 22),
-                              Text(
-                                l10n.journalYourEntries,
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: context.heading,
-                                ),
+                              JournalFilterBar(
+                                filters: _filters,
+                                onPeriodChanged: _setPeriod,
+                                onOpenMore: _openFilters,
+                                onClear: _clearFilters,
                               ),
                               const SizedBox(height: 12),
                               if (_entries.isEmpty)
@@ -294,7 +390,9 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
                                       ),
                                       const SizedBox(height: 12),
                                       Text(
-                                        l10n.diaryEmpty,
+                                        _filters.isNarrowed
+                                            ? l10n.journalFilterEmpty
+                                            : l10n.diaryEmpty,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(
                                           color: context.textSecondary,
@@ -309,9 +407,11 @@ class _DiaryListScreenState extends State<DiaryListScreen> {
                                     padding: const EdgeInsets.only(bottom: 12),
                                     child: _EntryCard(
                                       entry: entry,
-                                      dateLabel: _formatEntryDate(entry.entryDate),
+                                      dateLabel: _formatEntryDate(entry),
                                       skyLabel: _skyDisplayLabel(entry.sky),
                                       onTap: () => _showEntrySummary(entry),
+                                      onEdit: () => _editEntry(entry),
+                                      onDelete: () => _deleteEntry(entry),
                                     ),
                                   ),
                                 ),
@@ -453,18 +553,22 @@ class _EntryCard extends StatelessWidget {
     required this.dateLabel,
     required this.skyLabel,
     required this.onTap,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   final DiaryEntry entry;
   final String dateLabel;
   final String skyLabel;
   final VoidCallback onTap;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final accent = AppOptionCatalog.accentForSky(entry.sky);
-    final preview = entry.hasNotes ? entry.notesPreview : l10n.journalNoWrittenNotes;
+    final preview = entry.hasNotes ? entry.displayNotesPreview : l10n.journalNoWrittenNotes;
     final feelings = entry.feelings;
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
 
@@ -598,6 +702,24 @@ class _EntryCard extends StatelessWidget {
                           }).toList(),
                         ),
                       ],
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _EntryActionButton(
+                            icon: Icons.edit_outlined,
+                            label: l10n.edit,
+                            color: AppColors.primaryBlue,
+                            onPressed: onEdit,
+                          ),
+                          const SizedBox(width: 4),
+                          _EntryActionButton(
+                            icon: Icons.delete_outline_rounded,
+                            label: l10n.deleteAction,
+                            color: AppColors.accentRed,
+                            onPressed: onDelete,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -610,16 +732,52 @@ class _EntryCard extends StatelessWidget {
   }
 }
 
+class _EntryActionButton extends StatelessWidget {
+  const _EntryActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        foregroundColor: color,
+        minimumSize: const Size(44, 40),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      icon: Icon(icon, size: 16),
+      label: Text(
+        label,
+        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+      ),
+    );
+  }
+}
+
 class _JournalEntrySummarySheet extends StatelessWidget {
   const _JournalEntrySummarySheet({
     required this.entry,
     required this.dateLabel,
     required this.skyLabel,
+    required this.onEdit,
+    required this.onDelete,
   });
 
   final DiaryEntry entry;
   final String dateLabel;
   final String skyLabel;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -627,8 +785,8 @@ class _JournalEntrySummarySheet extends StatelessWidget {
     final empty = l10n.journalSummaryEmpty;
     final accent = AppOptionCatalog.accentForSky(entry.sky);
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
-    final notes = entry.hasNotes ? entry.notesPreview : empty;
-    final gratitude = entry.gratitude?.trim() ?? '';
+    final notes = entry.hasNotes ? entry.displayNotesPreview : empty;
+    final gratitude = entry.displayGratitude.trim();
     final impact = AppOptionCatalog.impactLabel(
       entry.impact,
       isTagalog: l10n.isTagalog,
@@ -813,23 +971,63 @@ class _JournalEntrySummarySheet extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryBlue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: onEdit,
+                          icon: const Icon(Icons.edit_outlined, size: 18),
+                          label: Text(l10n.edit),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primaryBlue,
+                            minimumSize: const Size.fromHeight(48),
+                            side: const BorderSide(color: AppColors.primaryBlue),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: onDelete,
+                          icon: const Icon(Icons.delete_outline_rounded, size: 18),
+                          label: Text(l10n.deleteAction),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.accentRed,
+                            minimumSize: const Size.fromHeight(48),
+                            side: const BorderSide(color: AppColors.accentRed),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: FilledButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        l10n.close,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
                     ),
                   ),
-                  child: Text(
-                    l10n.close,
-                    style: const TextStyle(fontWeight: FontWeight.w800),
-                  ),
-                ),
+                ],
               ),
             ),
           ],

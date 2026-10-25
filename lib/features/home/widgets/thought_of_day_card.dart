@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
-import 'home_header.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../kid_listo/widgets/kid_listo_portrait.dart';
 
 /// Thought of the Day banner (carousel slide) — text from Kid Listo API.
 class ThoughtOfDayBanner extends StatelessWidget {
@@ -91,12 +91,10 @@ class ThoughtOfDayBanner extends StatelessWidget {
                   bottom: -10,
                   child: SizedBox(
                     width: 140,
-                    child: Image.asset(
-                      HomeAssets.thoughtArt,
+                    child: KidListoPortrait(
                       fit: BoxFit.contain,
                       alignment: Alignment.centerRight,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Icon(
+                      errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.favorite_rounded,
                         color: context.iconOnSurface,
                         size: 56,

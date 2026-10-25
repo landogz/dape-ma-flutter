@@ -15,6 +15,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
       fallbackTitle: l10n.privacyPolicy,
       fallbackIntro: l10n.privacyIntro,
       fallbackBody: l10n.privacyBody,
+      translationKey: 'privacyPolicy',
       icon: Icons.shield_rounded,
       iconBackground: const Color(0xFFDCFCE7),
     );

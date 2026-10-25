@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../care_colors.dart';
 
 /// Circular calm visual with optional progress ring + leaf accents.
@@ -11,7 +12,7 @@ class CalmCircleVisual extends StatelessWidget {
     required this.child,
     this.progress = 0,
     this.size = 220,
-    this.fillColor = CareColors.calmMint,
+    this.fillColor = AppColors.mediumElectricBlue,
   });
 
   final Widget child;
@@ -35,7 +36,7 @@ class CalmCircleVisual extends StatelessWidget {
               child: Icon(
                 Icons.eco_rounded,
                 size: 48,
-                color: CareColors.calmForest.withValues(alpha: 0.35),
+                color: AppColors.mediumElectricBlue.withValues(alpha: 0.35),
               ),
             ),
           ),
@@ -47,7 +48,7 @@ class CalmCircleVisual extends StatelessWidget {
               child: Icon(
                 Icons.eco_rounded,
                 size: 48,
-                color: CareColors.calmForest.withValues(alpha: 0.35),
+                color: AppColors.mediumElectricBlue.withValues(alpha: 0.35),
               ),
             ),
           ),
@@ -56,7 +57,7 @@ class CalmCircleVisual extends StatelessWidget {
             painter: _RingPainter(
               progress: progress.clamp(0.0, 1.0),
               trackColor: CareColors.calmRing,
-              progressColor: CareColors.calmForest,
+              progressColor: AppColors.nileBlue,
             ),
           ),
           Container(
@@ -67,7 +68,7 @@ class CalmCircleVisual extends StatelessWidget {
               color: fillColor,
               boxShadow: [
                 BoxShadow(
-                  color: CareColors.calmForest.withValues(alpha: 0.12),
+                  color: AppColors.mediumElectricBlue.withValues(alpha: 0.12),
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),

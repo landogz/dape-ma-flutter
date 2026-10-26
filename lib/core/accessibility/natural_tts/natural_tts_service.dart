@@ -21,8 +21,36 @@ class NaturalTtsService extends ChangeNotifier {
 
   static final NaturalTtsService instance = NaturalTtsService._();
 
-  static const _englishVoice = 'en-US-JennyNeural';
-  static const _filipinoVoice = 'fil-PH-BlessicaNeural';
+  /// Warm narrator voices — Jenny sounds like a digital assistant.
+  static const _englishVoices = [
+    'en-US-AriaNeural',
+    'en-US-AvaMultilingualNeural',
+    'en-US-EmmaMultilingualNeural',
+  ];
+  static const _filipinoVoices = [
+    'fil-PH-BlessicaNeural',
+    'fil-PH-AngeloNeural',
+  ];
+  static const _noveltyVoiceHints = [
+    'zarvox',
+    'trinoids',
+    'bells',
+    'cellos',
+    'whisper',
+    'boing',
+    'bubbles',
+    'bad news',
+    'good news',
+    'superstar',
+    'organ',
+    'ralph',
+    'junior',
+    'albert',
+    'bahh',
+    'wobble',
+    'hysterical',
+    'novelty',
+  ];
 
   final AudioPlayer _player = AudioPlayer();
   final FlutterTts _deviceTts = FlutterTts();
@@ -33,10 +61,10 @@ class NaturalTtsService extends ChangeNotifier {
 
   bool get isSpeaking => _speaking;
 
-  String get _neuralVoice =>
+  List<String> get _neuralVoices =>
       LocaleController.instance.locale == AppLocale.tl
-          ? _filipinoVoice
-          : _englishVoice;
+          ? _filipinoVoices
+          : _englishVoices;
 
   String get _deviceLanguage =>
       LocaleController.instance.locale == AppLocale.tl ? 'fil-PH' : 'en-US';
@@ -76,11 +104,25 @@ class NaturalTtsService extends ChangeNotifier {
       seconds: (12 + text.length ~/ 80).clamp(20, 90),
     );
 
-    await Communicate(
-      text: text,
-      voice: _neuralVoice,
-      rate: '-8%',
-    ).save(file.path).timeout(timeout);
+    Object? lastError;
+    var saved = false;
+    for (final voice in _neuralVoices) {
+      try {
+        await Communicate(
+          text: text,
+          voice: voice,
+          rate: '+0%',
+          pitch: '+0Hz',
+        ).save(file.path).timeout(timeout);
+        saved = true;
+        break;
+      } catch (error) {
+        lastError = error;
+      }
+    }
+    if (!saved) {
+      throw lastError ?? Exception('Neural TTS failed');
+    }
 
     if (gen != _generation) {
       if (await file.exists()) await file.delete();
@@ -108,7 +150,7 @@ class NaturalTtsService extends ChangeNotifier {
     await _deviceTts.setSharedInstance(true);
     await _deviceTts.setVolume(1.0);
     await _deviceTts.setPitch(1.0);
-    await _deviceTts.setSpeechRate(0.45);
+    await _deviceTts.setSpeechRate(0.5);
     await _deviceTts.setLanguage(_deviceLanguage);
     await _preferNaturalDeviceVoice();
 
@@ -147,6 +189,11 @@ class NaturalTtsService extends ChangeNotifier {
 
         final name = '${voice['name'] ?? ''} ${voice['identifier'] ?? ''}';
         final quality = '${voice['quality'] ?? ''}'.toLowerCase();
+        final lowerName = name.toLowerCase();
+        if (_noveltyVoiceHints.any(lowerName.contains) ||
+            _noveltyVoiceHints.any(quality.contains)) {
+          continue;
+        }
         var score = 0;
         if (locale == language) score += 4;
         if (quality.contains('premium') ||
@@ -154,14 +201,17 @@ class NaturalTtsService extends ChangeNotifier {
             quality.contains('neural')) {
           score += 6;
         }
-        final lowerName = name.toLowerCase();
         if (lowerName.contains('premium') ||
             lowerName.contains('enhanced') ||
             lowerName.contains('neural') ||
-            lowerName.contains('siri')) {
+            lowerName.contains('samantha') ||
+            lowerName.contains('aria') ||
+            lowerName.contains('ava')) {
           score += 5;
         }
-        if (lowerName.contains('compact')) score -= 3;
+        if (lowerName.contains('compact') || lowerName.contains('siri')) {
+          score -= 3;
+        }
         if (score > bestScore) {
           bestScore = score;
           best = voice.map((key, value) => MapEntry(key, value.toString()));

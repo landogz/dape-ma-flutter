@@ -1645,6 +1645,8 @@ class AppStrings {
 
   // Comments
   String get writeComment => _t('writeComment', 'Write a comment...', 'Sumulat ng komento...');
+  String get commentEmojiTab => _t('commentEmojiTab', 'Emoji', 'Emoji');
+  String get commentStickersTab => _t('commentStickersTab', 'Stickers', 'Mga Sticker');
   String get reply => _t('reply', 'Reply', 'Tumugon');
   String get replyingTo => _t('replyingTo', 'Replying to', 'Tumutugon kay');
   String get edit => _t('edit', 'Edit', 'I-edit');

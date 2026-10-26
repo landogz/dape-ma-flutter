@@ -196,15 +196,18 @@ class CommentBubble extends StatelessWidget {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
                                 child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    maxHeight: 220,
-                                    minWidth: double.infinity,
+                                  constraints: BoxConstraints(
+                                    maxHeight: hasBody ? 220 : 160,
+                                    minWidth: hasBody ? double.infinity : 0,
                                   ),
                                   child: Image.network(
                                     comment.imageUrl!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    errorBuilder: (_, __, ___) => Container(
+                                    fit: hasBody
+                                        ? BoxFit.cover
+                                        : BoxFit.contain,
+                                    width: hasBody ? double.infinity : null,
+                                    alignment: Alignment.centerLeft,
+                                    errorBuilder: (_, _, _) => Container(
                                       height: 120,
                                       color: AppColors.softBlue,
                                       alignment: Alignment.center,

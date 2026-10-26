@@ -102,6 +102,7 @@ flutter:
     - assets/home/
     - assets/hope/
     - assets/kid_listo/
+    - assets/stickers/kid-listo/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

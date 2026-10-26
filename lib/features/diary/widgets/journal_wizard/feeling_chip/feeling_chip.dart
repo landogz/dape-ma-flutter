@@ -11,12 +11,14 @@ class JournalFeelingChip extends StatelessWidget {
     required this.selected,
     required this.accent,
     required this.onTap,
+    this.icon,
     this.onLongPress,
   });
 
   final String label;
   final bool selected;
   final Color accent;
+  final IconData? icon;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
 
@@ -56,14 +58,23 @@ class JournalFeelingChip extends StatelessWidget {
                   width: selected ? 1.6 : 1,
                 ),
               ),
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                  color: textColor,
-                ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (icon != null) ...[
+                    Icon(icon, size: 16, color: textColor),
+                    const SizedBox(width: 6),
+                  ],
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      height: 1.2,
+                      color: textColor,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),

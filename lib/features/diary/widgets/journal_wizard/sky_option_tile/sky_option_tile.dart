@@ -50,6 +50,7 @@ class JournalSkyOptionTile extends StatelessWidget {
                 child: Container(
                   width: 36,
                   height: 36,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: option.accent,
                     shape: BoxShape.circle,
@@ -57,6 +58,15 @@ class JournalSkyOptionTile extends StatelessWidget {
                       color: needsRing ? context.borderSubtle : option.accent,
                     ),
                   ),
+                  child: option.hasLookupIcon
+                      ? Icon(
+                          option.icon,
+                          size: 18,
+                          color: luminance > 0.55
+                              ? AppColors.nileBlue
+                              : Colors.white,
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(width: 12),

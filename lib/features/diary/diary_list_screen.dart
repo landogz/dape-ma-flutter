@@ -567,7 +567,8 @@ class _EntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final accent = AppOptionCatalog.accentForSky(entry.sky);
+    final skyOpt = AppOptionCatalog.skyByKey(entry.sky);
+    final accent = skyOpt?.accent ?? AppOptionCatalog.accentForSky(entry.sky);
     final preview = entry.hasNotes ? entry.displayNotesPreview : l10n.journalNoWrittenNotes;
     final feelings = entry.feelings;
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
@@ -649,13 +650,26 @@ class _EntryCard extends StatelessWidget {
                                 color: accent.withValues(alpha: 0.18),
                                 borderRadius: BorderRadius.circular(999),
                               ),
-                              child: Text(
-                                skyLabel,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w700,
-                                  color: context.heading,
-                                ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (skyOpt?.hasLookupIcon == true) ...[
+                                    Icon(
+                                      skyOpt!.icon,
+                                      size: 12,
+                                      color: context.heading,
+                                    ),
+                                    const SizedBox(width: 4),
+                                  ],
+                                  Text(
+                                    skyLabel,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: context.heading,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                         ],
@@ -783,7 +797,8 @@ class _JournalEntrySummarySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final empty = l10n.journalSummaryEmpty;
-    final accent = AppOptionCatalog.accentForSky(entry.sky);
+    final skyOpt = AppOptionCatalog.skyByKey(entry.sky);
+    final accent = skyOpt?.accent ?? AppOptionCatalog.accentForSky(entry.sky);
     final imageUrl = ApiUrl.resolve(entry.imageUrl);
     final notes = entry.hasNotes ? entry.displayNotesPreview : empty;
     final gratitude = entry.displayGratitude.trim();
@@ -846,13 +861,26 @@ class _JournalEntrySummarySheet extends StatelessWidget {
                           color: accent.withValues(alpha: 0.18),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: Text(
-                          skyLabel,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: context.heading,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (skyOpt?.hasLookupIcon == true) ...[
+                              Icon(
+                                skyOpt!.icon,
+                                size: 14,
+                                color: context.heading,
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Text(
+                              skyLabel,
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w700,
+                                color: context.heading,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],

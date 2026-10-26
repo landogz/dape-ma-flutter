@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 
 import 'heroicon_material.dart';
 
+bool hasAppOptionIconName(String? name) {
+  return name != null && name.trim().isNotEmpty;
+}
+
 IconData appOptionIcon(String? name, {required IconData fallback}) {
-  if (name == null || name.trim().isEmpty) {
+  final raw = name?.trim() ?? '';
+  if (raw.isEmpty) {
     return fallback;
   }
-  var key = name.trim();
+  var key = raw;
   if (key.startsWith('solid/')) {
     key = key.substring(6);
   }

@@ -12,6 +12,7 @@ class JournalSkyOption {
     required this.subtitleTl,
     required this.icon,
     required this.accent,
+    this.iconName,
   });
 
   final String key;
@@ -20,7 +21,17 @@ class JournalSkyOption {
   final String subtitleEn;
   final String subtitleTl;
   final IconData icon;
+  final String? iconName;
   final Color accent;
+
+  bool get hasLookupIcon {
+    final name = iconName?.trim() ?? '';
+    if (name.isEmpty) {
+      return false;
+    }
+    // Seeded sky rows use palette as a placeholder; only staff-picked icons render.
+    return name != 'palette_outlined';
+  }
 }
 
 class JournalFeelingOption {
@@ -29,12 +40,16 @@ class JournalFeelingOption {
     required this.labelEn,
     required this.labelTl,
     this.accent,
+    this.icon,
   });
 
   final String key;
   final String labelEn;
   final String labelTl;
   final Color? accent;
+  final IconData? icon;
+
+  bool get hasLookupIcon => icon != null;
 }
 
 class JournalImpactOption {

@@ -678,6 +678,7 @@ class _FeelingsStep extends StatelessWidget {
                 label: labelOf(opt),
                 selected: selected.contains(opt.key),
                 accent: opt.accent ?? AppColors.primaryBlue,
+                icon: opt.icon,
                 onTap: () => onToggle(opt.key),
               );
             }),

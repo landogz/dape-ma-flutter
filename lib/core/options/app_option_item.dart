@@ -42,7 +42,13 @@ class AppOptionItem {
       labelTl: (json['label_tl'] ?? json['label'] ?? '').toString(),
       subtitleEn: (json['subtitle_en'] ?? json['subtitle'] ?? '').toString(),
       subtitleTl: (json['subtitle_tl'] ?? json['subtitle'] ?? '').toString(),
-      iconName: json['icon']?.toString(),
+      iconName: () {
+        final raw = json['icon']?.toString().trim();
+        if (raw == null || raw.isEmpty) {
+          return null;
+        }
+        return raw;
+      }(),
       accentHex: json['accent']?.toString(),
       icon: fallbackIcon,
       accent: fallbackAccent,

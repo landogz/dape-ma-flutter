@@ -131,6 +131,7 @@ class AppOptionCatalog {
             subtitleEn: item.subtitleEn,
             subtitleTl: item.subtitleTl,
             icon: item.icon,
+            iconName: item.iconName,
             accent: item.accent ?? AppColors.primaryBlue,
           ),
         )
@@ -149,6 +150,7 @@ class AppOptionCatalog {
             labelEn: item.labelEn,
             labelTl: item.labelTl,
             accent: item.accent,
+            icon: hasAppOptionIconName(item.iconName) ? item.icon : null,
           ),
         )
         .toList();

@@ -171,6 +171,15 @@ class _JournalFilterSheetState extends State<JournalFilterSheet> {
                         final selected = _sky == opt.key;
                         final label = l10n.isTagalog ? opt.labelTl : opt.labelEn;
                         return FilterChip(
+                          avatar: opt.hasLookupIcon
+                              ? Icon(
+                                  opt.icon,
+                                  size: 16,
+                                  color: selected
+                                      ? AppColors.nileBlue
+                                      : context.textPrimary,
+                                )
+                              : CircleAvatar(backgroundColor: opt.accent),
                           label: Text(label),
                           selected: selected,
                           showCheckmark: false,
@@ -212,6 +221,7 @@ class _JournalFilterSheetState extends State<JournalFilterSheet> {
                             label: l10n.isTagalog ? opt.labelTl : opt.labelEn,
                             selected: _feeling == opt.key,
                             accent: opt.accent ?? AppColors.primaryBlue,
+                            icon: opt.icon,
                             onTap: () {
                               setState(() =>
                                   _feeling = _feeling == opt.key ? null : opt.key);

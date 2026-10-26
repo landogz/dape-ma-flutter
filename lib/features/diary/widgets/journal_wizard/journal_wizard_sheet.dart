@@ -571,31 +571,17 @@ class _SkyStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final twoCol = constraints.maxWidth >= 340;
-            return GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: options.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: twoCol ? 2 : 1,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-                mainAxisExtent: twoCol ? 92 : 80,
-              ),
-              itemBuilder: (context, index) {
-                final opt = options[index];
-                return JournalSkyOptionTile(
-                  option: opt,
-                  selected: selected == opt.key,
-                  label: labelOf(opt),
-                  subtitle: subtitleOf(opt),
-                  onTap: () => onSelect(opt.key),
-                );
-              },
-            );
-          },
+        ...options.map(
+          (opt) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: JournalSkyOptionTile(
+              option: opt,
+              selected: selected == opt.key,
+              label: labelOf(opt),
+              subtitle: subtitleOf(opt),
+              onTap: () => onSelect(opt.key),
+            ),
+          ),
         ),
       ],
     );

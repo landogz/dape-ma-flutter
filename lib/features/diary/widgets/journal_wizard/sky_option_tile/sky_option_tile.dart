@@ -33,8 +33,8 @@ class JournalSkyOptionTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Container(
-          constraints: const BoxConstraints(minHeight: 44),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          constraints: const BoxConstraints(minHeight: 56),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
@@ -43,19 +43,23 @@ class JournalSkyOptionTile extends StatelessWidget {
             ),
           ),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: option.accent,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: needsRing ? context.borderSubtle : option.accent,
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: option.accent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: needsRing ? context.borderSubtle : option.accent,
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -63,25 +67,23 @@ class JournalSkyOptionTile extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 15,
+                        fontSize: 16,
                         fontWeight: FontWeight.w700,
                         height: 1.2,
                         color: context.textPrimary,
                       ),
                     ),
                     if (caption.isNotEmpty) ...[
-                      const SizedBox(height: 2),
+                      const SizedBox(height: 3),
                       Text(
                         caption,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          height: 1.25,
+                          height: 1.35,
                           color: context.textSecondary,
                         ),
                       ),
@@ -90,11 +92,14 @@ class JournalSkyOptionTile extends StatelessWidget {
                 ),
               ),
               if (selected) ...[
-                const SizedBox(width: 6),
-                Icon(
-                  Icons.check_circle,
-                  color: context.iconOnSurface,
-                  size: 20,
+                const SizedBox(width: 8),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Icon(
+                    Icons.check_circle,
+                    color: context.iconOnSurface,
+                    size: 22,
+                  ),
                 ),
               ],
             ],

@@ -13,19 +13,15 @@ import '../../l10n/locale_controller.dart';
 class NaturalTtsService extends ChangeNotifier {
   NaturalTtsService._() {
     _player.onPlayerComplete.listen((_) {
-      if (!_speaking) return;
-      _speaking = false;
-      notifyListeners();
+      _playNextQueuedClip();
     });
   }
 
   static final NaturalTtsService instance = NaturalTtsService._();
 
-  /// Warm narrator voices — Jenny sounds like a digital assistant.
   static const _englishVoices = [
     'en-US-AriaNeural',
     'en-US-AvaMultilingualNeural',
-    'en-US-EmmaMultilingualNeural',
   ];
   static const _filipinoVoices = [
     'fil-PH-BlessicaNeural',
@@ -58,6 +54,10 @@ class NaturalTtsService extends ChangeNotifier {
   bool _deviceReady = false;
   bool _speaking = false;
   int _generation = 0;
+  List<String> _parts = [];
+  int _partIndex = 0;
+  String _voice = _englishVoices.first;
+  Future<File?>? _nextClip;
 
   bool get isSpeaking => _speaking;
 
@@ -93,20 +93,80 @@ class NaturalTtsService extends ChangeNotifier {
   }
 
   Future<void> stop() async {
+    _speaking = false;
     _generation++;
     await _halt(notify: true);
   }
 
   Future<void> _speakNeural(String text, int gen) async {
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/dape-natural-tts-$gen.mp3');
-    final timeout = Duration(
-      seconds: (12 + text.length ~/ 80).clamp(20, 90),
+    _parts = _splitUtterances(text);
+    _partIndex = 0;
+    _voice = _neuralVoices.first;
+    if (_parts.isEmpty) {
+      throw StateError('No speech text');
+    }
+
+    final first = await _synthPart(_parts.first, gen, firstClip: true);
+    if (gen != _generation) return;
+
+    if (_parts.length > 1) {
+      _nextClip = _synthPart(_parts[1], gen);
+    }
+
+    await _player.stop();
+    await _player.play(
+      DeviceFileSource(first.path, mimeType: 'audio/mpeg'),
     );
+  }
+
+  Future<void> _playNextQueuedClip() async {
+    final gen = _generation;
+    if (!_speaking || gen != _generation) return;
+
+    _partIndex++;
+    if (_partIndex >= _parts.length) {
+      _speaking = false;
+      notifyListeners();
+      return;
+    }
+
+    try {
+      var file = await _nextClip;
+      if (gen != _generation) return;
+      file ??= await _synthPart(_parts[_partIndex], gen);
+      if (gen != _generation) return;
+
+      _nextClip = _partIndex + 1 < _parts.length
+          ? _synthPart(_parts[_partIndex + 1], gen)
+          : null;
+
+      await _player.play(
+        DeviceFileSource(file.path, mimeType: 'audio/mpeg'),
+      );
+    } catch (_) {
+      if (gen != _generation) return;
+      final rest = _parts.sublist(_partIndex).join(' ');
+      try {
+        await _speakDevice(rest, gen);
+      } catch (_) {
+        _speaking = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<File> _synthPart(
+    String text,
+    int gen, {
+    bool firstClip = false,
+  }) async {
+    final dir = await getTemporaryDirectory();
+    final file = File('${dir.path}/dape-tts-$gen-${text.hashCode}.mp3');
+    final timeout = Duration(seconds: firstClip ? 8 : 12);
 
     Object? lastError;
-    var saved = false;
-    for (final voice in _neuralVoices) {
+    final voices = firstClip ? <String>[_voice] : _neuralVoices;
+    for (final voice in voices) {
       try {
         await Communicate(
           text: text,
@@ -114,25 +174,79 @@ class NaturalTtsService extends ChangeNotifier {
           rate: '+0%',
           pitch: '+0Hz',
         ).save(file.path).timeout(timeout);
-        saved = true;
-        break;
+        if (firstClip) _voice = voice;
+        return file;
       } catch (error) {
         lastError = error;
       }
     }
-    if (!saved) {
-      throw lastError ?? Exception('Neural TTS failed');
+    throw lastError ?? Exception('Neural TTS failed');
+  }
+
+  List<String> _splitUtterances(String text) {
+    final sentences = text
+        .split(RegExp(r'(?<=[.!?])\s+'))
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .toList();
+    if (sentences.isEmpty) return [text];
+
+    final parts = <String>[];
+    var maxLen = 140;
+    final buf = StringBuffer();
+
+    void flush() {
+      final chunk = buf.toString().trim();
+      if (chunk.isNotEmpty) parts.add(chunk);
+      buf.clear();
+      maxLen = 240;
     }
 
-    if (gen != _generation) {
-      if (await file.exists()) await file.delete();
-      return;
+    for (final sentence in sentences) {
+      if (sentence.length > maxLen) {
+        flush();
+        parts.addAll(_splitLong(sentence, maxLen));
+        maxLen = 240;
+        continue;
+      }
+      if (buf.isEmpty) {
+        buf.write(sentence);
+        continue;
+      }
+      if (buf.length + sentence.length + 1 <= maxLen) {
+        buf.write(' ');
+        buf.write(sentence);
+      } else {
+        flush();
+        buf.write(sentence);
+      }
     }
+    flush();
+    return parts;
+  }
 
-    await _player.stop();
-    await _player.play(
-      DeviceFileSource(file.path, mimeType: 'audio/mpeg'),
-    );
+  List<String> _splitLong(String text, int maxLen) {
+    final words = text.split(RegExp(r'\s+'));
+    final parts = <String>[];
+    final buf = StringBuffer();
+    for (final word in words) {
+      if (word.isEmpty) continue;
+      if (buf.isEmpty) {
+        buf.write(word);
+        continue;
+      }
+      if (buf.length + word.length + 1 <= maxLen) {
+        buf.write(' ');
+        buf.write(word);
+      } else {
+        parts.add(buf.toString());
+        buf
+          ..clear()
+          ..write(word);
+      }
+    }
+    if (buf.isNotEmpty) parts.add(buf.toString());
+    return parts;
   }
 
   Future<void> _speakDevice(String text, int gen) async {
@@ -227,6 +341,9 @@ class NaturalTtsService extends ChangeNotifier {
   }
 
   Future<void> _halt({required bool notify}) async {
+    _parts = [];
+    _partIndex = 0;
+    _nextClip = null;
     try {
       await _player.stop();
     } catch (_) {}

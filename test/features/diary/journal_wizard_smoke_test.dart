@@ -25,6 +25,9 @@ void main() {
     expect(find.textContaining('OF 4'), findsOneWidget);
     expect(find.text("What's your sky today?"), findsOneWidget);
     expect(find.text('Red'), findsOneWidget);
+    expect(find.text('Pink'), findsOneWidget);
+    expect(find.text('Light: Love · Dark: Anger'), findsOneWidget);
+    expect(find.text('Light: Happy, Optimistic, Imaginative'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
 
     await tester.tap(find.text('Red'));

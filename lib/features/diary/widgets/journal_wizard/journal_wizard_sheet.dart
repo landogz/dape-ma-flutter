@@ -16,6 +16,7 @@ import '../../diary_service.dart';
 import '../../image/diary_image_picker.dart';
 import '../diary_rich_text_toolbar.dart';
 import 'journal_constants.dart';
+import 'sky_option_tile/sky_option_tile.dart';
 import '../../../../core/theme/app_theme_colors.dart';
 
 Future<bool?> showJournalWizard(
@@ -547,13 +548,6 @@ class _SkyStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    JournalSkyOption? selectedOpt;
-    for (final option in options) {
-      if (option.key == selected) {
-        selectedOpt = option;
-        break;
-      }
-    }
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
@@ -588,91 +582,21 @@ class _SkyStep extends StatelessWidget {
                 crossAxisCount: twoCol ? 2 : 1,
                 mainAxisSpacing: 10,
                 crossAxisSpacing: 10,
-                mainAxisExtent: 64,
+                mainAxisExtent: twoCol ? 92 : 80,
               ),
               itemBuilder: (context, index) {
                 final opt = options[index];
-                final isSelected = selected == opt.key;
-                final luminance = opt.accent.computeLuminance();
-                final needsRing = luminance > 0.82 || luminance < 0.08;
-                return Material(
-                  color: isSelected
-                      ? context.softBrandSurface
-                      : context.optionFill,
-                  borderRadius: BorderRadius.circular(16),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(16),
-                    onTap: () => onSelect(opt.key),
-                    child: Container(
-                      constraints: const BoxConstraints(minHeight: 44),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.secondaryBlue
-                              : context.borderSubtle,
-                          width: isSelected ? 1.6 : 1,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 36,
-                            height: 36,
-                            decoration: BoxDecoration(
-                              color: opt.accent,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: needsRing
-                                    ? context.borderSubtle
-                                    : opt.accent,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              labelOf(opt),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: context.textPrimary,
-                              ),
-                            ),
-                          ),
-                          if (isSelected)
-                            Icon(
-                              Icons.check_circle,
-                              color: context.iconOnSurface,
-                              size: 20,
-                            ),
-                        ],
-                      ),
-                    ),
-                  ),
+                return JournalSkyOptionTile(
+                  option: opt,
+                  selected: selected == opt.key,
+                  label: labelOf(opt),
+                  subtitle: subtitleOf(opt),
+                  onTap: () => onSelect(opt.key),
                 );
               },
             );
           },
         ),
-        if (selectedOpt != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            subtitleOf(selectedOpt),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              fontStyle: FontStyle.italic,
-              color: context.textSecondary,
-            ),
-          ),
-        ],
       ],
     );
   }

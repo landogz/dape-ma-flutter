@@ -208,7 +208,7 @@ class AppOptionCatalog {
   static IconData _fallbackIconFor(String group) {
     return switch (group) {
       personaGroup => Icons.person_outline,
-      journalSkyGroup => Icons.wb_sunny_outlined,
+      journalSkyGroup => Icons.palette_outlined,
       journalImpactGroup => Icons.place_outlined,
       _ => Icons.label_outline,
     };

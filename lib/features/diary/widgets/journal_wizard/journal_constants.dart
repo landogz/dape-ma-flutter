@@ -54,6 +54,108 @@ class JournalConstants {
 
   static const skyOptions = <JournalSkyOption>[
     JournalSkyOption(
+      key: 'sky_red',
+      labelEn: 'Red',
+      labelTl: 'Pula',
+      subtitleEn: 'Light: Love · Dark: Anger',
+      subtitleTl: 'Liwanag: Pag-ibig · Dilim: Galit',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFFCE2028),
+    ),
+    JournalSkyOption(
+      key: 'sky_pink',
+      labelEn: 'Pink',
+      labelTl: 'Rosas',
+      subtitleEn: 'Light: Happy, Optimistic, Imaginative',
+      subtitleTl: 'Liwanag: Masaya, Optimista, Malikhain',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFFEC4899),
+    ),
+    JournalSkyOption(
+      key: 'sky_blue',
+      labelEn: 'Blue',
+      labelTl: 'Asul',
+      subtitleEn: 'Light: Calm/Peaceful, Serenity · Dark: Aloofness, Sad',
+      subtitleTl: 'Liwanag: Kalmado/Payapa, Katahimikan · Dilim: Distansya, Malungkot',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFF055498),
+    ),
+    JournalSkyOption(
+      key: 'sky_white',
+      labelEn: 'White',
+      labelTl: 'Puti',
+      subtitleEn: 'Light: Imaginative',
+      subtitleTl: 'Liwanag: Malikhain',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFFFFFFFF),
+    ),
+    JournalSkyOption(
+      key: 'sky_violet',
+      labelEn: 'Violet',
+      labelTl: 'Biolet',
+      subtitleEn: 'Light: Reflective, Imaginative',
+      subtitleTl: 'Liwanag: Mapagmuni, Malikhain',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFF7C3AED),
+    ),
+    JournalSkyOption(
+      key: 'sky_gray',
+      labelEn: 'Gray',
+      labelTl: 'Abo',
+      subtitleEn: 'Light: Neutral, Balance · Dark: Overwhelmed, Unconfident, Lack of Energy',
+      subtitleTl: 'Liwanag: Neutral, Balanse · Dilim: Nalulula, Walang kumpiyansa, Kakulangan sa enerhiya',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFF64748B),
+    ),
+    JournalSkyOption(
+      key: 'sky_purple',
+      labelEn: 'Purple',
+      labelTl: 'Lila',
+      subtitleEn: 'Dark: Afraid',
+      subtitleTl: 'Dilim: Takot',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFF581C87),
+    ),
+    JournalSkyOption(
+      key: 'sky_green',
+      labelEn: 'Green',
+      labelTl: 'Berde',
+      subtitleEn: 'Light: Growth, Hope, Healing · Dark: Boredom, Sickness',
+      subtitleTl: 'Liwanag: Paglago, Pag-asa, Paghilom · Dilim: Inip, Sakit',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFF16A34A),
+    ),
+    JournalSkyOption(
+      key: 'sky_orange',
+      labelEn: 'Orange',
+      labelTl: 'Kahel',
+      subtitleEn: 'Light: Confidence · Dark: Anxious, Frustration',
+      subtitleTl: 'Liwanag: Kumpiyansa · Dilim: Balisa, Frustrasyon',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFFEA580C),
+    ),
+    JournalSkyOption(
+      key: 'sky_yellow',
+      labelEn: 'Yellow',
+      labelTl: 'Dilaw',
+      subtitleEn: 'Light: Happiness, Optimism, Cheerful',
+      subtitleTl: 'Liwanag: Kaligayahan, Optimismo, Masayahin',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFFFBD116),
+    ),
+    JournalSkyOption(
+      key: 'sky_black',
+      labelEn: 'Black',
+      labelTl: 'Itim',
+      subtitleEn: 'Light: Power · Dark: Mourning, Heaviness',
+      subtitleTl: 'Liwanag: Kapangyarihan · Dilim: Pagluluksa, Bigat',
+      icon: Icons.palette_outlined,
+      accent: Color(0xFF0F172A),
+    ),
+  ];
+
+  static const legacySkyOptions = <JournalSkyOption>[
+    JournalSkyOption(
       key: 'clear_skies',
       labelEn: 'Clear Skies',
       labelTl: 'Maaliwalas',
@@ -140,6 +242,9 @@ class JournalConstants {
   static JournalSkyOption? skyByKey(String? key) {
     if (key == null || key.isEmpty) return null;
     for (final o in skyOptions) {
+      if (o.key == key) return o;
+    }
+    for (final o in legacySkyOptions) {
       if (o.key == key) return o;
     }
     return null;

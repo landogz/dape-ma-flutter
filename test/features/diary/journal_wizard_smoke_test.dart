@@ -23,11 +23,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('OF 4'), findsOneWidget);
-    expect(find.text("How's your sky today?"), findsOneWidget);
-    expect(find.text('Clear Skies'), findsOneWidget);
+    expect(find.text("What's your sky today?"), findsOneWidget);
+    expect(find.text('Red'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
 
-    await tester.tap(find.text('Clear Skies'));
+    await tester.tap(find.text('Red'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Next'));
     await tester.pumpAndSettle();

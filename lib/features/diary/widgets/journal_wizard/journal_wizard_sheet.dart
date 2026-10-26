@@ -577,64 +577,90 @@ class _SkyStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
-        ...options.map((opt) {
-          final isSelected = selected == opt.key;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Material(
-              color: isSelected
-                  ? context.softBrandSurface
-                  : context.optionFill,
-              borderRadius: BorderRadius.circular(16),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () => onSelect(opt.key),
-                child: Container(
-                  constraints: const BoxConstraints(minHeight: 64),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                  decoration: BoxDecoration(
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final twoCol = constraints.maxWidth >= 340;
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: options.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: twoCol ? 2 : 1,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                mainAxisExtent: 64,
+              ),
+              itemBuilder: (context, index) {
+                final opt = options[index];
+                final isSelected = selected == opt.key;
+                final luminance = opt.accent.computeLuminance();
+                final needsRing = luminance > 0.82 || luminance < 0.08;
+                return Material(
+                  color: isSelected
+                      ? context.softBrandSurface
+                      : context.optionFill,
+                  borderRadius: BorderRadius.circular(16),
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isSelected
-                          ? AppColors.secondaryBlue
-                          : context.borderSubtle,
-                      width: isSelected ? 1.6 : 1,
+                    onTap: () => onSelect(opt.key),
+                    child: Container(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.secondaryBlue
+                              : context.borderSubtle,
+                          width: isSelected ? 1.6 : 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: opt.accent,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: needsRing
+                                    ? context.borderSubtle
+                                    : opt.accent,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              labelOf(opt),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: context.textPrimary,
+                              ),
+                            ),
+                          ),
+                          if (isSelected)
+                            Icon(
+                              Icons.check_circle,
+                              color: context.iconOnSurface,
+                              size: 20,
+                            ),
+                        ],
+                      ),
                     ),
                   ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          color: opt.accent.withValues(alpha: 0.22),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(opt.icon, color: context.iconOnSurface),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          labelOf(opt),
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: context.textPrimary,
-                          ),
-                        ),
-                      ),
-                      if (isSelected)
-                        Icon(
-                          Icons.check_circle,
-                          color: context.iconOnSurface,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        }),
+                );
+              },
+            );
+          },
+        ),
         if (selectedOpt != null) ...[
           const SizedBox(height: 8),
           Text(

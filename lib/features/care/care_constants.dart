@@ -51,11 +51,11 @@ class CareConstants {
   /// Maps Care hub mood keys to journal "sky" reflection keys.
   static String? skyForCareMood(String? mood) {
     return switch (mood) {
-      'struggling' => 'stormy',
-      'difficult' => 'overcast',
-      'meh' => 'passing_mist',
-      'good' => 'clear_skies',
-      'great' => 'clear_skies',
+      'struggling' => 'sky_black',
+      'difficult' => 'sky_orange',
+      'meh' => 'sky_gray',
+      'good' => 'sky_blue',
+      'great' => 'sky_yellow',
       _ => null,
     };
   }

@@ -1889,10 +1889,10 @@ class AppStrings {
   String get journalNext => _t('journalNext', 'Next', 'Susunod');
   String get journalSaveEntry => _t('journalSaveEntry', 'Save Entry', 'I-save ang Entry');
   String get journalSkyTitle =>
-      _t('journalSkyTitle', "How's your sky today?", 'Kumusta ang langit mo ngayon?');
+      _t('journalSkyTitle', "What's your sky today?", 'Ano ang langit mo ngayon?');
   String get journalSkySubtitle => _t('journalSkySubtitle', 
-        'Pick the weather that matches your inner world.',
-        'Piliin ang panahon na tumutugma sa iyong loob.',
+        'Pick the color that matches your inner world. Light tones are brighter moods; dark tones are heavier ones.',
+        'Piliin ang kulay na tumutugma sa iyong loob. Ang maliwanag na tono ay mas magaan na damdamin; ang madilim ay mas mabigat.',
       );
   String get journalFeelingsTitle =>
       _t('journalFeelingsTitle', 'What are you feeling?', 'Ano ang nararamdaman mo?');

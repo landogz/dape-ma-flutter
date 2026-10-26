@@ -30,6 +30,7 @@ IconData appOptionIcon(String? name, {required IconData fallback}) {
     'auto_awesome_outlined' => Icons.auto_awesome_outlined,
     'menu_book_rounded' => Icons.menu_book_rounded,
     'medical_services_outlined' => Icons.medical_services_outlined,
+    'palette_outlined' => Icons.palette_outlined,
     'wb_sunny_outlined' => Icons.wb_sunny_outlined,
     'cloud_queue_outlined' => Icons.cloud_queue_outlined,
     'cloud_outlined' => Icons.cloud_outlined,

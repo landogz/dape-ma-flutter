@@ -1056,6 +1056,12 @@ class AppStrings {
         '$minutes min read',
         {'minutes': minutes.toString()});
   String get featuredBadge => _t('featuredBadge', 'Featured', 'Featured');
+  String featuredPostSlide(int current, int total) => _t(
+        'featuredPostSlide',
+        'Featured post $current of $total',
+        'Featured na post $current sa $total',
+        {'current': current.toString(), 'total': total.toString()},
+      );
   String get sharePost => _t('sharePost', 'Share', 'I-share');
   String get linkCopied => _t('linkCopied', 'Copied to clipboard', 'Nakopya sa clipboard');
   String get profileCompleteLabel =>

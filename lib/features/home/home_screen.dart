@@ -93,6 +93,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return withImage.isNotEmpty ? withImage.first : _posts.first;
   }
 
+  List<Post> get _featuredPosts {
+    final marked = _posts.where((post) => post.isFeatured).toList();
+    if (marked.isNotEmpty) {
+      return marked;
+    }
+    final fallback = _featuredPost;
+    return fallback == null ? const [] : [fallback];
+  }
+
   Future<void> _refreshAuthState() async {
     final token = await AuthService.getToken();
     if (mounted) {
@@ -376,7 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final greeting = _displayGreeting(l10n);
-    final featured = _featuredPost;
+    final featuredPosts = _featuredPosts;
     final bottomInset = MediaQuery.viewPaddingOf(context).bottom;
 
     return Scaffold(
@@ -443,10 +452,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  if (featured != null)
-                    FeaturedPostCard(
-                      post: featured,
-                      onTap: () => _openPostDetail(featured),
+                  if (featuredPosts.isNotEmpty)
+                    FeaturedPostsSection(
+                      posts: featuredPosts,
+                      onTap: _openPostDetail,
                     )
                   else
                     Text(

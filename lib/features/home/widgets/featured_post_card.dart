@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -182,20 +184,49 @@ class FeaturedPostCard extends StatelessWidget {
   }
 }
 
-/// Horizontal featured posts carousel used on the Posts screen.
+/// One card when a single post is featured; a swipeable carousel when there are more.
+class FeaturedPostsSection extends StatelessWidget {
+  const FeaturedPostsSection({
+    super.key,
+    required this.posts,
+    required this.onTap,
+  });
+
+  final List<Post> posts;
+  final ValueChanged<Post> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (posts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    if (posts.length == 1) {
+      return FeaturedPostCard(
+        post: posts.first,
+        onTap: () => onTap(posts.first),
+      );
+    }
+
+    return FeaturedPostCarousel(
+      posts: posts,
+      onTap: onTap,
+    );
+  }
+}
+
+/// Horizontal featured posts carousel used on Home and Posts.
 class FeaturedPostCarousel extends StatefulWidget {
   const FeaturedPostCarousel({
     super.key,
     required this.posts,
     required this.onTap,
-    this.isBookmarked,
-    this.onBookmarkTap,
+    this.autoPlay = true,
   });
 
   final List<Post> posts;
   final ValueChanged<Post> onTap;
-  final bool Function(Post post)? isBookmarked;
-  final ValueChanged<Post>? onBookmarkTap;
+  final bool autoPlay;
 
   @override
   State<FeaturedPostCarousel> createState() => _FeaturedPostCarouselState();
@@ -204,17 +235,59 @@ class FeaturedPostCarousel extends StatefulWidget {
 class _FeaturedPostCarouselState extends State<FeaturedPostCarousel> {
   late final PageController _controller;
   int _index = 0;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _controller = PageController(viewportFraction: 0.92);
+    _startAutoPlay();
+  }
+
+  @override
+  void didUpdateWidget(covariant FeaturedPostCarousel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.posts.length != widget.posts.length) {
+      _index = _index.clamp(0, widget.posts.length - 1);
+    }
+    if (oldWidget.autoPlay != widget.autoPlay) {
+      _startAutoPlay();
+    }
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  void _startAutoPlay() {
+    _timer?.cancel();
+    if (!widget.autoPlay || widget.posts.length < 2) {
+      return;
+    }
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_controller.hasClients || widget.posts.length < 2) {
+        return;
+      }
+      final next = (_index + 1) % widget.posts.length;
+      _controller.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 420),
+        curve: Curves.easeOutCubic,
+      );
+    });
+  }
+
+  Future<void> _goTo(int index) async {
+    if (!_controller.hasClients) return;
+    await _controller.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   @override
@@ -236,8 +309,9 @@ class _FeaturedPostCarouselState extends State<FeaturedPostCarousel> {
             onPageChanged: (i) => setState(() => _index = i),
             itemBuilder: (context, i) {
               final post = widget.posts[i];
+              final isLast = i == widget.posts.length - 1;
               return Padding(
-                padding: const EdgeInsets.only(right: 10),
+                padding: EdgeInsets.only(right: isLast ? 0 : 10),
                 child: FeaturedPostCard(
                   post: post,
                   onTap: () => widget.onTap(post),
@@ -247,21 +321,38 @@ class _FeaturedPostCarouselState extends State<FeaturedPostCarousel> {
           ),
         ),
         if (widget.posts.length > 1) ...[
-          const SizedBox(height: 10),
+          const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var i = 0; i < widget.posts.length; i++)
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  width: i == _index ? 16 : 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: i == _index
-                        ? AppColors.primaryBlue
-                        : const Color(0xFFCBD5E1),
-                    borderRadius: BorderRadius.circular(999),
+                Semantics(
+                  button: true,
+                  selected: i == _index,
+                  label: context.l10n.featuredPostSlide(
+                    i + 1,
+                    widget.posts.length,
+                  ),
+                  child: InkWell(
+                    onTap: () => _goTo(i),
+                    customBorder: const CircleBorder(),
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: Center(
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
+                          width: i == _index ? 16 : 6,
+                          height: 6,
+                          decoration: BoxDecoration(
+                            color: i == _index
+                                ? AppColors.primaryBlue
+                                : const Color(0xFFCBD5E1),
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
             ],

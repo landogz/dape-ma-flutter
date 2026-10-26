@@ -19,6 +19,7 @@ class Post {
   final PostReactionType? userReaction;
   final Map<PostReactionType, int> reactionCounts;
   final bool commentsEnabled;
+  final bool isFeatured;
   final double averageRating;
   final int reviewsCount;
   final int? userRating;
@@ -41,6 +42,7 @@ class Post {
     this.userReaction,
     Map<PostReactionType, int>? reactionCounts,
     this.commentsEnabled = true,
+    this.isFeatured = false,
     this.averageRating = 0,
     this.reviewsCount = 0,
     this.userRating,
@@ -55,6 +57,7 @@ class Post {
     bool clearUserReaction = false,
     Map<PostReactionType, int>? reactionCounts,
     bool? commentsEnabled,
+    bool? isFeatured,
     double? averageRating,
     int? reviewsCount,
     int? userRating,
@@ -79,6 +82,7 @@ class Post {
           clearUserReaction ? null : (userReaction ?? this.userReaction),
       reactionCounts: reactionCounts ?? this.reactionCounts,
       commentsEnabled: commentsEnabled ?? this.commentsEnabled,
+      isFeatured: isFeatured ?? this.isFeatured,
       averageRating: averageRating ?? this.averageRating,
       reviewsCount: reviewsCount ?? this.reviewsCount,
       userRating: clearUserRating ? null : (userRating ?? this.userRating),
@@ -115,6 +119,7 @@ class Post {
       commentsEnabled: json.containsKey('comments_enabled')
           ? parseJsonBool(json['comments_enabled'], true)
           : true,
+      isFeatured: parseJsonBool(json['is_featured']),
       averageRating: parseJsonDouble(avg),
       reviewsCount: parseJsonInt(reviewCount),
       userRating: json['user_rating'] == null

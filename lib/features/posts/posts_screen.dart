@@ -10,6 +10,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 import '../auth/login_screen.dart';
 import '../home/widgets/category_tabs.dart';
+import '../home/widgets/featured_post_card.dart';
 import '../home/widgets/post_card.dart';
 import '../post_detail/post_detail_screen.dart';
 import '../post_engagement/post_engagement_service.dart';
@@ -296,10 +297,17 @@ class _PostsScreenState extends State<PostsScreen> {
     await _loadBookmarkedIds();
   }
 
+  List<Post> get _featuredPosts =>
+      _posts.where((post) => post.isFeatured).toList();
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final feed = _posts;
+    final featured = _featuredPosts;
+    final featuredIds = featured.map((post) => post.id).toSet();
+    final feed = featured.length > 1
+        ? _posts.where((post) => !featuredIds.contains(post.id)).toList()
+        : _posts;
 
     return Scaffold(
       backgroundColor: context.pageBackground,
@@ -361,6 +369,13 @@ class _PostsScreenState extends State<PostsScreen> {
                     onChanged: (c) => _loadPosts(category: c),
                   ),
                   const SizedBox(height: 12),
+                  if (!_loading && featured.length > 1) ...[
+                    FeaturedPostsSection(
+                      posts: featured,
+                      onTap: _openPostDetail,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ]),
               ),
             ),
@@ -369,7 +384,7 @@ class _PostsScreenState extends State<PostsScreen> {
                 hasScrollBody: false,
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (feed.isEmpty)
+            else if (feed.isEmpty && featured.length <= 1)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 40),

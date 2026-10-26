@@ -25,13 +25,9 @@ class JournalFeelingChip extends StatelessWidget {
     final onAccent = accent.computeLuminance() > 0.55
         ? AppColors.nileBlue
         : Colors.white;
-    final fill = selected
-        ? accent
-        : accent.withValues(alpha: context.isDarkMode ? 0.28 : 0.14);
-    final border = selected
-        ? accent
-        : accent.withValues(alpha: 0.55);
-    final textColor = selected ? onAccent : _unselectedText(context, accent);
+    final fill = selected ? accent : context.chipBackground;
+    final border = selected ? accent : context.borderSubtle;
+    final textColor = selected ? onAccent : context.textPrimary;
 
     return Semantics(
       button: true,
@@ -74,12 +70,5 @@ class JournalFeelingChip extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _unselectedText(BuildContext context, Color accent) {
-    if (accent.computeLuminance() < 0.18) {
-      return context.textPrimary;
-    }
-    return Color.alphaBlend(accent.withValues(alpha: 0.85), AppColors.nileBlue);
   }
 }

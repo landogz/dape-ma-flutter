@@ -118,6 +118,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         if (_isLoggedIn) _loadCurrentUser();
       }
     });
+    ReadAloudService.instance.addListener(_onReadAloudChanged);
     _loadComments();
     _refreshPostEngagement();
     AnalyticsClient.instance.trackPostView(widget.post.id);
@@ -557,8 +558,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  void _onReadAloudChanged() {
+    if (mounted) setState(() {});
+  }
+
   @override
   void dispose() {
+    ReadAloudService.instance.removeListener(_onReadAloudChanged);
     _commentFocus.dispose();
     _commentController.dispose();
     _ytController?.dispose();

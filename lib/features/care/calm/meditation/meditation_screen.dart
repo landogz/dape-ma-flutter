@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 
+import '../../../../core/accessibility/natural_tts/natural_tts_service.dart';
 import '../../../../core/l10n/app_strings.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_theme_colors.dart';
@@ -132,7 +132,7 @@ class GuidedSessionPlayer extends StatefulWidget {
 }
 
 class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
-  final _tts = FlutterTts();
+  final _tts = NaturalTtsService.instance;
   Timer? _ticker;
   int _seconds = 0;
   int _stepIndex = 0;
@@ -167,8 +167,6 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
   }
 
   Future<void> _speakCurrent(List<String> steps) async {
-    await _tts.setSpeechRate(0.42);
-    await _tts.setPitch(1.0);
     if (!_playing || !mounted) return;
     await _tts.speak(steps[_stepIndex]);
   }

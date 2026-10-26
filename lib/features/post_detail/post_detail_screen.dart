@@ -213,10 +213,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
       if (!mounted) return;
       setState(() {
+        final chronological = result.comments.reversed.toList();
         if (loadMore) {
-          _comments = [..._comments, ...result.comments];
+          _comments = [...chronological, ..._comments];
         } else {
-          _comments = result.comments;
+          _comments = chronological;
         }
         _commentsPage = page;
         _hasMoreComments = result.hasMore;
@@ -459,11 +460,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
       builder: (ctx) => EditCommentSheet(
         initialBody: comment.body,
-        onSave: (body) async {
+        initialImageUrl: comment.imageUrl,
+        onSave: (body, image) async {
           final result = await PostEngagementService.updateComment(
             _post.id,
             comment.id,
             body,
+            image: image,
           );
           if (!mounted) return;
           setState(() {
@@ -1140,7 +1143,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                   )
                                 else
                                   IconButton(
-                                    tooltip: 'Emoji',
+                                    tooltip: l10n.commentEmojiTab,
                                     icon: Icon(
                                       Icons.emoji_emotions_outlined,
                                       color: context.textSecondary,

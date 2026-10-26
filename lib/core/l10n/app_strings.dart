@@ -1727,6 +1727,10 @@ class AppStrings {
       _t('commentCannotBeEmpty', 'Comment cannot be empty', 'Hindi maaaring walang laman ang komento');
   String get updateCommentHint =>
       _t('updateCommentHint', 'Update your comment...', 'I-update ang iyong komento...');
+  String get commentCaptionOptional =>
+      _t('commentCaptionOptional', 'Add a caption (optional)', 'Magdagdag ng caption (opsyonal)');
+  String get commentChangeSticker =>
+      _t('commentChangeSticker', 'Change sticker', 'Palitan ang sticker');
   String get saveChanges => _t('saveChanges', 'Save changes', 'I-save ang mga pagbabago');
   String get commentUpdateFailed =>
       _t('commentUpdateFailed', 'Could not update comment. Try again.', 'Hindi ma-update ang komento. Subukan muli.');

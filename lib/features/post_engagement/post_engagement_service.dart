@@ -197,12 +197,31 @@ class PostEngagementService {
   static Future<PostComment> updateComment(
     int postId,
     int commentId,
-    String body,
-  ) async {
-    final res = await AuthService.authedPut<Map<String, dynamic>>(
-      Endpoints.postComment(postId, commentId),
-      data: <String, dynamic>{'body': body},
-    );
+    String body, {
+    File? image,
+  }) async {
+    final Object payload;
+    if (image != null) {
+      payload = FormData.fromMap({
+        'body': body,
+        'image': await MultipartFile.fromFile(
+          image.path,
+          filename: image.path.split('/').last,
+        ),
+      });
+    } else {
+      payload = <String, dynamic>{'body': body};
+    }
+
+    final res = image != null
+        ? await AuthService.authedPost<Map<String, dynamic>>(
+            Endpoints.postComment(postId, commentId),
+            data: payload,
+          )
+        : await AuthService.authedPut<Map<String, dynamic>>(
+            Endpoints.postComment(postId, commentId),
+            data: payload,
+          );
     final root = res.data ?? <String, dynamic>{};
     final data = root['data'] is Map<String, dynamic>
         ? root['data'] as Map<String, dynamic>

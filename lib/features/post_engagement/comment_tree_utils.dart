@@ -5,7 +5,7 @@ List<PostComment> addCommentToTree(
   PostComment comment,
 ) {
   if (comment.parentId == null || comment.parentId == 0) {
-    return [comment, ...comments];
+    return [...comments, comment];
   }
 
   return comments

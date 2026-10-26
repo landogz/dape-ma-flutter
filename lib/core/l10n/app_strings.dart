@@ -1908,6 +1908,24 @@ class AppStrings {
       );
   String get journalAddYourOwn =>
       _t('journalAddYourOwn', 'Add your own', 'Idagdag ang sa iyo');
+  String get journalCustomFeelingHint => _t(
+        'journalCustomFeelingHint',
+        'Long-press a custom feeling to remove it.',
+        'Pindutin nang matagal ang custom feeling para alisin.',
+      );
+  String get journalRemoveCustomFeelingTitle => _t(
+        'journalRemoveCustomFeelingTitle',
+        'Remove feeling?',
+        'Alisin ang feeling?',
+      );
+  String journalRemoveCustomFeelingBody(String feeling) => _t(
+        'journalRemoveCustomFeelingBody',
+        'Remove “$feeling” from your saved feelings?',
+        'Alisin ang “$feeling” sa iyong listahan?',
+        {'feeling': feeling},
+      );
+  String get journalRemoveFeeling =>
+      _t('journalRemoveFeeling', 'Remove', 'Alisin');
   String get journalImpactTitle =>
       _t('journalImpactTitle', 'What shaped your day?', 'Ano ang humubog sa araw mo?');
   String get journalImpactSubtitle => _t('journalImpactSubtitle', 

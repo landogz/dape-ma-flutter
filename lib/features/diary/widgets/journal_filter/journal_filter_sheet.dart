@@ -4,6 +4,7 @@ import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/options/app_option_catalog.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme_colors.dart';
+import '../journal_wizard/feeling_chip/feeling_chip.dart';
 import 'journal_entry_filters.dart';
 
 Future<JournalEntryFilters?> showJournalFilterSheet(
@@ -207,15 +208,25 @@ class _JournalFilterSheetState extends State<JournalFilterSheet> {
                       runSpacing: 8,
                       children: [
                         ...feelings.map((opt) {
-                          return _feelingChip(
+                          return JournalFeelingChip(
                             label: l10n.isTagalog ? opt.labelTl : opt.labelEn,
-                            value: opt.key,
+                            selected: _feeling == opt.key,
+                            accent: opt.accent ?? AppColors.primaryBlue,
+                            onTap: () {
+                              setState(() =>
+                                  _feeling = _feeling == opt.key ? null : opt.key);
+                            },
                           );
                         }),
                         ...extras.map(
-                          (feeling) => _feelingChip(
+                          (feeling) => JournalFeelingChip(
                             label: feeling,
-                            value: feeling,
+                            selected: _feeling == feeling,
+                            accent: AppColors.primaryBlue,
+                            onTap: () {
+                              setState(() =>
+                                  _feeling = _feeling == feeling ? null : feeling);
+                            },
                           ),
                         ),
                       ],
@@ -275,24 +286,4 @@ class _JournalFilterSheetState extends State<JournalFilterSheet> {
     );
   }
 
-  Widget _feelingChip({required String label, required String value}) {
-    final selected = _feeling == value;
-    return FilterChip(
-      label: Text(label),
-      selected: selected,
-      showCheckmark: false,
-      onSelected: (_) {
-        setState(() => _feeling = selected ? null : value);
-      },
-      selectedColor: AppColors.accentYellow,
-      backgroundColor: context.chipBackground,
-      labelStyle: TextStyle(
-        fontWeight: FontWeight.w700,
-        color: selected ? AppColors.nileBlue : context.textPrimary,
-      ),
-      side: BorderSide(
-        color: selected ? AppColors.accentYellow : context.borderSubtle,
-      ),
-    );
-  }
 }

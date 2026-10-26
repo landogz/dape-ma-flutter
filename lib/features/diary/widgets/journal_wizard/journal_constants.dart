@@ -28,11 +28,13 @@ class JournalFeelingOption {
     required this.key,
     required this.labelEn,
     required this.labelTl,
+    this.accent,
   });
 
   final String key;
   final String labelEn;
   final String labelTl;
+  final Color? accent;
 }
 
 class JournalImpactOption {
@@ -194,16 +196,66 @@ class JournalConstants {
   ];
 
   static const feelingOptions = <JournalFeelingOption>[
-    JournalFeelingOption(key: 'Grounded', labelEn: 'Grounded', labelTl: 'Nakatuntong'),
-    JournalFeelingOption(key: 'Restless', labelEn: 'Restless', labelTl: 'Hindi mapakali'),
-    JournalFeelingOption(key: 'Grateful', labelEn: 'Grateful', labelTl: 'Nagpapasalamat'),
-    JournalFeelingOption(key: 'Anxious', labelEn: 'Anxious', labelTl: 'Balisa'),
-    JournalFeelingOption(key: 'Peaceful', labelEn: 'Peaceful', labelTl: 'Payapa'),
-    JournalFeelingOption(key: 'Triggered', labelEn: 'Triggered', labelTl: 'Na-trigger'),
-    JournalFeelingOption(key: 'Hopeful', labelEn: 'Hopeful', labelTl: 'Umaasa'),
-    JournalFeelingOption(key: 'Lonely', labelEn: 'Lonely', labelTl: 'Nangungulila'),
-    JournalFeelingOption(key: 'Motivated', labelEn: 'Motivated', labelTl: 'Motibado'),
-    JournalFeelingOption(key: 'Overwhelmed', labelEn: 'Overwhelmed', labelTl: 'Nalulula'),
+    JournalFeelingOption(
+      key: 'Grounded',
+      labelEn: 'Grounded',
+      labelTl: 'Nakatuntong',
+      accent: Color(0xFF16A34A),
+    ),
+    JournalFeelingOption(
+      key: 'Restless',
+      labelEn: 'Restless',
+      labelTl: 'Hindi mapakali',
+      accent: Color(0xFFEA580C),
+    ),
+    JournalFeelingOption(
+      key: 'Grateful',
+      labelEn: 'Grateful',
+      labelTl: 'Nagpapasalamat',
+      accent: Color(0xFFFBD116),
+    ),
+    JournalFeelingOption(
+      key: 'Anxious',
+      labelEn: 'Anxious',
+      labelTl: 'Balisa',
+      accent: Color(0xFFEA580C),
+    ),
+    JournalFeelingOption(
+      key: 'Peaceful',
+      labelEn: 'Peaceful',
+      labelTl: 'Payapa',
+      accent: Color(0xFF055498),
+    ),
+    JournalFeelingOption(
+      key: 'Triggered',
+      labelEn: 'Triggered',
+      labelTl: 'Na-trigger',
+      accent: Color(0xFFCE2028),
+    ),
+    JournalFeelingOption(
+      key: 'Hopeful',
+      labelEn: 'Hopeful',
+      labelTl: 'Umaasa',
+      accent: Color(0xFF16A34A),
+    ),
+    JournalFeelingOption(
+      key: 'Lonely',
+      labelEn: 'Lonely',
+      labelTl: 'Nangungulila',
+      accent: Color(0xFF7C3AED),
+    ),
+    JournalFeelingOption(
+      key: 'Motivated',
+      labelEn: 'Motivated',
+      labelTl: 'Motibado',
+      accent: Color(0xFFEA580C),
+    ),
+    JournalFeelingOption(
+      key: 'Overwhelmed',
+      labelEn: 'Overwhelmed',
+      labelTl: 'Nalulula',
+      accent: Color(0xFF64748B),
+    ),
   ];
 
   static const impactOptions = <JournalImpactOption>[

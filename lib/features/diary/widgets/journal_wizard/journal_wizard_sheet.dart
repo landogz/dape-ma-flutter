@@ -15,6 +15,8 @@ import '../../../../core/utils/api_url.dart';
 import '../../diary_service.dart';
 import '../../image/diary_image_picker.dart';
 import '../diary_rich_text_toolbar.dart';
+import 'feeling_chip/feeling_chip.dart';
+import 'feeling_chip/remove_custom_feeling_dialog.dart';
 import 'journal_constants.dart';
 import 'sky_option_tile/sky_option_tile.dart';
 import '../../../../core/theme/app_theme_colors.dart';
@@ -321,6 +323,29 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
     }
   }
 
+  Future<void> _removeCustomFeeling(String value) async {
+    final confirmed = await showRemoveCustomFeelingDialog(
+      context,
+      feeling: value,
+    );
+    if (!confirmed || !mounted) return;
+
+    setState(() {
+      _customFeelingOptions.remove(value);
+      _feelings.remove(value);
+    });
+    try {
+      await AuthService.authedPut<Map<String, dynamic>>(
+        Endpoints.profileUpdate,
+        data: {
+          'journal_custom_feelings': List<String>.from(_customFeelingOptions),
+        },
+      );
+    } catch (_) {
+      // Local list is already updated.
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -473,6 +498,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
               }
             });
           },
+          onRemoveCustom: _removeCustomFeeling,
           labelOf: _feelingLabel,
           customController: _customFeelingController,
           onAddCustom: _addCustomFeeling,
@@ -594,6 +620,7 @@ class _FeelingsStep extends StatelessWidget {
     required this.options,
     required this.customOptions,
     required this.onToggle,
+    required this.onRemoveCustom,
     required this.labelOf,
     required this.customController,
     required this.onAddCustom,
@@ -603,6 +630,7 @@ class _FeelingsStep extends StatelessWidget {
   final List<JournalFeelingOption> options;
   final List<String> customOptions;
   final ValueChanged<String> onToggle;
+  final ValueChanged<String> onRemoveCustom;
   final String Function(JournalFeelingOption) labelOf;
   final TextEditingController customController;
   final VoidCallback onAddCustom;
@@ -646,21 +674,35 @@ class _FeelingsStep extends StatelessWidget {
           runSpacing: 8,
           children: [
             ...options.map((opt) {
-              return _feelingChip(
-                context,
+              return JournalFeelingChip(
                 label: labelOf(opt),
-                value: opt.key,
+                selected: selected.contains(opt.key),
+                accent: opt.accent ?? AppColors.primaryBlue,
+                onTap: () => onToggle(opt.key),
               );
             }),
             ...extras.map((feeling) {
-              return _feelingChip(
-                context,
+              return JournalFeelingChip(
                 label: feeling,
-                value: feeling,
+                selected: selected.contains(feeling),
+                accent: AppColors.primaryBlue,
+                onTap: () => onToggle(feeling),
+                onLongPress: () => onRemoveCustom(feeling),
               );
             }),
           ],
         ),
+        if (extras.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            l10n.journalCustomFeelingHint,
+            style: TextStyle(
+              fontSize: 12,
+              height: 1.35,
+              color: context.textSecondary,
+            ),
+          ),
+        ],
         const SizedBox(height: 20),
         Row(
           children: [
@@ -704,30 +746,6 @@ class _FeelingsStep extends StatelessWidget {
           ],
         ),
       ],
-    );
-  }
-
-  Widget _feelingChip(
-    BuildContext context, {
-    required String label,
-    required String value,
-  }) {
-    final isOn = selected.contains(value);
-    return FilterChip(
-      label: Text(label),
-      selected: isOn,
-      onSelected: (_) => onToggle(value),
-      showCheckmark: false,
-      selectedColor: AppColors.accentYellow,
-      backgroundColor: context.chipBackground,
-      labelStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        color: isOn ? AppColors.nileBlue : context.textPrimary,
-      ),
-      side: BorderSide(
-        color: isOn ? AppColors.accentYellow : context.borderSubtle,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
     );
   }
 }

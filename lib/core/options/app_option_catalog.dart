@@ -148,6 +148,7 @@ class AppOptionCatalog {
             key: item.key,
             labelEn: item.labelEn,
             labelTl: item.labelTl,
+            accent: item.accent,
           ),
         )
         .toList();

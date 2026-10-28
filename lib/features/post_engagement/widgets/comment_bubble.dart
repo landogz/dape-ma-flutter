@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/user_avatar.dart';
+import '../comment_tree_utils.dart';
 
 class CommentBubble extends StatelessWidget {
   const CommentBubble({
@@ -270,7 +271,7 @@ class CommentBubble extends StatelessWidget {
   }
 }
 
-class CommentThread extends StatelessWidget {
+class CommentThread extends StatefulWidget {
   const CommentThread({
     super.key,
     required this.comment,
@@ -282,6 +283,9 @@ class CommentThread extends StatelessWidget {
     this.depth = 0,
   });
 
+  /// Collapse nested replies behind "View N replies" when there are 2+.
+  static const int collapseAt = 2;
+
   final PostComment comment;
   final String Function(DateTime?) timeAgoBuilder;
   final bool Function(PostComment comment) canManageBuilder;
@@ -291,30 +295,96 @@ class CommentThread extends StatelessWidget {
   final int depth;
 
   @override
+  State<CommentThread> createState() => _CommentThreadState();
+}
+
+class _CommentThreadState extends State<CommentThread> {
+  bool _repliesExpanded = false;
+
+  int get _nestedCount => countCommentsInTree(widget.comment.replies);
+
+  bool get _shouldCollapse => _nestedCount >= CommentThread.collapseAt;
+
+  @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final showReplies = widget.comment.replies.isNotEmpty
+        && (!_shouldCollapse || _repliesExpanded);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         CommentBubble(
-          comment: comment,
-          timeAgo: timeAgoBuilder(comment.createdAt),
-          canManage: canManageBuilder(comment),
-          onEdit: () => onEdit(comment),
-          onDelete: () => onDelete(comment),
-          onReply: onReply == null ? null : () => onReply!(comment),
-          depth: depth,
+          comment: widget.comment,
+          timeAgo: widget.timeAgoBuilder(widget.comment.createdAt),
+          canManage: widget.canManageBuilder(widget.comment),
+          onEdit: () => widget.onEdit(widget.comment),
+          onDelete: () => widget.onDelete(widget.comment),
+          onReply: widget.onReply == null
+              ? null
+              : () => widget.onReply!(widget.comment),
+          depth: widget.depth,
         ),
-        ...comment.replies.map(
-          (reply) => CommentThread(
-            comment: reply,
-            timeAgoBuilder: timeAgoBuilder,
-            canManageBuilder: canManageBuilder,
-            onEdit: onEdit,
-            onDelete: onDelete,
-            onReply: onReply,
-            depth: depth + 1,
+        if (_shouldCollapse && !_repliesExpanded)
+          Padding(
+            padding: EdgeInsets.only(
+              left: 12.0 + widget.depth.clamp(0, 2) * 10.0,
+              bottom: 8,
+            ),
+            child: TextButton.icon(
+              onPressed: () => setState(() => _repliesExpanded = true),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.mediumElectricBlue,
+                minimumSize: const Size(44, 40),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
+              label: Text(
+                l10n.viewReplies(_nestedCount),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
+              ),
+            ),
           ),
-        ),
+        if (showReplies) ...[
+          ...widget.comment.replies.map(
+            (reply) => CommentThread(
+              comment: reply,
+              timeAgoBuilder: widget.timeAgoBuilder,
+              canManageBuilder: widget.canManageBuilder,
+              onEdit: widget.onEdit,
+              onDelete: widget.onDelete,
+              onReply: widget.onReply,
+              depth: widget.depth + 1,
+            ),
+          ),
+          if (_shouldCollapse)
+            Padding(
+              padding: EdgeInsets.only(
+                left: 12.0 + widget.depth.clamp(0, 2) * 10.0,
+                bottom: 8,
+              ),
+              child: TextButton(
+                onPressed: () => setState(() => _repliesExpanded = false),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.textSecondary,
+                  minimumSize: const Size(44, 40),
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  l10n.hideReplies,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ],
     );
   }

@@ -1686,6 +1686,15 @@ class AppStrings {
   String get commentStickersTab => _t('commentStickersTab', 'Stickers', 'Mga Sticker');
   String get reply => _t('reply', 'Reply', 'Tumugon');
   String get replyingTo => _t('replyingTo', 'Replying to', 'Tumutugon kay');
+  String viewReplies(int count) => count == 1
+      ? _t('viewReplyOne', 'View 1 reply', 'Tingnan ang 1 reply')
+      : _t(
+          'viewReplies',
+          'View {count} replies',
+          'Tingnan ang {count} reply',
+          {'count': count.toString()},
+        );
+  String get hideReplies => _t('hideReplies', 'Hide replies', 'Itago ang mga reply');
   String get edit => _t('edit', 'Edit', 'I-edit');
   String get deleteAction => _t('deleteAction', 'Delete', 'Burahin');
 

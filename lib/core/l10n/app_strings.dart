@@ -1345,7 +1345,19 @@ class AppStrings {
   String get currentPasswordRequired =>
       _t('currentPasswordRequired', 'Current password is required', 'Kailangan ang kasalukuyang password');
   String get passwordMinLength =>
-      _t('passwordMinLength', 'New password must be at least 6 characters', 'Ang bagong password ay dapat 6 character');
+      _t('passwordMinLength', 'Password must include at least 8 characters, upper and lower case, a number, a symbol.', 'Ang password ay dapat may 8 character, malaki at maliit na letra, numero, at simbolo.');
+  String get passwordPolicyHint => _t(
+        'passwordPolicyHint',
+        'Password must include at least 8 characters, upper and lower case, a number, a symbol.',
+        'Ang password ay dapat may 8 character, malaki at maliit na letra, numero, at simbolo.',
+      );
+  String get passwordMustChangeTitle =>
+      _t('passwordMustChangeTitle', 'Set a new password', 'Magtakda ng bagong password');
+  String get passwordMustChangeBody => _t(
+        'passwordMustChangeBody',
+        'Your password was set by an administrator or has expired. Choose a new password to continue.',
+        'Itinakda ng administrator ang password o nag-expire na ito. Pumili ng bago para magpatuloy.',
+      );
   String get passwordsDoNotMatch =>
       _t('passwordsDoNotMatch', 'New passwords do not match', 'Hindi magkatugma ang mga bagong password');
   String get passwordUpdated =>
@@ -1576,8 +1588,8 @@ class AppStrings {
   String get confirmPasswordHint =>
       _t('confirmPasswordHint', 'Confirm new password', 'Kumpirmahin ang bagong password');
   String get passwordMinEight => _t('passwordMinEight', 
-        'Password must be at least 8 characters',
-        'Ang password ay dapat hindi bababa sa 8 character',
+        'Password must include at least 8 characters, upper and lower case, a number, a symbol.',
+        'Ang password ay dapat may 8 character, malaki at maliit na letra, numero, at simbolo.',
       );
   String get saveNewPassword =>
       _t('saveNewPassword', 'Save new password', 'I-save ang bagong password');
@@ -1667,7 +1679,7 @@ class AppStrings {
   String get registrationFailed =>
       _t('registrationFailed', 'Registration failed. Please check your details.', 'Hindi matagumpay ang pagrehistro. Suriin ang mga detalye.');
   String get passwordMinSix =>
-      _t('passwordMinSix', 'Password must be at least 8 characters', 'Ang password ay dapat hindi bababa sa 8 character');
+      _t('passwordMinSix', 'Password must include at least 8 characters, upper and lower case, a number, a symbol.', 'Ang password ay dapat may 8 character, malaki at maliit na letra, numero, at simbolo.');
 
   // Bookmarks extras
   String get bookmarkRemoveFailed =>

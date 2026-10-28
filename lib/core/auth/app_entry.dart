@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../features/account/force_change_password/force_change_password_screen.dart';
 import '../../features/account/profile/profile_completeness.dart';
 import '../../features/kid_listo/kid_listo_welcome_screen.dart';
 import '../../features/shell/main_shell_screen.dart';
@@ -28,6 +29,10 @@ class AppEntry {
   }
 
   static Future<Widget> screen({List<Post> posts = const []}) async {
+    if (AuthService.mustChangePassword) {
+      return ForceChangePasswordScreen(initialPosts: posts);
+    }
+
     final complete = await _profileIsComplete();
     if (!complete) {
       AuthNavigator.markProfileSetup(posts: posts);

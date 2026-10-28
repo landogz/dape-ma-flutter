@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 import '../../core/l10n/locale_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../account/widgets/settings_hero_header.dart';
+import '../post_detail/widgets/post_article_layout.dart';
 import 'legal_page_service.dart';
 
 class LegalDocumentScreen extends StatefulWidget {
@@ -99,10 +101,9 @@ class _LegalDocumentScreenState extends State<LegalDocumentScreen> {
                         color: AppColors.primaryBlue.withValues(alpha: 0.25),
                       ),
                     ),
-                    child: SelectableText(
-                      _body,
-                      textAlign: TextAlign.start,
-                      style: TextStyle(
+                    child: HtmlWidget(
+                      normalizeArticleHtml(_body),
+                      textStyle: TextStyle(
                         color: context.textPrimary.withValues(alpha: 0.9),
                         fontSize: 14,
                         height: 1.55,

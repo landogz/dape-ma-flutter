@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import 'widgets/auth_decor.dart';
 import 'widgets/auth_scaffold.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../../core/validation/password_policy/password_policy.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   const ResetPasswordScreen({
@@ -155,11 +156,22 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   if (value == null || value.isEmpty) {
                     return l10n.passwordRequired;
                   }
-                  if (value.length < 8) {
-                    return l10n.passwordMinEight;
+                  if (!PasswordPolicy.isValid(value)) {
+                    return l10n.passwordPolicyHint;
                   }
                   return null;
                 },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
+              child: Text(
+                l10n.passwordPolicyHint,
+                style: const TextStyle(
+                  fontSize: 12,
+                  height: 1.4,
+                  color: AuthTokens.muted,
+                ),
               ),
             ),
             const SizedBox(height: 14),

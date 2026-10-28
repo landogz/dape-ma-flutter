@@ -11,6 +11,7 @@ import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/api_url.dart';
+import '../../core/validation/password_policy/password_policy.dart';
 import 'edit_profile/interests_picker_sheet.dart';
 import 'profile/profile_about.dart';
 import 'profile/profile_photo_sheet.dart';
@@ -556,8 +557,8 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
       setState(() => _error = context.l10n.currentPasswordRequired);
       return;
     }
-    if (newPass.length < 6) {
-      setState(() => _error = context.l10n.passwordMinLength);
+    if (!PasswordPolicy.isValid(newPass)) {
+      setState(() => _error = context.l10n.passwordPolicyHint);
       return;
     }
     if (newPass != confirm) {
@@ -637,6 +638,15 @@ class _ChangePasswordSheetState extends State<_ChangePasswordSheet> {
                   ),
             ),
             const SizedBox(height: 20),
+            Text(
+              l10n.passwordPolicyHint,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.4,
+                color: context.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _currentController,
               decoration: inputDecoration.copyWith(

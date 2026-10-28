@@ -10,6 +10,7 @@ class AuthService {
   AuthService._();
 
   static String? _cachedToken;
+  static bool mustChangePassword = false;
 
   static Future<String?> getToken() async {
     if (_cachedToken != null) return _cachedToken;
@@ -55,6 +56,7 @@ class AuthService {
 
   static Future<void> logout() async {
     _cachedToken = null;
+    mustChangePassword = false;
     await AuthStorage.clearToken();
     await AuthStorage.clearUserId();
     await SettingsPreferences.setUserScope(null);
@@ -77,6 +79,7 @@ class AuthService {
       final user = root['data'] is Map<String, dynamic>
           ? root['data'] as Map<String, dynamic>
           : root;
+      mustChangePassword = user['must_change_password'] == true;
       final id = user['id'];
       final userId = id == null ? null : '$id';
       if (userId != null && userId.isNotEmpty) {

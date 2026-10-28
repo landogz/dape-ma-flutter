@@ -19,8 +19,33 @@ class AppNotification {
 
   bool get isUnread => readAt == null;
 
+  String? get linkType {
+    final raw = data['link_type']?.toString().trim();
+    if (raw != null && raw.isNotEmpty) return raw;
+    if (postId != null) return 'post';
+    if (hopeEventId != null) return 'hope_event';
+    return null;
+  }
+
   int? get postId {
-    final value = data['post_id'];
+    final fromPost = _asInt(data['post_id']);
+    if (fromPost != null) return fromPost;
+    if (data['link_type']?.toString() == 'post') {
+      return _asInt(data['link_id']);
+    }
+    return null;
+  }
+
+  int? get hopeEventId {
+    final fromKey = _asInt(data['hope_event_id']);
+    if (fromKey != null) return fromKey;
+    if (data['link_type']?.toString() == 'hope_event') {
+      return _asInt(data['link_id']);
+    }
+    return null;
+  }
+
+  static int? _asInt(dynamic value) {
     if (value is int) return value;
     return int.tryParse(value?.toString() ?? '');
   }

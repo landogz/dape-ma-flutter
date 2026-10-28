@@ -7,6 +7,7 @@ import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../hope/events/hope_event_detail_screen.dart';
 import '../post_detail/post_detail_screen.dart';
 import '../settings/notification_settings_screen.dart';
 import 'models/app_notification.dart';
@@ -223,6 +224,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           });
         }
       } catch (_) {}
+    }
+
+    final hopeEventId = item.hopeEventId;
+    if (hopeEventId != null) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => HopeEventDetailScreen(eventId: hopeEventId),
+        ),
+      );
+      return;
     }
 
     final postId = item.postId;

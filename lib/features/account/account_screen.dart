@@ -55,6 +55,7 @@ class _AccountScreenState extends State<AccountScreen> {
   bool _loading = true;
   bool _loggedIn = false;
   String _name = '';
+  String _username = '';
   String? _photoUrl;
   String? _about;
   String? _memberSince;
@@ -93,6 +94,7 @@ class _AccountScreenState extends State<AccountScreen> {
         _loggedIn = false;
         _loading = false;
         _name = '';
+        _username = '';
         _photoUrl = null;
         _about = null;
         _memberSince = null;
@@ -126,6 +128,7 @@ class _AccountScreenState extends State<AccountScreen> {
       setState(() {
         _loggedIn = true;
         _name = summary.name;
+        _username = summary.username;
         _photoUrl = ApiUrl.resolve(summary.photoUrl);
         _pickedFile = null;
         _about = ProfileAbout.clamp(summary.about);
@@ -360,10 +363,15 @@ class _AccountScreenState extends State<AccountScreen> {
     return parts.first;
   }
 
+  String get _displayName {
+    if (_name.trim().isNotEmpty) return _name.trim();
+    if (_username.trim().isNotEmpty) return _username.trim();
+    return _firstName;
+  }
+
   String get _handle {
-    final base = _firstName
-        .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final raw = _username.trim().isNotEmpty ? _username.trim() : _firstName;
+    final base = raw.toLowerCase().replaceAll(RegExp(r'[^a-z0-9_]'), '');
     if (base.isEmpty) return '@member';
     return '@$base';
   }
@@ -726,11 +734,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                           const EditProfileScreen(),
                                         ),
                                         child: Text(
-                                          WordMasker.mask(
-                                            _name.trim().isNotEmpty
-                                                ? _name.trim()
-                                                : _firstName,
-                                          ),
+                                          WordMasker.mask(_displayName),
                                           textAlign: TextAlign.center,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,

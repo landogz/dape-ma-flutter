@@ -1,6 +1,7 @@
 class ProfileSummary {
   const ProfileSummary({
     required this.name,
+    required this.username,
     required this.photoUrl,
     required this.about,
     required this.memberSinceRaw,
@@ -20,6 +21,7 @@ class ProfileSummary {
   });
 
   final String name;
+  final String username;
   final String? photoUrl;
   final String? about;
   final String? memberSinceRaw;
@@ -44,6 +46,7 @@ class ProfileSummary {
 
     return ProfileSummary(
       name: (user['name'] as String?)?.trim() ?? '',
+      username: (user['nickname'] as String?)?.trim() ?? '',
       photoUrl: user['profile_image_url'] as String?,
       memberSinceRaw: user['created_at'] as String?,
       about: (user['about'] as String?)?.trim(),

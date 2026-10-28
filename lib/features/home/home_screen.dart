@@ -190,11 +190,14 @@ class _HomeScreenState extends State<HomeScreen> {
       final user = data['data'] is Map<String, dynamic>
           ? data['data'] as Map<String, dynamic>
           : data;
-      final name = user['name'] as String?;
+      final nickname = (user['nickname'] as String?)?.trim();
+      final name = (user['name'] as String?)?.trim();
+      final greeting = (nickname != null && nickname.isNotEmpty)
+          ? nickname
+          : (name != null && name.isNotEmpty ? name : null);
       if (mounted) {
         setState(() {
-          _userName =
-              name != null && name.trim().isNotEmpty ? name.trim() : null;
+          _userName = greeting;
         });
       }
     } catch (_) {

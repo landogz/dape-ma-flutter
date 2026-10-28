@@ -27,6 +27,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _loading = true;
   bool _saving = false;
   String _name = '';
+  String _username = '';
   String _email = '';
   String? _about;
   String? _photoUrl;
@@ -60,6 +61,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!mounted) return;
       setState(() {
         _name = (user['name'] as String?)?.trim() ?? '';
+        _username = (user['nickname'] as String?)?.trim() ?? '';
         _email = (user['email'] as String?)?.trim() ?? '';
         _about = (user['about'] as String?)?.trim();
         _photoUrl = ApiUrl.resolve(user['profile_image_url'] as String?);
@@ -88,7 +90,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       initialInterests: _interests,
     );
     if (saved == null || !mounted) return;
-    await _saveProfile(name: _name, interests: saved);
+    await _saveProfile(interests: saved);
   }
 
   bool get _hasProfilePhoto =>
@@ -111,7 +113,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       case ProfilePhotoChoice.change:
         await _pickImage();
       case ProfilePhotoChoice.remove:
-        await _saveProfile(name: _name, removePhoto: true);
+        await _saveProfile(removePhoto: true);
       case null:
         return;
     }
@@ -127,13 +129,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
     if (xFile != null && mounted) {
       setState(() => _pickedFile = File(xFile.path));
-      await _saveProfile(name: _name, photoFile: _pickedFile);
+      await _saveProfile(photoFile: _pickedFile);
     }
   }
 
+  Future<void> _editUsername() async {
+    final saved = await _editTextFieldSheet(
+      title: context.l10n.usernameLabel,
+      initialValue: _username,
+      textCapitalization: TextCapitalization.none,
+      hint: context.l10n.usernameHint,
+    );
+    if (saved == null) return;
+    final username = saved.trim();
+    if (username.isEmpty) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.usernameRequired)),
+      );
+      return;
+    }
+    await _saveProfile(username: username);
+  }
+
   Future<void> _editName() async {
-    final controller = TextEditingController(text: _name);
-    final saved = await showModalBottomSheet<String>(
+    final saved = await _editTextFieldSheet(
+      title: context.l10n.fullNameLabel,
+      initialValue: _name,
+      textCapitalization: TextCapitalization.words,
+    );
+    if (saved != null && saved.trim().isNotEmpty) {
+      await _saveProfile(name: saved.trim());
+    }
+  }
+
+  Future<String?> _editTextFieldSheet({
+    required String title,
+    required String initialValue,
+    required TextCapitalization textCapitalization,
+    String? hint,
+  }) {
+    final controller = TextEditingController(text: initialValue);
+    return showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: context.cardBackground,
@@ -153,7 +190,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                context.l10n.fullNameLabel,
+                title,
                 style: TextStyle(
                   color: context.heading,
                   fontWeight: FontWeight.w800,
@@ -163,8 +200,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 14),
               TextField(
                 controller: controller,
-                textCapitalization: TextCapitalization.words,
+                textCapitalization: textCapitalization,
+                autofocus: true,
                 decoration: InputDecoration(
+                  hintText: hint,
                   filled: true,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -191,10 +230,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
       },
     );
-
-    if (saved != null && saved.isNotEmpty) {
-      await _saveProfile(name: saved);
-    }
   }
 
   Future<void> _editAbout() async {
@@ -211,7 +246,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (saved != null) {
       final about = ProfileAbout.clamp(saved);
       await _saveProfile(
-        name: _name,
         about: about.isEmpty ? null : about,
         updateAbout: true,
       );
@@ -228,7 +262,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _saveProfile({
-    required String name,
+    String? name,
+    String? username,
     File? photoFile,
     List<String>? interests,
     bool removePhoto = false,
@@ -251,7 +286,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       } else if (photoFile != null) {
         // POST multipart — PHP does not reliably parse files on PUT.
         final formData = FormData.fromMap({
-          'name': name,
+          if (name != null) 'name': name,
+          if (username != null) 'nickname': username,
           'interests': ?interests,
           if (updateAbout) 'about': about ?? '',
           'profile_photo': await MultipartFile.fromFile(
@@ -279,7 +315,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         await AuthService.authedPut<Map<String, dynamic>>(
           Endpoints.profileUpdate,
           data: <String, dynamic>{
-            if (!updateAbout) 'name': name,
+            if (name != null) 'name': name,
+            if (username != null) 'nickname': username,
             'interests': ?interests,
             if (updateAbout) 'about': about ?? '',
           },
@@ -288,7 +325,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (!mounted) return;
       setState(() {
-        _name = name;
+        if (name != null) _name = name;
+        if (username != null) _username = username;
         if (interests != null) {
           _interests = List<String>.from(interests);
         }
@@ -329,6 +367,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final l10n = context.l10n;
     final nameParts = _name.split(' ').where((p) => p.isNotEmpty).toList();
     final firstName = nameParts.isEmpty ? _name : nameParts.first;
+    final headerName = _username.isNotEmpty
+        ? _username
+        : (firstName.isEmpty ? l10n.youAreSignedIn : firstName);
 
     return Scaffold(
       backgroundColor: context.pageBackground,
@@ -393,13 +434,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            firstName.isEmpty ? l10n.youAreSignedIn : firstName,
+                            headerName,
                             style: TextStyle(
                               color: context.heading,
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
                             ),
                           ),
+                          if (_name.isNotEmpty && _username.isNotEmpty) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              _name,
+                              style: TextStyle(
+                                color: context.textSecondary,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                           if (_memberSince != null) ...[
                             const SizedBox(height: 4),
                             Text(
@@ -416,6 +468,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 28),
+                _ProfileFieldCard(
+                  icon: Icons.alternate_email_rounded,
+                  value: _username.isEmpty ? '—' : _username,
+                  label: l10n.usernameLabel,
+                  onTap: _editUsername,
+                ),
+                const SizedBox(height: 12),
                 _ProfileFieldCard(
                   icon: Icons.person_outline_rounded,
                   value: _name.isEmpty ? '—' : _name,

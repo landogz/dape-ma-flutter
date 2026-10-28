@@ -1156,6 +1156,11 @@ class AppStrings {
       );
   String get memberSince => _t('memberSince', 'Member since', 'Miyembro mula');
   String get fullNameLabel => _t('fullNameLabel', 'Full Name', 'Buong Pangalan');
+  String get usernameLabel => _t('usernameLabel', 'Username', 'Username');
+  String get usernameHint =>
+      _t('usernameHint', 'Choose a username', 'Pumili ng username');
+  String get usernameRequired =>
+      _t('usernameRequired', 'Please enter a username.', 'Maglagay ng username.');
   String get emailAddressLabel => _t('emailAddressLabel', 'Email Address', 'Email Address');
   String get aboutMeLabel => _t('aboutMeLabel', 'About Me', 'Tungkol sa Akin');
   String get aboutMeHint =>
@@ -1420,11 +1425,15 @@ class AppStrings {
         'We’ll use this to personalize your experience.',
         'Gagamitin namin ito para i-personalize ang iyong karanasan.',
       );
-  String get regNicknameHint => _t('regNicknameHint', 'Type your nickname', 'I-type ang iyong palayaw');
-  String get regNicknameHelper =>
-      _t('regNicknameHelper', 'You can change this anytime.', 'Maaari mong baguhin ito anytime.');
+  String get regNicknameHint =>
+      _t('regNicknameHint', 'Type your username', 'I-type ang iyong username');
+  String get regNicknameHelper => _t(
+        'regNicknameHelper',
+        'This is your username. Your full name can be set later in Edit Profile.',
+        'Ito ang iyong username. Maaaring i-set ang buong pangalan sa Edit Profile.',
+      );
   String get regNicknameRequired =>
-      _t('regNicknameRequired', 'Please enter a nickname.', 'Maglagay ng palayaw.');
+      _t('regNicknameRequired', 'Please enter a username.', 'Maglagay ng username.');
   String get regOptionalLabel => _t('regOptionalLabel', 'OPTIONAL', 'OPSYONAL');
   String get regPronounsTitle =>
       _t('regPronounsTitle', 'What are your pronouns?', 'Ano ang iyong mga panghalip?');

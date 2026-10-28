@@ -38,9 +38,8 @@ class ProfileCompleteness {
 
   static double scoreFromUser(Map<String, dynamic> user) {
     final name = (user['name'] ?? '').toString().trim();
-    final nickname = (user['nickname'] ?? '').toString().trim();
     return score(
-      name: name.isNotEmpty ? name : nickname,
+      name: name,
       photoUrl: user['profile_image_url']?.toString(),
     );
   }

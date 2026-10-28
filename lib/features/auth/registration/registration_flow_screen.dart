@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/options/app_option_catalog.dart';
+import '../../../core/validation/username_policy.dart';
 import 'steps/birthday_step.dart';
 import 'steps/get_started_step.dart';
 import 'steps/interests_step.dart';
@@ -124,10 +125,17 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
   }
 
   Future<void> _nextFromNickname() async {
-    final nickname = _nicknameController.text.trim();
-    if (nickname.isEmpty) {
+    final nickname = UsernamePolicy.normalize(_nicknameController.text);
+    final errorKey = UsernamePolicy.validate(nickname);
+    if (errorKey != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.regNicknameRequired)),
+        SnackBar(
+          content: Text(
+            errorKey == 'required'
+                ? context.l10n.regNicknameRequired
+                : context.l10n.usernameInvalid,
+          ),
+        ),
       );
       return;
     }
@@ -139,6 +147,22 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
       );
       if (!mounted) return;
       setState(() => _step = 2);
+    } on DioException catch (e) {
+      if (!mounted) return;
+      final errors = e.response?.data is Map ? e.response!.data['errors'] : null;
+      final nickErrors = errors is Map ? errors['nickname'] : null;
+      final nickMessage = nickErrors is List && nickErrors.isNotEmpty
+          ? nickErrors.first.toString()
+          : null;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            nickMessage != null && nickMessage.toLowerCase().contains('taken')
+                ? context.l10n.usernameTaken
+                : (_dioMessage(e) ?? context.l10n.regOnboardingFailed),
+          ),
+        ),
+      );
     } catch (_) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

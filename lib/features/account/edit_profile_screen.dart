@@ -12,6 +12,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
 import '../../core/utils/api_url.dart';
 import '../../core/validation/password_policy/password_policy.dart';
+import '../../core/validation/username_policy.dart';
 import 'edit_profile/interests_picker_sheet.dart';
 import 'profile/profile_about.dart';
 import 'profile/profile_photo_sheet.dart';
@@ -141,15 +142,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       hint: context.l10n.usernameHint,
     );
     if (saved == null) return;
-    final username = saved.trim();
-    if (username.isEmpty) {
+    final username = UsernamePolicy.normalize(saved);
+    final errorKey = UsernamePolicy.validate(username);
+    if (errorKey != null) {
       if (!mounted) return;
+      final message = errorKey == 'required'
+          ? context.l10n.usernameRequired
+          : context.l10n.usernameInvalid;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.usernameRequired)),
+        SnackBar(content: Text(message)),
       );
       return;
     }
     await _saveProfile(username: username);
+  }
+
+  String _profileErrorMessage(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map) {
+        final errors = data['errors'];
+        if (errors is Map && errors['nickname'] is List && errors['nickname'].isNotEmpty) {
+          final first = errors['nickname'].first.toString().toLowerCase();
+          if (first.contains('taken') || first.contains('unique')) {
+            return context.l10n.usernameTaken;
+          }
+          if (first.contains('letter') ||
+              first.contains('regex') ||
+              first.contains('character')) {
+            return context.l10n.usernameInvalid;
+          }
+          return errors['nickname'].first.toString();
+        }
+        final message = data['message']?.toString().trim();
+        if (message != null && message.isNotEmpty) return message;
+      }
+    }
+    return context.l10n.updateFailed;
   }
 
   Future<void> _editName() async {
@@ -273,7 +302,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() => _saving = true);
     try {
       if (removePhoto) {
-        await AuthService.authedPut<Map<String, dynamic>>(
+        await AuthService.authedPost<Map<String, dynamic>>(
           Endpoints.profileUpdate,
           data: const {'remove_profile_photo': true},
         );
@@ -312,7 +341,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           });
         }
       } else {
-        await AuthService.authedPut<Map<String, dynamic>>(
+        // Prefer POST — some PHP setups drop JSON bodies on PUT.
+        await AuthService.authedPost<Map<String, dynamic>>(
           Endpoints.profileUpdate,
           data: <String, dynamic>{
             if (name != null) 'name': name,
@@ -347,7 +377,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
       );
       await _load();
-    } catch (_) {
+    } catch (error) {
       if (!mounted) return;
       setState(() {
         _saving = false;
@@ -355,7 +385,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(context.l10n.updateFailed),
+          content: Text(_profileErrorMessage(error)),
           backgroundColor: AppColors.accentRed,
         ),
       );

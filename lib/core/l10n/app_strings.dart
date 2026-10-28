@@ -1161,6 +1161,16 @@ class AppStrings {
       _t('usernameHint', 'Choose a username', 'Pumili ng username');
   String get usernameRequired =>
       _t('usernameRequired', 'Please enter a username.', 'Maglagay ng username.');
+  String get usernameInvalid => _t(
+        'usernameInvalid',
+        'Use 3–30 characters: letters, numbers, dots, underscores, or hyphens.',
+        'Gumamit ng 3–30 character: letra, numero, tuldok, underscore, o gitling.',
+      );
+  String get usernameTaken => _t(
+        'usernameTaken',
+        'This username is already taken.',
+        'Nakuha na ang username na ito.',
+      );
   String get emailAddressLabel => _t('emailAddressLabel', 'Email Address', 'Email Address');
   String get aboutMeLabel => _t('aboutMeLabel', 'About Me', 'Tungkol sa Akin');
   String get aboutMeHint =>

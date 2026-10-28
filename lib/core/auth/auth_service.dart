@@ -215,7 +215,8 @@ class AuthService {
     List<String>? interests,
     bool complete = false,
   }) async {
-    final res = await authedPut<Map<String, dynamic>>(
+    // Prefer POST — some PHP setups drop JSON bodies on PUT.
+    final res = await authedPost<Map<String, dynamic>>(
       Endpoints.onboardingUpdate,
       data: <String, dynamic>{
         'nickname': ?nickname,

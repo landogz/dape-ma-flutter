@@ -330,7 +330,10 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                             ),
                           ),
                           child: Text(
-                            l10n.submissionsClosed,
+                            l10n.submissionsClosedWindow(
+                              start: _contest!.submissionStartsAt,
+                              end: _contest!.submissionEndsAt,
+                            ),
                             style: TextStyle(
                               color: context.heading,
                               fontWeight: FontWeight.w700,

@@ -228,6 +228,27 @@ class AppStrings {
       );
   String get submissionsClosed =>
       _t('submissionsClosed', 'Submissions are closed', 'Sarado na ang pag-submit');
+  String submissionsClosedWindow({String? start, String? end}) {
+    final startLabel = (start ?? '').trim();
+    final endLabel = (end ?? '').trim();
+    if (startLabel.isNotEmpty && endLabel.isNotEmpty) {
+      return _t(
+        'submissionsClosedWindow',
+        'Submissions are closed. Window: {start} – {end}.',
+        'Sarado na ang pag-submit. Panahon: {start} – {end}.',
+        {'start': startLabel, 'end': endLabel},
+      );
+    }
+    if (endLabel.isNotEmpty) {
+      return _t(
+        'submissionsClosedUntil',
+        'Submissions are closed. Ended on {end}.',
+        'Sarado na ang pag-submit. Natapos noong {end}.',
+        {'end': endLabel},
+      );
+    }
+    return submissionsClosed;
+  }
   String get publishedEntries =>
       _t('publishedEntries', 'Published entries', 'Mga na-publish na entry');
   String get noPublishedEntriesYet => _t('noPublishedEntriesYet', 

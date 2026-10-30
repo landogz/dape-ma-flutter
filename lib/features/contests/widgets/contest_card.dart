@@ -84,8 +84,12 @@ class ContestCard extends StatelessWidget {
     final l10n = context.l10n;
     final dateLabel = _dateLabel();
     final isOpen = contest.canSubmitEntry;
-    final statusLabel =
-        isOpen ? l10n.acceptingEntries : l10n.submissionsClosed;
+    final statusLabel = isOpen
+        ? l10n.acceptingEntries
+        : l10n.submissionsClosedWindow(
+            start: contest.submissionStartsAt,
+            end: contest.submissionEndsAt,
+          );
 
     return Material(
       color: context.cardBackground,

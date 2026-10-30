@@ -57,8 +57,7 @@ class SongContest {
   }
 
   /// Show submit CTA for open contests; API still enforces the real window.
-  bool get canSubmitEntry =>
-      isOpenForSubmission || status.toLowerCase() == 'open';
+  bool get canSubmitEntry => isOpenForSubmission;
 }
 
 bool _parseBool(dynamic value, {bool defaultValue = false}) {

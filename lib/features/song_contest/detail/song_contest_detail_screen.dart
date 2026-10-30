@@ -266,7 +266,10 @@ class _SongContestDetailScreenState extends State<SongContestDetailScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            l10n.submissionsClosed,
+                            l10n.submissionsClosedWindow(
+                              start: _contest!.submissionStartsAt,
+                              end: _contest!.submissionEndsAt,
+                            ),
                             style:
                                 Theme.of(context).textTheme.bodyMedium?.copyWith(
                                       color: context.heading,

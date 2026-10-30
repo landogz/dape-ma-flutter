@@ -39,9 +39,8 @@ class Contest {
   bool get isPoster => category.toLowerCase() == 'poster';
   bool get isVideo => category.toLowerCase() == 'video';
 
-  /// Show submit CTA for open contests; API still enforces the real window.
-  bool get canSubmitEntry =>
-      isOpenForSubmission || status.toLowerCase() == 'open';
+  /// Must match API `is_open_for_submission` (status + active + date window).
+  bool get canSubmitEntry => isOpenForSubmission;
 
   factory Contest.fromJson(Map<String, dynamic> json) {
     return Contest(

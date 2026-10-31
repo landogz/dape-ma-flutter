@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/rehab_center.dart';
 import '../../hope/hope_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
@@ -203,6 +204,39 @@ class RehabCenterDetailScreen extends StatelessWidget {
                               height: 1.25,
                             ),
                           ),
+                          if (center
+                              .categoryDisplay(isTagalog: context.l10n.isTagalog)
+                              .isNotEmpty) ...[
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: center.categoryColor ?? HopeColors.purple,
+                                  borderRadius: BorderRadius.circular(999),
+                                ),
+                                child: Text(
+                                  center.categoryDisplay(
+                                    isTagalog: context.l10n.isTagalog,
+                                  ),
+                                  style: TextStyle(
+                                    color: (center.categoryColor ??
+                                                    HopeColors.purple)
+                                                .computeLuminance() >
+                                            0.65
+                                        ? const Color(0xFF123A60)
+                                        : Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                           if (regionLine.isNotEmpty) ...[
                             const SizedBox(height: 6),
                             Text(

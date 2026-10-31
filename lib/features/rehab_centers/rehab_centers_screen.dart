@@ -4,6 +4,8 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/rehab_center.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
+import '../../core/options/app_option_catalog.dart';
+import '../../core/options/app_option_item.dart';
 import '../hope/hope_colors.dart';
 import 'widgets/rehab_center_card.dart';
 import '../../core/theme/app_theme_colors.dart';
@@ -19,6 +21,7 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
   List<RehabCenter> _centers = [];
   bool _loading = false;
   String _region = '';
+  String _category = '';
   String _search = '';
   final _searchController = TextEditingController();
 
@@ -33,13 +36,20 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
   @override
   void initState() {
     super.initState();
+    AppOptionCatalog.instance.addListener(_onCatalogChanged);
+    AppOptionCatalog.prefetch(force: true);
     _loadCenters();
   }
 
   @override
   void dispose() {
+    AppOptionCatalog.instance.removeListener(_onCatalogChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onCatalogChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadCenters() async {
@@ -50,6 +60,7 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
         Endpoints.rehabCenters,
         query: <String, dynamic>{
           if (_region.isNotEmpty) 'region': _region,
+          if (_category.isNotEmpty) 'category': _category,
           if (_search.trim().isNotEmpty) 'search': _search.trim(),
         },
       );
@@ -75,9 +86,23 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
     }
   }
 
+  Color _chipColor(AppOptionItem item, {required bool selected}) {
+    final accent = item.accent;
+    if (accent == null) {
+      return selected ? HopeColors.purple : HopeColors.mutedOf(context);
+    }
+    return accent;
+  }
+
+  bool _isLightAccent(Color color) {
+    return color.computeLuminance() > 0.65;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isTagalog = l10n.isTagalog;
+    final categories = AppOptionCatalog.rehabCenterCategories();
 
     return Scaffold(
       backgroundColor: context.pageBackground,
@@ -98,7 +123,80 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
         children: [
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ChoiceChip(
+                    label: Text(l10n.allCategories),
+                    selected: _category.isEmpty,
+                    onSelected: (_) {
+                      setState(() => _category = '');
+                      _loadCenters();
+                    },
+                    selectedColor: HopeColors.purple,
+                    labelStyle: TextStyle(
+                      color: _category.isEmpty
+                          ? Colors.white
+                          : HopeColors.mutedOf(context),
+                      fontWeight: FontWeight.w700,
+                    ),
+                    backgroundColor: context.pageBackground,
+                    side: BorderSide(
+                      color: _category.isEmpty
+                          ? HopeColors.purple
+                          : HopeColors.cardBorderOf(context),
+                    ),
+                    showCheckmark: false,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                  ),
+                ),
+                ...categories.map((item) {
+                  final selected = _category == item.key;
+                  final accent = _chipColor(item, selected: selected);
+                  final onAccent = selected
+                      ? (_isLightAccent(accent)
+                          ? const Color(0xFF123A60)
+                          : Colors.white)
+                      : HopeColors.mutedOf(context);
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      label: Text(item.label(isTagalog: isTagalog)),
+                      selected: selected,
+                      onSelected: (_) {
+                        setState(() => _category = item.key);
+                        _loadCenters();
+                      },
+                      selectedColor: accent,
+                      labelStyle: TextStyle(
+                        color: onAccent,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      backgroundColor: context.pageBackground,
+                      side: BorderSide(
+                        color: selected
+                            ? accent
+                            : HopeColors.cardBorderOf(context),
+                      ),
+                      showCheckmark: false,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 8,
+                      ),
+                    ),
+                  );
+                }),
+              ],
+            ),
+          ),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
             child: Row(
               children: _regions.map((r) {
                 final value = r['value']!;
@@ -115,13 +213,15 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                     },
                     selectedColor: HopeColors.purple,
                     labelStyle: TextStyle(
-                      color: selected ? Colors.white : HopeColors.mutedOf(context),
+                      color:
+                          selected ? Colors.white : HopeColors.mutedOf(context),
                       fontWeight: FontWeight.w700,
                     ),
                     backgroundColor: context.pageBackground,
                     side: BorderSide(
-                      color:
-                          selected ? HopeColors.purple : HopeColors.cardBorderOf(context),
+                      color: selected
+                          ? HopeColors.purple
+                          : HopeColors.cardBorderOf(context),
                     ),
                     showCheckmark: false,
                     padding: const EdgeInsets.symmetric(
@@ -158,11 +258,13 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                     const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
+                  borderSide:
+                      BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide(color: HopeColors.cardBorderOf(context)),
+                  borderSide:
+                      BorderSide(color: HopeColors.cardBorderOf(context)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(14),
@@ -201,7 +303,9 @@ class _RehabCentersScreenState extends State<RehabCentersScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                _region.isNotEmpty || _search.isNotEmpty
+                                _region.isNotEmpty ||
+                                        _category.isNotEmpty ||
+                                        _search.isNotEmpty
                                     ? l10n.tryDifferentSearch
                                     : l10n.checkBackLater,
                                 textAlign: TextAlign.center,

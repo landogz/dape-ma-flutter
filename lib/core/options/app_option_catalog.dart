@@ -25,6 +25,7 @@ class AppOptionCatalog extends ChangeNotifier {
   static const journalImpactGroup = 'journal_impact';
   static const careToolkitGroup = 'care_toolkit';
   static const careSupportGroup = 'care_support';
+  static const rehabCenterGroup = 'rehab_center';
 
   Map<String, List<AppOptionItem>> _byGroup = {};
   Future<void>? _inFlight;
@@ -263,6 +264,88 @@ class AppOptionCatalog extends ChangeNotifier {
     ];
   }
 
+  /// Active rehab center categories from Lookups (`rehab_center`) with accent colors.
+  static List<AppOptionItem> rehabCenterCategories() {
+    final remote = instance._byGroup[rehabCenterGroup];
+    if (remote != null) {
+      return List<AppOptionItem>.from(remote);
+    }
+    return const [
+      AppOptionItem(
+        key: 'residential',
+        labelEn: 'Residential',
+        labelTl: 'Residential',
+        subtitleEn: 'Live-in treatment facility',
+        subtitleTl: 'Pasilidad na may tuluyan',
+        iconName: 'home_outlined',
+        icon: Icons.home_outlined,
+        accentHex: '#123a60',
+        accent: Color(0xFF123A60),
+        sortOrder: 1,
+      ),
+      AppOptionItem(
+        key: 'outpatient',
+        labelEn: 'Outpatient',
+        labelTl: 'Outpatient',
+        subtitleEn: 'Day programs without overnight stay',
+        subtitleTl: 'Programa sa araw nang walang tuluyan',
+        iconName: 'medical_services_outlined',
+        icon: Icons.medical_services_outlined,
+        accentHex: '#055498',
+        accent: Color(0xFF055498),
+        sortOrder: 2,
+      ),
+      AppOptionItem(
+        key: 'community_based',
+        labelEn: 'Community-based',
+        labelTl: 'Community-based',
+        subtitleEn: 'Barangay and community recovery programs',
+        subtitleTl: 'Programa sa barangay at komunidad',
+        iconName: 'groups_outlined',
+        icon: Icons.groups_outlined,
+        accentHex: '#16A34A',
+        accent: Color(0xFF16A34A),
+        sortOrder: 3,
+      ),
+      AppOptionItem(
+        key: 'aftercare',
+        labelEn: 'Aftercare / Halfway',
+        labelTl: 'Aftercare / Halfway',
+        subtitleEn: 'Halfway houses and aftercare support',
+        subtitleTl: 'Halfway house at aftercare',
+        iconName: 'handshake_outlined',
+        icon: Icons.handshake_outlined,
+        accentHex: '#FBD116',
+        accent: Color(0xFFFBD116),
+        sortOrder: 4,
+      ),
+      AppOptionItem(
+        key: 'detox',
+        labelEn: 'Detoxification',
+        labelTl: 'Detoxification',
+        subtitleEn: 'Medical detox and withdrawal management',
+        subtitleTl: 'Medikal na detox at pamamahala ng withdrawal',
+        iconName: 'spa_outlined',
+        icon: Icons.spa_outlined,
+        accentHex: '#CE2028',
+        accent: Color(0xFFCE2028),
+        sortOrder: 5,
+      ),
+      AppOptionItem(
+        key: 'dual_diagnosis',
+        labelEn: 'Dual diagnosis',
+        labelTl: 'Dual diagnosis',
+        subtitleEn: 'Substance use with mental health care',
+        subtitleTl: 'Substance use at mental health care',
+        iconName: 'psychology_outlined',
+        icon: Icons.psychology_outlined,
+        accentHex: '#7C3AED',
+        accent: Color(0xFF7C3AED),
+        sortOrder: 6,
+      ),
+    ];
+  }
+
   /// Active Care Self-care Toolkit checks from Lookups (`care_toolkit`).
   /// Empty remote group means staff hid every toolkit — do not fall back.
   static List<AppOptionItem> careToolkits() {
@@ -345,6 +428,8 @@ class AppOptionCatalog extends ChangeNotifier {
       journalSkyGroup => Icons.palette_outlined,
       journalImpactGroup => Icons.place_outlined,
       careToolkitGroup => Icons.favorite_outline,
+      careSupportGroup => Icons.support_agent_outlined,
+      rehabCenterGroup => Icons.local_hospital_outlined,
       _ => Icons.label_outline,
     };
   }

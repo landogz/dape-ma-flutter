@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/rehab_center.dart';
 import '../../hope/hope_colors.dart';
 import '../detail/rehab_center_detail_screen.dart';
@@ -35,6 +36,12 @@ class RehabCenterCard extends StatelessWidget {
       if (center.region.isNotEmpty) center.region,
       if (center.province.isNotEmpty) center.province,
     ].join(' · ');
+    final categoryLabel =
+        center.categoryDisplay(isTagalog: context.l10n.isTagalog);
+    final categoryColor = center.categoryColor ?? HopeColors.purple;
+    final onCategory = categoryColor.computeLuminance() > 0.65
+        ? const Color(0xFF123A60)
+        : Colors.white;
 
     return Material(
       color: context.cardBackground,
@@ -60,11 +67,13 @@ class RehabCenterCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 28,
-                backgroundColor: HopeColors.softOf(context),
+                backgroundColor: categoryColor.withValues(alpha: 0.14),
                 child: Text(
                   initial,
                   style: TextStyle(
-                    color: HopeColors.headingOf(context),
+                    color: categoryColor.computeLuminance() > 0.65
+                        ? const Color(0xFF123A60)
+                        : categoryColor,
                     fontWeight: FontWeight.w800,
                     fontSize: 20,
                   ),
@@ -83,6 +92,27 @@ class RehabCenterCard extends StatelessWidget {
                         fontSize: 15,
                       ),
                     ),
+                    if (categoryLabel.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: categoryColor,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Text(
+                          categoryLabel,
+                          style: TextStyle(
+                            color: onCategory,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
                     if (regionLine.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       Text(

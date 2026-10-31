@@ -8,6 +8,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/l10n/translation_catalog.dart';
 import '../../core/moderation/blocked_word_catalog.dart';
 import '../../core/models/post.dart';
+import '../../core/options/app_option_catalog.dart';
 import '../../core/navigation/deep_link_service.dart';
 import '../../core/navigation/fade_route.dart';
 import '../../core/network/api_client.dart';
@@ -118,6 +119,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     await TranslationCatalog.prefetch(force: true);
     await BlockedWordCatalog.prefetch(force: true);
+    await AppOptionCatalog.prefetch(force: true);
 
     final loggedIn = await AuthService.ensureValidSession();
 

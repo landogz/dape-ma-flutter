@@ -22,9 +22,19 @@ class _SelfCareToolkitScreenState extends State<SelfCareToolkitScreen> {
   @override
   void initState() {
     super.initState();
-    AppOptionCatalog.prefetch().then((_) {
-      if (mounted) setState(() {});
-    });
+    AppOptionCatalog.instance.addListener(_onCatalogChanged);
+    // Always re-fetch so Lookups Active/Inactive changes show without relaunch.
+    AppOptionCatalog.prefetch(force: true);
+  }
+
+  @override
+  void dispose() {
+    AppOptionCatalog.instance.removeListener(_onCatalogChanged);
+    super.dispose();
+  }
+
+  void _onCatalogChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
@@ -54,6 +64,19 @@ class _SelfCareToolkitScreenState extends State<SelfCareToolkitScreen> {
         children: [
           ToolkitHeroCard(body: l10n.careToolkitHero),
           const SizedBox(height: 18),
+          if (toolkits.isEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                l10n.careToolkitEmpty,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.35,
+                  color: CareColors.headingOf(context).withValues(alpha: 0.7),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           ...toolkits.map(
             (item) => ToolkitCheckTile(
               title: item.label(isTagalog: isTagalog),

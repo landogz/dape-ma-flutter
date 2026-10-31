@@ -5,6 +5,7 @@ import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/translation_catalog.dart';
 import '../../core/moderation/blocked_word_catalog.dart';
+import '../../core/options/app_option_catalog.dart';
 import '../../core/models/post.dart';
 import '../account/account_screen.dart';
 import '../care/care_hub_screen.dart';
@@ -64,6 +65,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
   void _onTabSelected(int index) {
     TranslationCatalog.prefetch(force: true);
     BlockedWordCatalog.prefetch(force: true);
+    AppOptionCatalog.prefetch(force: true);
     if (_currentIndex == index) return;
     setState(() => _currentIndex = index);
     final screen = index >= 0 && index < _tabScreens.length

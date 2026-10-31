@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../features/auth/registration/registration_constants.dart';
@@ -9,8 +11,12 @@ import '../theme/app_colors.dart';
 import 'app_option_icons.dart';
 import 'app_option_item.dart';
 
-class AppOptionCatalog {
+/// Lookups catalog from `/app-options` (pronouns, journal, care toolkits, …).
+/// Polls so Active/Inactive changes in admin reflect on the mobile app.
+class AppOptionCatalog extends ChangeNotifier {
   AppOptionCatalog._();
+
+  static final AppOptionCatalog instance = AppOptionCatalog._();
 
   static const pronounsGroup = 'pronouns';
   static const personaGroup = 'persona';
@@ -19,24 +25,57 @@ class AppOptionCatalog {
   static const journalImpactGroup = 'journal_impact';
   static const careToolkitGroup = 'care_toolkit';
 
-  static Map<String, List<AppOptionItem>> _byGroup = {};
-  static Future<void>? _inFlight;
+  Map<String, List<AppOptionItem>> _byGroup = {};
+  Future<void>? _inFlight;
+  Timer? _syncTimer;
+  bool _paused = false;
 
-  static bool get hasRemote => _byGroup.isNotEmpty;
+  static bool get hasRemote => instance._byGroup.isNotEmpty;
 
   static Future<void> prefetch({String? locale, bool force = false}) {
-    if (!force && _byGroup.isNotEmpty) {
+    if (!force && instance._byGroup.isNotEmpty) {
       return Future.value();
     }
-    if (!force && _inFlight != null) {
-      return _inFlight!;
+    if (!force && instance._inFlight != null) {
+      return instance._inFlight!;
     }
 
-    _inFlight = _fetch(locale: locale);
-    return _inFlight!;
+    final run = instance._fetch(locale: locale);
+    instance._inFlight = run;
+    return run.whenComplete(() {
+      if (identical(instance._inFlight, run)) {
+        instance._inFlight = null;
+      }
+    });
   }
 
-  static Future<void> _fetch({String? locale}) async {
+  static void startLiveSync() {
+    instance._paused = false;
+    instance._syncTimer?.cancel();
+    instance._syncTimer = Timer.periodic(
+      const Duration(seconds: 20),
+      (_) {
+        if (instance._paused) return;
+        prefetch(force: true);
+      },
+    );
+  }
+
+  static void pauseLiveSync() {
+    instance._paused = true;
+  }
+
+  static void resumeLiveSync() {
+    instance._paused = false;
+    prefetch(force: true);
+  }
+
+  static void stopLiveSync() {
+    instance._syncTimer?.cancel();
+    instance._syncTimer = null;
+  }
+
+  Future<void> _fetch({String? locale}) async {
     try {
       final client = ApiClient();
       final response = await client.get<Map<String, dynamic>>(
@@ -77,16 +116,15 @@ class AppOptionCatalog {
 
       if (next.isNotEmpty) {
         _byGroup = next;
+        notifyListeners();
       }
     } catch (_) {
       // Keep built-in fallbacks.
-    } finally {
-      _inFlight = null;
     }
   }
 
   static List<AppOptionItem> pronouns() {
-    final remote = _byGroup[pronounsGroup];
+    final remote = instance._byGroup[pronounsGroup];
     if (remote != null && remote.isNotEmpty) {
       return remote;
     }
@@ -102,7 +140,7 @@ class AppOptionCatalog {
   }
 
   static List<AppOptionItem> personas() {
-    final remote = _byGroup[personaGroup];
+    final remote = instance._byGroup[personaGroup];
     if (remote != null && remote.isNotEmpty) {
       return remote;
     }
@@ -119,7 +157,7 @@ class AppOptionCatalog {
   }
 
   static List<JournalSkyOption> skies() {
-    final remote = _byGroup[journalSkyGroup];
+    final remote = instance._byGroup[journalSkyGroup];
     if (remote == null || remote.isEmpty) {
       return JournalConstants.skyOptions;
     }
@@ -140,7 +178,7 @@ class AppOptionCatalog {
   }
 
   static List<JournalFeelingOption> feelings() {
-    final remote = _byGroup[journalFeelingGroup];
+    final remote = instance._byGroup[journalFeelingGroup];
     if (remote == null || remote.isEmpty) {
       return JournalConstants.feelingOptions;
     }
@@ -158,7 +196,7 @@ class AppOptionCatalog {
   }
 
   static List<JournalImpactOption> impacts() {
-    final remote = _byGroup[journalImpactGroup];
+    final remote = instance._byGroup[journalImpactGroup];
     if (remote == null || remote.isEmpty) {
       return JournalConstants.impactOptions;
     }
@@ -174,10 +212,10 @@ class AppOptionCatalog {
         .toList();
   }
 
-  /// Active Care Self-care Toolkit checks (Stress / Anxiety / Sleep).
+  /// Active Care Self-care Toolkit checks from Lookups (`care_toolkit`).
   /// Empty remote group means staff hid every toolkit — do not fall back.
   static List<AppOptionItem> careToolkits() {
-    final remote = _byGroup[careToolkitGroup];
+    final remote = instance._byGroup[careToolkitGroup];
     if (remote != null) {
       return List<AppOptionItem>.from(remote);
     }

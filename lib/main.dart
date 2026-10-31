@@ -65,12 +65,14 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     TranslationCatalog.startLiveSync();
     BlockedWordCatalog.startLiveSync();
+    AppOptionCatalog.startLiveSync();
   }
 
   @override
   void dispose() {
     TranslationCatalog.stopLiveSync();
     BlockedWordCatalog.stopLiveSync();
+    AppOptionCatalog.stopLiveSync();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -80,11 +82,13 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       TranslationCatalog.resumeLiveSync();
       BlockedWordCatalog.resumeLiveSync();
+      AppOptionCatalog.resumeLiveSync();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
       TranslationCatalog.pauseLiveSync();
       BlockedWordCatalog.pauseLiveSync();
+      AppOptionCatalog.pauseLiveSync();
     }
   }
 
@@ -96,6 +100,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
         AccessibilityController.instance,
         TranslationCatalog.instance,
         BlockedWordCatalog.instance,
+        AppOptionCatalog.instance,
       ]),
       builder: (context, _) {
         final localeController = LocaleController.instance;

@@ -7,9 +7,16 @@ import '../../core/models/post.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
+import '../care/get_support_screen.dart';
+import '../care/self_care_toolkit_screen.dart';
+import '../contests/detail/contest_detail_screen.dart';
+import '../hope/directory/hope_directory_screen.dart';
 import '../hope/events/hope_event_detail_screen.dart';
+import '../iec_materials/detail/iec_material_detail_screen.dart';
 import '../post_detail/post_detail_screen.dart';
+import '../rehab_centers/rehab_centers_screen.dart';
 import '../settings/notification_settings_screen.dart';
+import '../trainings/trainings_screen.dart';
 import 'models/app_notification.dart';
 import 'notifications_service.dart';
 import 'widgets/notification_card.dart';
@@ -152,6 +159,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           color: AppColors.primaryBlue,
           background: const Color(0xFFDBEAFE),
         );
+      case 'new_hope_event':
+      case 'new_contest':
+      case 'new_iec_material':
+      case 'new_care_support':
+      case 'new_hope_directory':
+      case 'new_care_toolkit':
+      case 'new_rehab_center':
+      case 'new_training':
+      case 'content_published':
+        return (
+          icon: Icons.campaign_rounded,
+          color: AppColors.primaryBlue,
+          background: const Color(0xFFDBEAFE),
+        );
       default:
         return (
           icon: Icons.notifications_rounded,
@@ -174,6 +195,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       case 'event':
       case 'seminar':
       case 'training':
+      case 'new_training':
         return l10n.notifTypeSeminar;
       case 'goal':
       case 'goals':
@@ -189,6 +211,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         return l10n.notifTypeLiked;
       case 'admin_push':
         return l10n.notifTypeAdminPush;
+      case 'new_hope_event':
+        return l10n.notifTypeHopeEvent;
+      case 'new_contest':
+        return l10n.notifTypeContest;
+      case 'new_iec_material':
+        return l10n.notifTypeIecMaterial;
+      case 'new_care_support':
+        return l10n.notifTypeCareSupport;
+      case 'new_hope_directory':
+        return l10n.notifTypeHopeDirectory;
+      case 'new_care_toolkit':
+        return l10n.notifTypeCareToolkit;
+      case 'new_rehab_center':
+        return l10n.notifTypeRehabCenter;
+      case 'content_published':
+        return l10n.notifTypeContentPublished;
       default:
         return l10n.notifTypeGeneral;
     }
@@ -226,18 +264,82 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       } catch (_) {}
     }
 
-    final hopeEventId = item.hopeEventId;
-    if (hopeEventId != null) {
+    final linkType = item.linkType;
+    final linkId = item.linkId;
+
+    if (linkType == 'hope_event' && (item.hopeEventId ?? linkId) != null) {
       if (!mounted) return;
       await Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => HopeEventDetailScreen(eventId: hopeEventId),
+          builder: (_) => HopeEventDetailScreen(
+            eventId: item.hopeEventId ?? linkId!,
+          ),
         ),
       );
       return;
     }
 
-    final postId = item.postId;
+    if (linkType == 'contest' && linkId != null) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => ContestDetailScreen(contestId: linkId),
+        ),
+      );
+      return;
+    }
+
+    if (linkType == 'iec_material' && linkId != null) {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => IecMaterialDetailScreen(materialId: linkId),
+        ),
+      );
+      return;
+    }
+
+    if (linkType == 'rehab_center') {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const RehabCentersScreen()),
+      );
+      return;
+    }
+
+    if (linkType == 'training') {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const TrainingsScreen()),
+      );
+      return;
+    }
+
+    if (linkType == 'care_support') {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const GetSupportScreen()),
+      );
+      return;
+    }
+
+    if (linkType == 'care_toolkit') {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const SelfCareToolkitScreen()),
+      );
+      return;
+    }
+
+    if (linkType == 'hope_directory') {
+      if (!mounted) return;
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const HopeDirectoryScreen()),
+      );
+      return;
+    }
+
+    final postId = item.postId ?? (linkType == 'post' ? linkId : null);
     if (postId == null) return;
 
     try {

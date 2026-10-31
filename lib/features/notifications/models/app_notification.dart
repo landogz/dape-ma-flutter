@@ -27,6 +27,12 @@ class AppNotification {
     return null;
   }
 
+  int? get linkId {
+    final fromKey = _asInt(data['link_id']);
+    if (fromKey != null) return fromKey;
+    return postId ?? hopeEventId;
+  }
+
   int? get postId {
     final fromPost = _asInt(data['post_id']);
     if (fromPost != null) return fromPost;

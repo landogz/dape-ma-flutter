@@ -1284,6 +1284,25 @@ class AppStrings {
   String get notifTypeLiked => _t('notifTypeLiked', 'Post liked', 'May nag-like sa post');
   String get notifTypeAdminPush =>
       _t('notifTypeAdminPush', 'Announcement', 'Anunsyo');
+  String get notifTypeHopeEvent =>
+      _t('notifTypeHopeEvent', 'Hope event', 'Hope event');
+  String get notifTypeContest =>
+      _t('notifTypeContest', 'Contest', 'Contest');
+  String get notifTypeIecMaterial =>
+      _t('notifTypeIecMaterial', 'IEC material', 'IEC material');
+  String get notifTypeCareSupport =>
+      _t('notifTypeCareSupport', 'Care Support', 'Care Support');
+  String get notifTypeHopeDirectory =>
+      _t('notifTypeHopeDirectory', 'Hope Directory', 'Hope Directory');
+  String get notifTypeCareToolkit =>
+      _t('notifTypeCareToolkit', 'Self-care Toolkit', 'Self-care Toolkit');
+  String get notifTypeRehabCenter => _t(
+        'notifTypeRehabCenter',
+        'Treatment Rehabilitation Center',
+        'Treatment Rehabilitation Center',
+      );
+  String get notifTypeContentPublished =>
+      _t('notifTypeContentPublished', 'New update', 'Bagong update');
   String get notifTypeGeneral => _t('notifTypeGeneral', 'Notification', 'Notification');
   String get privacyIntro => _t('privacyIntro', 
         'Your privacy matters to us. Read our Privacy Policy to learn how we protect your information.',

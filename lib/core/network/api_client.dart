@@ -7,7 +7,7 @@ class ApiClient {
 
   ApiClient._(this._dio);
 
-  factory ApiClient({String? token}) {
+  factory ApiClient({String? token, Map<String, String>? extraHeaders}) {
     final options = BaseOptions(
       baseUrl: Endpoints.baseUrl,
       connectTimeout: const Duration(seconds: 10),
@@ -15,6 +15,7 @@ class ApiClient {
       headers: {
         'Accept': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
+        ...?extraHeaders,
       },
     );
 

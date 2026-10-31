@@ -408,6 +408,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _commentImage = null;
         _replyingTo = null;
       });
+      await AnalyticsClient.instance.trackComment(_post.id);
       _commentFocus.unfocus();
       _showFloatingSnack(
             parentId == null

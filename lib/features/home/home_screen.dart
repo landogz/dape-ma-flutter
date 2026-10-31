@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/app_strings.dart';
 import '../../core/l10n/locale_scope.dart';
@@ -304,10 +303,10 @@ class _HomeScreenState extends State<HomeScreen> {
     Post post, {
     bool focusComment = false,
   }) async {
-    await AnalyticsClient.instance.trackPostView(post.id);
     if (!mounted) return;
     final updated = await Navigator.of(context).push<Post?>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: 'PostDetail'),
         builder: (_) => PostDetailScreen(
           post: post,
           initialIsBookmarked: _bookmarkedIds.contains(post.id),

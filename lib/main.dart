@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/accessibility/accessibility_controller.dart';
 import 'core/accessibility/accessibility_scope.dart';
+import 'core/analytics/analytics_client.dart';
 import 'core/auth/auth_service.dart';
 import 'core/l10n/app_locale.dart';
 import 'core/options/app_option_catalog.dart';
@@ -47,6 +48,7 @@ Future<void> _safeStartup() async {
   await withTimeout(AppOptionCatalog.prefetch(), 'app options');
   await withTimeout(TranslationCatalog.prefetch(), 'translations');
   await withTimeout(BlockedWordCatalog.prefetch(), 'blocked words');
+  await withTimeout(AnalyticsClient.instance.bootstrap(), 'analytics');
 }
 
 class DapeMaApp extends StatefulWidget {
@@ -113,6 +115,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
             controller: a11y,
             child: MaterialApp(
               navigatorKey: DeepLinkService.navigatorKey,
+              navigatorObservers: [AnalyticsNavigatorObserver()],
               title: 'DAPE-MA Mobile',
               debugShowCheckedModeBanner: false,
               theme: theme,

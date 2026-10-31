@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_navigator.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/translation_catalog.dart';
@@ -52,11 +53,23 @@ class _MainShellScreenState extends State<MainShellScreen> {
     setState(() => _authReady = true);
   }
 
+  static const _tabScreens = [
+    'Home',
+    'Hope',
+    'FAQ',
+    'Care',
+    'Account',
+  ];
+
   void _onTabSelected(int index) {
     TranslationCatalog.prefetch(force: true);
     BlockedWordCatalog.prefetch(force: true);
     if (_currentIndex == index) return;
     setState(() => _currentIndex = index);
+    final screen = index >= 0 && index < _tabScreens.length
+        ? _tabScreens[index]
+        : 'Tab_$index';
+    AnalyticsClient.instance.trackScreenView(screen);
   }
 
   void _openKidListoAfterProfile() {

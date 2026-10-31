@@ -277,10 +277,10 @@ class _PostsScreenState extends State<PostsScreen> {
     Post post, {
     bool focusComment = false,
   }) async {
-    await AnalyticsClient.instance.trackPostView(post.id);
     if (!mounted) return;
     final updated = await Navigator.of(context).push<Post?>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: 'PostDetail'),
         builder: (_) => PostDetailScreen(
           post: post,
           focusCommentOnOpen: focusComment,

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/location/profile_location_service.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme_colors.dart';
@@ -35,6 +36,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   String? _memberSince;
   File? _pickedFile;
   List<String> _interests = [];
+  String? _region;
+  String? _province;
+  String? _city;
+  bool _detectingLocation = false;
 
   @override
   void initState() {
@@ -69,12 +74,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         _pickedFile = null;
         _memberSince = memberSince;
         _interests = _parseInterests(user['interests']);
+        _region = (user['region'] as String?)?.trim();
+        _province = (user['province'] as String?)?.trim();
+        _city = (user['city'] as String?)?.trim();
+        if (_region != null && _region!.isEmpty) _region = null;
+        if (_province != null && _province!.isEmpty) _province = null;
+        if (_city != null && _city!.isEmpty) _city = null;
         _loading = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
     }
+  }
+
+  String get _locationSummary {
+    final place = ProfileLocation(
+      region: _region,
+      province: _province,
+      city: _city,
+    );
+    if (place.isEmpty) return context.l10n.locationHint;
+    return place.summary;
   }
 
   List<String> _parseInterests(dynamic raw) {
@@ -298,6 +319,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     bool removePhoto = false,
     String? about,
     bool updateAbout = false,
+    ProfileLocation? location,
+    bool updateLocation = false,
+    String? successMessage,
   }) async {
     setState(() => _saving = true);
     try {
@@ -319,6 +343,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           if (username != null) 'nickname': username,
           'interests': ?interests,
           if (updateAbout) 'about': about ?? '',
+          if (updateLocation)
+            ...(location?.toProfilePayload() ??
+                const {'region': '', 'province': '', 'city': ''}),
           'profile_photo': await MultipartFile.fromFile(
             photoFile.path,
             filename: photoFile.path.split(RegExp(r'[/\\]')).last,
@@ -349,6 +376,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             if (username != null) 'nickname': username,
             'interests': ?interests,
             if (updateAbout) 'about': about ?? '',
+            if (updateLocation)
+              ...(location?.toProfilePayload() ??
+                  const {
+                    'region': '',
+                    'province': '',
+                    'city': '',
+                  }),
           },
         );
       }
@@ -363,15 +397,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         if (updateAbout) {
           _about = about;
         }
+        if (updateLocation) {
+          _region = location?.region;
+          _province = location?.province;
+          _city = location?.city;
+        }
         _saving = false;
         _pickedFile = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            removePhoto
-                ? context.l10n.photoRemoved
-                : context.l10n.profileUpdated,
+            successMessage ??
+                (removePhoto
+                    ? context.l10n.photoRemoved
+                    : context.l10n.profileUpdated),
           ),
           backgroundColor: Colors.green,
         ),
@@ -389,6 +429,76 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           backgroundColor: AppColors.accentRed,
         ),
       );
+    }
+  }
+
+  Future<void> _editLocation() async {
+    final result = await showModalBottomSheet<_LocationSheetResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: context.cardBackground,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => _LocationSheet(
+        initial: ProfileLocation(
+          region: _region,
+          province: _province,
+          city: _city,
+        ),
+      ),
+    );
+    if (result == null || !mounted) return;
+
+    if (result.clear) {
+      await _saveProfile(
+        location: const ProfileLocation(),
+        updateLocation: true,
+        successMessage: context.l10n.locationUpdated,
+      );
+      return;
+    }
+
+    if (result.location != null) {
+      await _saveProfile(
+        location: result.location,
+        updateLocation: true,
+        successMessage: context.l10n.locationUpdated,
+      );
+    }
+  }
+
+  Future<void> _detectAndSaveLocation() async {
+    if (_saving || _detectingLocation) return;
+    setState(() => _detectingLocation = true);
+    try {
+      final place = await ProfileLocationService.detectFromGps();
+      if (!mounted) return;
+      await _saveProfile(
+        location: place,
+        updateLocation: true,
+        successMessage: context.l10n.locationUpdated,
+      );
+    } on ProfileLocationException catch (error) {
+      if (!mounted) return;
+      final l10n = context.l10n;
+      final message = switch (error.failure) {
+        ProfileLocationFailure.serviceDisabled => l10n.locationServicesDisabled,
+        ProfileLocationFailure.permissionDenied => l10n.locationPermissionDenied,
+        ProfileLocationFailure.permissionDeniedForever =>
+          l10n.locationPermissionDeniedForever,
+        ProfileLocationFailure.unavailable ||
+        ProfileLocationFailure.reverseFailed =>
+          l10n.locationDetectFailed,
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.accentRed,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _detectingLocation = false);
     }
   }
 
@@ -536,6 +646,34 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ),
                 const SizedBox(height: 12),
                 _ProfileFieldCard(
+                  icon: Icons.location_on_outlined,
+                  value: _detectingLocation
+                      ? l10n.detectingLocation
+                      : _locationSummary,
+                  label: l10n.locationLabel,
+                  onTap: (_saving || _detectingLocation) ? null : _editLocation,
+                  trailing: IconButton(
+                    tooltip: l10n.useCurrentLocation,
+                    onPressed: (_saving || _detectingLocation)
+                        ? null
+                        : _detectAndSaveLocation,
+                    icon: _detectingLocation
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primaryBlue,
+                            ),
+                          )
+                        : Icon(
+                            Icons.my_location_rounded,
+                            color: context.heading,
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _ProfileFieldCard(
                   icon: Icons.lock_outline_rounded,
                   value: '••••••••',
                   label: l10n.changePassword,
@@ -553,12 +691,14 @@ class _ProfileFieldCard extends StatelessWidget {
     required this.value,
     required this.label,
     required this.onTap,
+    this.trailing,
   });
 
   final IconData icon;
   final String value;
   final String label;
   final VoidCallback? onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
@@ -608,6 +748,7 @@ class _ProfileFieldCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (trailing != null) trailing!,
               if (onTap != null)
                 Icon(
                   Icons.chevron_right_rounded,
@@ -615,6 +756,220 @@ class _ProfileFieldCard extends StatelessWidget {
                 ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LocationSheetResult {
+  const _LocationSheetResult({this.location, this.clear = false});
+
+  final ProfileLocation? location;
+  final bool clear;
+}
+
+class _LocationSheet extends StatefulWidget {
+  const _LocationSheet({required this.initial});
+
+  final ProfileLocation initial;
+
+  @override
+  State<_LocationSheet> createState() => _LocationSheetState();
+}
+
+class _LocationSheetState extends State<_LocationSheet> {
+  late final TextEditingController _regionController;
+  late final TextEditingController _provinceController;
+  late final TextEditingController _cityController;
+  bool _detecting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _regionController = TextEditingController(text: widget.initial.region ?? '');
+    _provinceController =
+        TextEditingController(text: widget.initial.province ?? '');
+    _cityController = TextEditingController(text: widget.initial.city ?? '');
+  }
+
+  @override
+  void dispose() {
+    _regionController.dispose();
+    _provinceController.dispose();
+    _cityController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _detect() async {
+    if (_detecting) return;
+    setState(() => _detecting = true);
+    try {
+      final place = await ProfileLocationService.detectFromGps();
+      if (!mounted) return;
+      setState(() {
+        _regionController.text = place.region ?? '';
+        _provinceController.text = place.province ?? '';
+        _cityController.text = place.city ?? '';
+      });
+    } on ProfileLocationException catch (error) {
+      if (!mounted) return;
+      final l10n = context.l10n;
+      final message = switch (error.failure) {
+        ProfileLocationFailure.serviceDisabled => l10n.locationServicesDisabled,
+        ProfileLocationFailure.permissionDenied => l10n.locationPermissionDenied,
+        ProfileLocationFailure.permissionDeniedForever =>
+          l10n.locationPermissionDeniedForever,
+        ProfileLocationFailure.unavailable ||
+        ProfileLocationFailure.reverseFailed =>
+          l10n.locationDetectFailed,
+      };
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: AppColors.accentRed,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _detecting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final hasValue = _regionController.text.trim().isNotEmpty ||
+        _provinceController.text.trim().isNotEmpty ||
+        _cityController.text.trim().isNotEmpty;
+
+    return Padding(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 20,
+        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              l10n.locationLabel,
+              style: TextStyle(
+                color: context.heading,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 14),
+            SizedBox(
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: _detecting ? null : _detect,
+                icon: _detecting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.primaryBlue,
+                        ),
+                      )
+                    : const Icon(Icons.my_location_rounded),
+                label: Text(
+                  _detecting ? l10n.detectingLocation : l10n.useCurrentLocation,
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primaryBlue,
+                  side: const BorderSide(color: AppColors.primaryBlue),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _regionController,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: l10n.regionLabel,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _provinceController,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: l10n.provinceLabel,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _cityController,
+              textCapitalization: TextCapitalization.words,
+              decoration: InputDecoration(
+                labelText: l10n.cityLabel,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _detecting
+                    ? null
+                    : () {
+                        Navigator.of(context).pop(
+                          _LocationSheetResult(
+                            location: ProfileLocation(
+                              region: _regionController.text.trim(),
+                              province: _provinceController.text.trim(),
+                              city: _cityController.text.trim(),
+                            ),
+                          ),
+                        );
+                      },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryBlue,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(l10n.save),
+              ),
+            ),
+            if (hasValue) ...[
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: _detecting
+                    ? null
+                    : () => Navigator.of(context).pop(
+                          const _LocationSheetResult(clear: true),
+                        ),
+                child: Text(
+                  l10n.clearLocation,
+                  style: const TextStyle(color: AppColors.accentRed),
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

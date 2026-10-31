@@ -72,6 +72,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>DAPE-MA uses your location to set your Region, Province, and City on your profile for local services and demographics.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access so you can add photos to your journal entries.</string>
 	<key>NSMicrophoneUsageDescription</key>

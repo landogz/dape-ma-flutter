@@ -1208,6 +1208,42 @@ class AppStrings {
         {'max': max.toString()},
       );
   String get interestsLabel => _t('interestsLabel', 'Interests', 'Mga Interes');
+  String get locationLabel => _t('locationLabel', 'Location', 'Lokasyon');
+  String get locationHint => _t(
+        'locationHint',
+        'Add Region, Province, and City',
+        'Idagdag ang Rehiyon, Lalawigan, at Lungsod',
+      );
+  String get useCurrentLocation =>
+      _t('useCurrentLocation', 'Use current location', 'Gamitin ang kasalukuyang lokasyon');
+  String get detectingLocation =>
+      _t('detectingLocation', 'Detecting location…', 'Tinutukoy ang lokasyon…');
+  String get locationUpdated =>
+      _t('locationUpdated', 'Location updated', 'Na-update ang lokasyon');
+  String get clearLocation =>
+      _t('clearLocation', 'Clear location', 'Alisin ang lokasyon');
+  String get locationPermissionDenied => _t(
+        'locationPermissionDenied',
+        'Location permission is required to detect your place.',
+        'Kailangan ang pahintulot sa lokasyon para matukoy ang iyong lugar.',
+      );
+  String get locationPermissionDeniedForever => _t(
+        'locationPermissionDeniedForever',
+        'Location access is blocked. Enable it in Settings, then try again.',
+        'Naka-block ang access sa lokasyon. I-enable ito sa Settings, tapos subukan ulit.',
+      );
+  String get locationServicesDisabled => _t(
+        'locationServicesDisabled',
+        'Turn on Location Services, then try again.',
+        'I-on ang Location Services, tapos subukan ulit.',
+      );
+  String get locationDetectFailed => _t(
+        'locationDetectFailed',
+        'Could not detect your location. Try again or enter it manually.',
+        'Hindi matukoy ang lokasyon. Subukan ulit o ilagay nang manual.',
+      );
+  String get provinceLabel => _t('provinceLabel', 'Province', 'Lalawigan');
+  String get cityLabel => _t('cityLabel', 'City / Municipality', 'Lungsod / Munisipyo');
   String get interestsHint =>
       _t('interestsHint', 'Select your interests', 'Piliin ang iyong mga interes');
   String get interestsPickerHint => _t('interestsPickerHint', 

@@ -93,6 +93,8 @@ class Endpoints {
   static const appOptions = '/app-options';
   static const translations = '/translations';
   static const blockedWords = '/blocked-words';
+  static const geocodeSearch = '/geocode/search';
+  static const geocodeReverse = '/geocode/reverse';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';

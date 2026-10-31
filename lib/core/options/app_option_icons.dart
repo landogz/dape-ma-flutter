@@ -59,6 +59,9 @@ IconData appOptionIcon(String? name, {required IconData fallback}) {
     'person_outline' => Icons.person_outline,
     'bolt_outlined' => Icons.bolt_outlined,
     'psychology_outlined' => Icons.psychology_outlined,
+    'phone_outlined' => Icons.phone_outlined,
+    'chat_outlined' => Icons.chat_outlined,
+    'life_ring_outlined' => Icons.support,
     _ => fallback,
   };
 }

@@ -1,17 +1,55 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/locale_scope.dart';
+import '../../core/options/app_option_catalog.dart';
+import '../../core/options/app_option_item.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_theme_colors.dart';
 import 'care_colors.dart';
 import 'support/support_pages.dart';
-import '../../core/theme/app_theme_colors.dart';
 
-class GetSupportScreen extends StatelessWidget {
+class GetSupportScreen extends StatefulWidget {
   const GetSupportScreen({super.key});
+
+  @override
+  State<GetSupportScreen> createState() => _GetSupportScreenState();
+}
+
+class _GetSupportScreenState extends State<GetSupportScreen> {
+  @override
+  void initState() {
+    super.initState();
+    AppOptionCatalog.instance.addListener(_onCatalogChanged);
+    AppOptionCatalog.prefetch(force: true);
+  }
+
+  @override
+  void dispose() {
+    AppOptionCatalog.instance.removeListener(_onCatalogChanged);
+    super.dispose();
+  }
+
+  void _onCatalogChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final isTagalog = l10n.isTagalog;
+    final categories = AppOptionCatalog.careSupportCategories();
+    final byKey = {for (final item in categories) item.key: item};
+    final hotline = byKey['hotline'];
+    final counseling = byKey['counseling'];
+    final crisisEmergency = byKey['crisis_emergency'];
+    final crisisResource = byKey['crisis_resource'];
+    final showCrisis = crisisEmergency != null || crisisResource != null;
+    final crisisTitle = crisisEmergency?.label(isTagalog: isTagalog) ??
+        crisisResource?.label(isTagalog: isTagalog) ??
+        l10n.careCrisis;
+    final crisisSubtitle = crisisEmergency?.subtitle(isTagalog: isTagalog) ??
+        crisisResource?.subtitle(isTagalog: isTagalog) ??
+        l10n.careCrisisBody;
 
     return Scaffold(
       backgroundColor: CareColors.mintSoftOf(context),
@@ -62,36 +100,44 @@ class GetSupportScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          _SupportTile(
-            title: l10n.careHotlines,
-            subtitle: l10n.careHotlinesBody,
-            color: context.pastelPanel(AppColors.softPurple),
-            iconColor: AppColors.accentPurple,
-            icon: Icons.chat_bubble_outline,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const HotlinesScreen()),
+          if (hotline != null)
+            _SupportTile(
+              title: hotline.label(isTagalog: isTagalog),
+              subtitle: _subtitle(hotline, isTagalog) ?? l10n.careHotlinesBody,
+              color: context.pastelPanel(AppColors.softPurple),
+              iconColor: AppColors.accentPurple,
+              icon: hotline.icon,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const HotlinesScreen()),
+              ),
             ),
-          ),
-          _SupportTile(
-            title: l10n.careCounseling,
-            subtitle: l10n.careCounselingBody,
-            color: context.pastelPanel(AppColors.softBlue),
-            iconColor: AppColors.mediumElectricBlue,
-            icon: Icons.phone_in_talk_outlined,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const CounselingScreen()),
+          if (counseling != null)
+            _SupportTile(
+              title: counseling.label(isTagalog: isTagalog),
+              subtitle:
+                  _subtitle(counseling, isTagalog) ?? l10n.careCounselingBody,
+              color: context.pastelPanel(AppColors.softBlue),
+              iconColor: AppColors.mediumElectricBlue,
+              icon: counseling.icon,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CounselingScreen()),
+              ),
             ),
-          ),
-          _SupportTile(
-            title: l10n.careCrisis,
-            subtitle: l10n.careCrisisBody,
-            color: context.pastelPanel(AppColors.softRed),
-            iconColor: AppColors.fireEngineRed,
-            icon: Icons.warning_amber_rounded,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const CrisisSupportScreen()),
+          if (showCrisis)
+            _SupportTile(
+              title: crisisTitle,
+              subtitle: crisisSubtitle.isNotEmpty
+                  ? crisisSubtitle
+                  : l10n.careCrisisBody,
+              color: context.pastelPanel(AppColors.softRed),
+              iconColor: AppColors.fireEngineRed,
+              icon: crisisEmergency?.icon ??
+                  crisisResource?.icon ??
+                  Icons.warning_amber_rounded,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CrisisSupportScreen()),
+              ),
             ),
-          ),
           const SizedBox(height: 8),
           Container(
             padding: const EdgeInsets.all(14),
@@ -120,6 +166,11 @@ class GetSupportScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String? _subtitle(AppOptionItem item, bool isTagalog) {
+    final value = item.subtitle(isTagalog: isTagalog);
+    return value.isEmpty ? null : value;
   }
 }
 

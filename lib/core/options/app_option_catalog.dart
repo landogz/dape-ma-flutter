@@ -24,6 +24,7 @@ class AppOptionCatalog extends ChangeNotifier {
   static const journalFeelingGroup = 'journal_feeling';
   static const journalImpactGroup = 'journal_impact';
   static const careToolkitGroup = 'care_toolkit';
+  static const careSupportGroup = 'care_support';
 
   Map<String, List<AppOptionItem>> _byGroup = {};
   Future<void>? _inFlight;
@@ -210,6 +211,56 @@ class AppOptionCatalog extends ChangeNotifier {
           ),
         )
         .toList();
+  }
+
+  /// Active Care Get Support categories from Lookups (`care_support`).
+  static List<AppOptionItem> careSupportCategories() {
+    final remote = instance._byGroup[careSupportGroup];
+    if (remote != null) {
+      return List<AppOptionItem>.from(remote);
+    }
+    return const [
+      AppOptionItem(
+        key: 'hotline',
+        labelEn: '24/7 Hotlines',
+        labelTl: '24/7 Hotlines',
+        subtitleEn: 'Crisis and support hotlines',
+        subtitleTl: 'Mga hotline para sa krisis at suporta',
+        iconName: 'phone_outlined',
+        icon: Icons.phone_outlined,
+        sortOrder: 1,
+      ),
+      AppOptionItem(
+        key: 'counseling',
+        labelEn: 'Counseling',
+        labelTl: 'Counseling',
+        subtitleEn: 'Counseling and talk support',
+        subtitleTl: 'Counseling at usapang tulong',
+        iconName: 'chat_outlined',
+        icon: Icons.chat_outlined,
+        sortOrder: 2,
+      ),
+      AppOptionItem(
+        key: 'crisis_emergency',
+        labelEn: 'Crisis emergency',
+        labelTl: 'Crisis emergency',
+        subtitleEn: 'Emergency crisis banner',
+        subtitleTl: 'Banner para sa emergency crisis',
+        iconName: 'medical_services_outlined',
+        icon: Icons.medical_services_outlined,
+        sortOrder: 3,
+      ),
+      AppOptionItem(
+        key: 'crisis_resource',
+        labelEn: 'Crisis resources',
+        labelTl: 'Crisis resources',
+        subtitleEn: 'Crisis information resources',
+        subtitleTl: 'Mga resource para sa crisis',
+        iconName: 'life_ring_outlined',
+        icon: Icons.support,
+        sortOrder: 4,
+      ),
+    ];
   }
 
   /// Active Care Self-care Toolkit checks from Lookups (`care_toolkit`).

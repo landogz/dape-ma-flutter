@@ -17,6 +17,7 @@ class AppOptionCatalog {
   static const journalSkyGroup = 'journal_sky';
   static const journalFeelingGroup = 'journal_feeling';
   static const journalImpactGroup = 'journal_impact';
+  static const careToolkitGroup = 'care_toolkit';
 
   static Map<String, List<AppOptionItem>> _byGroup = {};
   static Future<void>? _inFlight;
@@ -173,6 +174,47 @@ class AppOptionCatalog {
         .toList();
   }
 
+  /// Active Care Self-care Toolkit checks (Stress / Anxiety / Sleep).
+  /// Empty remote group means staff hid every toolkit — do not fall back.
+  static List<AppOptionItem> careToolkits() {
+    final remote = _byGroup[careToolkitGroup];
+    if (remote != null) {
+      return List<AppOptionItem>.from(remote);
+    }
+    return const [
+      AppOptionItem(
+        key: 'stress',
+        labelEn: 'Stress Check',
+        labelTl: 'Stress Check',
+        subtitleEn: 'Understand your stress level',
+        subtitleTl: 'Unawain ang antas ng stress mo',
+        iconName: 'bolt_outlined',
+        icon: Icons.bolt_outlined,
+        sortOrder: 1,
+      ),
+      AppOptionItem(
+        key: 'anxiety',
+        labelEn: 'Anxiety Check',
+        labelTl: 'Anxiety Check',
+        subtitleEn: 'Check in on anxious feelings',
+        subtitleTl: 'Suriin ang pakiramdam ng pagkabalisa',
+        iconName: 'favorite_outline',
+        icon: Icons.favorite_outline,
+        sortOrder: 2,
+      ),
+      AppOptionItem(
+        key: 'sleep',
+        labelEn: 'Sleep Quality',
+        labelTl: 'Kalidad ng Tulog',
+        subtitleEn: 'See how well you are resting',
+        subtitleTl: 'Tingnan kung gaano kahusay ang iyong pahinga',
+        iconName: 'bedtime_outlined',
+        icon: Icons.bedtime_outlined,
+        sortOrder: 3,
+      ),
+    ];
+  }
+
   static JournalSkyOption? skyByKey(String? key) {
     if (key == null || key.isEmpty) return null;
     for (final option in skies()) {
@@ -213,6 +255,7 @@ class AppOptionCatalog {
       personaGroup => Icons.person_outline,
       journalSkyGroup => Icons.palette_outlined,
       journalImpactGroup => Icons.place_outlined,
+      careToolkitGroup => Icons.favorite_outline,
       _ => Icons.label_outline,
     };
   }

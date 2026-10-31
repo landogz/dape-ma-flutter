@@ -62,9 +62,10 @@ class AppStrings {
 
   // DDB Services
   String get ddbServicesTitle => _t('ddbServicesTitle', 'DDB Services', 'Mga Serbisyo ng DDB');
-  String get ddbServicesSubtitle => _t('ddbServicesSubtitle', 
-        'Browse DDB trainings, rehab centers, IEC materials, and contests.',
-        'Tingnan ang mga training, rehab center, IEC materials, at contests ng DDB.',
+  String get ddbServicesSubtitle => _t(
+        'ddbServicesSubtitle',
+        'Browse DDB trainings, treatment rehabilitation centers, IEC materials, and contests.',
+        'Tingnan ang mga training, treatment rehabilitation center, IEC materials, at contests ng DDB.',
       );
   String get contestsTitle => _t('contestsTitle', 'Contests', 'Mga Contest');
   String get contestsSubtitle => _t('contestsSubtitle', 
@@ -1683,9 +1684,17 @@ class AppStrings {
       );
 
   // Rehab
-  String get rehabCentersTitle => _t('rehabCentersTitle', 'Rehab Centers', 'Mga Rehab Center');
+  String get rehabCentersTitle => _t(
+        'rehabCentersTitle',
+        'Treatment Rehabilitation Center',
+        'Treatment Rehabilitation Center',
+      );
   String get allRegions => _t('allRegions', 'All regions', 'Lahat ng rehiyon');
-  String get searchRehabHint => _t('searchRehabHint', 'Search rehab centers...', 'Maghanap ng rehab center...');
+  String get searchRehabHint => _t(
+        'searchRehabHint',
+        'Search treatment rehabilitation centers...',
+        'Maghanap ng treatment rehabilitation center...',
+      );
 
   // Reviews
   String get rateAndReview => _t('rateAndReview', 'Rate & Review', 'Mag-rate at Mag-review');
@@ -1742,7 +1751,11 @@ class AppStrings {
   // Rehab extras
   String get searchRehabByHint =>
       _t('searchRehabByHint', 'Search by name, address, or province', 'Maghanap ayon sa pangalan, address, o lalawigan');
-  String get noRehabFound => _t('noRehabFound', 'No rehab centers found', 'Walang nahanap na rehab center');
+  String get noRehabFound => _t(
+        'noRehabFound',
+        'No treatment rehabilitation centers found',
+        'Walang nahanap na treatment rehabilitation center',
+      );
   String get tryDifferentSearch =>
       _t('tryDifferentSearch', 'Try a different region or search', 'Subukan ang ibang rehiyon o paghahanap');
   String get checkBackLater =>
@@ -2076,10 +2089,15 @@ class AppStrings {
         'Browse prevention materials',
         'Tingnan ang prevention materials',
       );
-  String get hopeRehabTile => _t('hopeRehabTile', 'Rehab Centers', 'Rehab Centers');
-  String get hopeRehabTileBody => _t('hopeRehabTileBody', 
-        'Find rehab facilities',
-        'Hanapin ang rehab facilities',
+  String get hopeRehabTile => _t(
+        'hopeRehabTile',
+        'Treatment Rehabilitation Center',
+        'Treatment Rehabilitation Center',
+      );
+  String get hopeRehabTileBody => _t(
+        'hopeRehabTileBody',
+        'Find treatment rehabilitation facilities',
+        'Hanapin ang treatment rehabilitation facilities',
       );
   String get hopeLearnPhase2 => _t('hopeLearnPhase2', 
         'DAPE Learn is coming in Phase 2.',

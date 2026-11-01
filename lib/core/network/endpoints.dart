@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 
 class Endpoints {
   /// Set to `true` only when using local Laravel on port 8000 (simulator/emulator).
-  static const bool useLocalApi = false;
+  static const bool useLocalApi = true;
 
   static const String _productionBaseUrl =
       'https://dapemade.ddb.gov.ph/api/v1';
@@ -54,6 +54,7 @@ class Endpoints {
   static const videoContest = '/video-contest';
   static const iecMaterials = '/iec-materials';
   static const stickerPacks = '/sticker-packs';
+  static const colorFunWorksheets = '/color-fun-worksheets';
   static const search = '/search';
   static const analyticsEvents = '/analytics/events';
   static const login = '/auth/login';
@@ -131,7 +132,7 @@ class Endpoints {
   static String videoContestSubmit(int id) => '/video-contest/$id/entries';
   /// Deprecated: use [contestMyEntry].
   static String videoContestMyEntry(int id) => '/video-contest/$id/my-entry';
-  static String iecMaterialDetail(int id) => '/iec-materials/$id';
+  static String iecMaterialDetail(Object id) => '/iec-materials/$id';
 
   static String postsByCategory(String slug) => '$posts?category=$slug';
   static String rehabByRegion(String region) => '$rehabCenters?region=$region';

@@ -2,11 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/l10n/locale_scope.dart';
+import '../../../../core/models/color_fun_worksheet.dart';
+import '../../../../core/options/app_option_catalog.dart';
+import '../../../../core/options/app_option_item.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../care_colors.dart';
 import '../widgets/calm_app_bar.dart';
 import '../widgets/calm_info_sheet.dart';
 import '../../../../core/theme/app_theme_colors.dart';
+import 'color_fun_library_repository.dart';
 import 'coloring_canvas_screen.dart';
 
 class ColorFunScreen extends StatefulWidget {
@@ -17,59 +21,57 @@ class ColorFunScreen extends StatefulWidget {
 }
 
 class _ColorFunScreenState extends State<ColorFunScreen> {
-  int _filter = 0;
+  String _filter = 'all';
+  final _repo = ColorFunLibraryRepository.instance;
 
-  static const _worksheets = [
-    _Worksheet(
-      id: 'love_birds',
-      title: 'Love Birds',
-      category: 1,
-      icon: Icons.favorite_border_rounded,
-    ),
-    _Worksheet(
-      id: 'garden',
-      title: 'Garden',
-      category: 1,
-      icon: Icons.local_florist_outlined,
-    ),
-    _Worksheet(
-      id: 'cute_ducks',
-      title: 'Cute Ducks',
-      category: 1,
-      icon: Icons.water_rounded,
-    ),
-    _Worksheet(
-      id: 'heart',
-      title: 'Heart',
-      category: 3,
-      icon: Icons.favorite_rounded,
-    ),
-    _Worksheet(
-      id: 'friends',
-      title: 'Friends',
-      category: 2,
-      icon: Icons.groups_outlined,
-    ),
-    _Worksheet(
-      id: 'kindness',
-      title: 'Be Kind',
-      category: 3,
-      icon: Icons.volunteer_activism_outlined,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _repo.addListener(_onLibraryChanged);
+    AppOptionCatalog.instance.addListener(_onLibraryChanged);
+    ColorFunLibraryRepository.prefetch();
+    AppOptionCatalog.prefetch();
+  }
+
+  @override
+  void dispose() {
+    _repo.removeListener(_onLibraryChanged);
+    AppOptionCatalog.instance.removeListener(_onLibraryChanged);
+    super.dispose();
+  }
+
+  void _onLibraryChanged() {
+    if (mounted) setState(() {});
+  }
+
+  List<AppOptionItem> get _filters {
+    final items = AppOptionCatalog.colorFunCategories();
+    if (items.any((item) => item.key == 'all')) {
+      return items;
+    }
+    return [
+      const AppOptionItem(
+        key: 'all',
+        labelEn: 'All',
+        labelTl: 'Lahat',
+        icon: Icons.palette_outlined,
+      ),
+      ...items,
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final filters = [
-      l10n.careColorFilterAll,
-      l10n.careColorFilterNature,
-      l10n.careColorFilterPeople,
-      l10n.careColorFilterMessages,
-    ];
-    final items = _filter == 0
-        ? _worksheets
-        : _worksheets.where((w) => w.category == _filter).toList();
+    final filters = _filters;
+    final selectedFilter = filters.any((item) => item.key == _filter)
+        ? _filter
+        : (filters.isNotEmpty ? filters.first.key : 'all');
+    final items = selectedFilter == 'all'
+        ? _repo.worksheets
+        : _repo.worksheets
+            .where((w) => w.category == selectedFilter)
+            .toList(growable: false);
 
     return Scaffold(
       backgroundColor: context.pageBackground,
@@ -127,18 +129,21 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                           for (var i = 0; i < filters.length; i++) ...[
                             if (i > 0) const SizedBox(width: 8),
                             ChoiceChip(
-                              label: Text(filters[i]),
-                              selected: _filter == i,
-                              onSelected: (_) => setState(() => _filter = i),
+                              label: Text(
+                                filters[i].label(isTagalog: l10n.isTagalog),
+                              ),
+                              selected: selectedFilter == filters[i].key,
+                              onSelected: (_) =>
+                                  setState(() => _filter = filters[i].key),
                               selectedColor: AppColors.mediumElectricBlue,
                               labelStyle: TextStyle(
-                                color: _filter == i
+                                color: selectedFilter == filters[i].key
                                     ? Colors.white
                                     : CareColors.mutedOf(context),
                                 fontWeight: FontWeight.w700,
                               ),
                               side: BorderSide(
-                                color: _filter == i
+                                color: selectedFilter == filters[i].key
                                     ? AppColors.mediumElectricBlue
                                     : CareColors.cardBorderOf(context),
                               ),
@@ -154,59 +159,87 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
                 ),
               ),
             ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-              sliver: items.isEmpty
-                  ? const SliverToBoxAdapter(child: SizedBox.shrink())
-                  : SliverGrid(
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 0.82,
+            if (_repo.isLoading)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.careColorFunLoading,
+                        style: TextStyle(color: CareColors.mutedOf(context)),
                       ),
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final item = items[index];
-                          return _WorksheetCard(
-                            worksheet: item,
-                            onOpen: () {
-                              HapticFeedback.lightImpact();
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => ColoringCanvasScreen(
-                                    title: item.title,
-                                    icon: item.icon,
-                                  ),
-                                ),
-                              );
-                            },
+                    ],
+                  ),
+                ),
+              )
+            else if (items.isEmpty)
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.image_outlined,
+                        size: 48,
+                        color: CareColors.mutedOf(context),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.careColorFunEmpty,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.4,
+                          color: CareColors.mutedOf(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                sliver: SliverGrid(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 12,
+                    crossAxisSpacing: 12,
+                    childAspectRatio: 0.82,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final item = items[index];
+                      return _WorksheetCard(
+                        worksheet: item,
+                        onOpen: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ColoringCanvasScreen(
+                                title: item.title,
+                                imageUrl: item.imageUrl,
+                              ),
+                            ),
                           );
                         },
-                        childCount: items.length,
-                      ),
-                    ),
-            ),
+                      );
+                    },
+                    childCount: items.length,
+                  ),
+                ),
+              ),
           ],
         ),
       ),
     );
   }
-}
-
-class _Worksheet {
-  const _Worksheet({
-    required this.id,
-    required this.title,
-    required this.category,
-    required this.icon,
-  });
-
-  final String id;
-  final String title;
-  final int category;
-  final IconData icon;
 }
 
 class _WorksheetCard extends StatelessWidget {
@@ -215,7 +248,7 @@ class _WorksheetCard extends StatelessWidget {
     required this.onOpen,
   });
 
-  final _Worksheet worksheet;
+  final ColorFunWorksheet worksheet;
   final VoidCallback onOpen;
 
   @override
@@ -235,13 +268,32 @@ class _WorksheetCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: Container(
-                  color: CareColors.pageBgOf(context),
-                  alignment: Alignment.center,
-                  child: Icon(
-                    worksheet.icon,
-                    size: 56,
-                    color: AppColors.mediumElectricBlue.withValues(alpha: 0.55),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(17)),
+                  child: ColoredBox(
+                    color: CareColors.pageBgOf(context),
+                    child: Image.network(
+                      worksheet.imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => Icon(
+                        Icons.palette_outlined,
+                        size: 56,
+                        color: AppColors.mediumElectricBlue.withValues(alpha: 0.55),
+                      ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Center(
+                          child: SizedBox(
+                            width: 28,
+                            height: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.mediumElectricBlue.withValues(alpha: 0.6),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

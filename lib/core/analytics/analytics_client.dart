@@ -96,6 +96,14 @@ class AnalyticsClient with WidgetsBindingObserver {
     );
   }
 
+  Future<void> trackIecShare(int iecId) async {
+    await _enqueue(
+      'iec_share',
+      resourceType: 'iec_material',
+      resourceId: iecId,
+    );
+  }
+
   Future<void> trackSearch({String? query}) async {
     await _enqueue(
       'search',

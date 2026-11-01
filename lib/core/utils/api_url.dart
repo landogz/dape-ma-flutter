@@ -59,6 +59,9 @@ class ApiUrl {
   static String shareContest(int id, {String? uuid}) =>
       '$origin/contests/${shareKey(id, uuid)}';
 
+  static String shareIecMaterial(int id, {String? uuid}) =>
+      '$origin/iec-materials/${shareKey(id, uuid)}';
+
   static String shareKey(int id, String? uuid) {
     final value = uuid?.trim();
     if (value != null && value.isNotEmpty) {

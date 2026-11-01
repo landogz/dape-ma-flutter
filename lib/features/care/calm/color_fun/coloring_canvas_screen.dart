@@ -10,10 +10,12 @@ class ColoringCanvasScreen extends StatefulWidget {
   const ColoringCanvasScreen({
     super.key,
     required this.title,
-    required this.icon,
+    this.imageUrl,
+    this.icon = Icons.palette_outlined,
   });
 
   final String title;
+  final String? imageUrl;
   final IconData icon;
 
   @override
@@ -58,6 +60,8 @@ class _ColoringCanvasScreenState extends State<ColoringCanvasScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final imageUrl = widget.imageUrl?.trim();
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
 
     return Scaffold(
       backgroundColor: CareColors.pageBgOf(context),
@@ -81,12 +85,34 @@ class _ColoringCanvasScreenState extends State<ColoringCanvasScreen> {
                         return GestureDetector(
                           onPanStart: (d) => _start(d.localPosition),
                           onPanUpdate: (d) => _move(d.localPosition),
-                          child: CustomPaint(
-                            size: Size(constraints.maxWidth, constraints.maxHeight),
-                            painter: _ColoringPainter(
-                              strokes: List.of(_strokes),
-                              outline: widget.icon,
-                            ),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              if (hasImage)
+                                Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (_, __, ___) => Center(
+                                    child: Icon(
+                                      widget.icon,
+                                      size: constraints.biggest.shortestSide * 0.4,
+                                      color: AppColors.mediumElectricBlue
+                                          .withValues(alpha: 0.35),
+                                    ),
+                                  ),
+                                )
+                              else
+                                CustomPaint(
+                                  painter: _OutlinePainter(outline: widget.icon),
+                                ),
+                              CustomPaint(
+                                size: Size(
+                                  constraints.maxWidth,
+                                  constraints.maxHeight,
+                                ),
+                                painter: _StrokePainter(strokes: List.of(_strokes)),
+                              ),
+                            ],
                           ),
                         );
                       },
@@ -166,10 +192,9 @@ class _ColoringCanvasScreenState extends State<ColoringCanvasScreen> {
   }
 }
 
-class _ColoringPainter extends CustomPainter {
-  _ColoringPainter({required this.strokes, required this.outline});
+class _OutlinePainter extends CustomPainter {
+  _OutlinePainter({required this.outline});
 
-  final List<_Stroke> strokes;
   final IconData outline;
 
   @override
@@ -193,7 +218,20 @@ class _ColoringPainter extends CustomPainter {
         (size.height - iconPainter.height) / 2,
       ),
     );
+  }
 
+  @override
+  bool shouldRepaint(covariant _OutlinePainter oldDelegate) =>
+      oldDelegate.outline != outline;
+}
+
+class _StrokePainter extends CustomPainter {
+  _StrokePainter({required this.strokes});
+
+  final List<_Stroke> strokes;
+
+  @override
+  void paint(Canvas canvas, Size size) {
     for (final stroke in strokes) {
       final paint = Paint()
         ..color = stroke.color
@@ -206,5 +244,5 @@ class _ColoringPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ColoringPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _StrokePainter oldDelegate) => true;
 }

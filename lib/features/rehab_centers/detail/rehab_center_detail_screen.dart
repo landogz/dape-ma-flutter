@@ -179,6 +179,70 @@ class RehabCenterDetailScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+                      if (center.hasCoordinates)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          top: 0,
+                          bottom: 28,
+                          child: IgnorePointer(
+                            child: Center(
+                              child: Icon(
+                                Icons.location_on_rounded,
+                                size: 52,
+                                color: center.categoryColor ?? HopeColors.purple,
+                                shadows: const [
+                                  Shadow(
+                                    color: Color(0x66000000),
+                                    blurRadius: 8,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (center
+                          .categoryDisplay(isTagalog: context.l10n.isTagalog)
+                          .isNotEmpty)
+                        Positioned(
+                          top: top + 12,
+                          right: 12,
+                          child: Container(
+                            constraints: const BoxConstraints(maxWidth: 180),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: center.categoryColor ?? HopeColors.purple,
+                              borderRadius: BorderRadius.circular(999),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Color(0x33000000),
+                                  blurRadius: 8,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              center.categoryDisplay(
+                                isTagalog: context.l10n.isTagalog,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: (center.categoryColor ?? HopeColors.purple)
+                                            .computeLuminance() >
+                                        0.65
+                                    ? const Color(0xFF123A60)
+                                    : Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

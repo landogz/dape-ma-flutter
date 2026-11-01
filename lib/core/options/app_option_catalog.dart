@@ -27,6 +27,7 @@ class AppOptionCatalog extends ChangeNotifier {
   static const careSupportGroup = 'care_support';
   static const rehabCenterGroup = 'rehab_center';
   static const postCategoryGroup = 'post_category';
+  static const colorFunGroup = 'color_fun';
 
   Map<String, List<AppOptionItem>> _byGroup = {};
   Future<void>? _inFlight;
@@ -267,6 +268,44 @@ class AppOptionCatalog extends ChangeNotifier {
     ];
   }
 
+  /// Color Fun filter chips from Lookups (`color_fun`).
+  static List<AppOptionItem> colorFunCategories() {
+    final remote = instance._byGroup[colorFunGroup];
+    if (remote != null && remote.isNotEmpty) {
+      return List<AppOptionItem>.from(remote);
+    }
+    return const [
+      AppOptionItem(
+        key: 'all',
+        labelEn: 'All',
+        labelTl: 'Lahat',
+        icon: Icons.palette_outlined,
+        sortOrder: 1,
+      ),
+      AppOptionItem(
+        key: 'nature',
+        labelEn: 'Nature',
+        labelTl: 'Kalikasan',
+        icon: Icons.spa_outlined,
+        sortOrder: 2,
+      ),
+      AppOptionItem(
+        key: 'people',
+        labelEn: 'People',
+        labelTl: 'Tao',
+        icon: Icons.groups_outlined,
+        sortOrder: 3,
+      ),
+      AppOptionItem(
+        key: 'messages',
+        labelEn: 'Messages',
+        labelTl: 'Mensahe',
+        icon: Icons.favorite_outline,
+        sortOrder: 4,
+      ),
+    ];
+  }
+
   static String? postCategoryLabel(String? slug, {required bool isTagalog}) {
     final key = slug?.trim() ?? '';
     if (key.isEmpty || key == 'all') {
@@ -497,6 +536,7 @@ class AppOptionCatalog extends ChangeNotifier {
       careSupportGroup => Icons.support_agent_outlined,
       rehabCenterGroup => Icons.local_hospital_outlined,
       postCategoryGroup => Icons.folder_open_outlined,
+      colorFunGroup => Icons.palette_outlined,
       _ => Icons.label_outline,
     };
   }

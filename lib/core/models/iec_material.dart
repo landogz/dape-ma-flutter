@@ -1,5 +1,6 @@
 class IecMaterial {
   final int id;
+  final String? uuid;
   final String title;
   final String? description;
   final String? topic;
@@ -10,6 +11,7 @@ class IecMaterial {
 
   IecMaterial({
     required this.id,
+    this.uuid,
     required this.title,
     this.description,
     this.topic,
@@ -24,6 +26,7 @@ class IecMaterial {
       id: json['id'] is int
           ? json['id'] as int
           : int.tryParse('${json['id']}') ?? 0,
+      uuid: json['uuid']?.toString(),
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
       topic: json['topic'] as String?,
@@ -40,6 +43,10 @@ class IecMaterial {
   bool get isImage => mediaType == 'image' || mediaType == 'gif';
   bool get isYoutube => mediaType == 'youtube';
   bool get isLottie => mediaType == 'lottie';
+
+  /// GIF / image / lottie files can be saved; YouTube links cannot.
+  bool get canDownload =>
+      mediaUrl.trim().isNotEmpty && !isYoutube && (isImage || isLottie);
 
   String get previewUrl =>
       (thumbnailUrl != null && thumbnailUrl!.trim().isNotEmpty)

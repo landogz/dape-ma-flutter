@@ -13,6 +13,7 @@ import 'core/l10n/translation_catalog.dart';
 import 'core/moderation/blocked_word_catalog.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/deep_link_service.dart';
+import 'features/care/calm/color_fun/color_fun_library_repository.dart';
 import 'features/post_engagement/stickers/sticker_library_repository.dart';
 import 'features/push/push_notification_service.dart';
 import 'features/splash/splash_screen.dart';
@@ -50,6 +51,7 @@ Future<void> _safeStartup() async {
   await withTimeout(TranslationCatalog.prefetch(), 'translations');
   await withTimeout(BlockedWordCatalog.prefetch(), 'blocked words');
   await withTimeout(StickerLibraryRepository.prefetch(), 'sticker library');
+  await withTimeout(ColorFunLibraryRepository.prefetch(), 'color fun library');
   await withTimeout(AnalyticsClient.instance.bootstrap(), 'analytics');
 }
 
@@ -69,6 +71,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     BlockedWordCatalog.startLiveSync();
     AppOptionCatalog.startLiveSync();
     StickerLibraryRepository.startLiveSync();
+    ColorFunLibraryRepository.startLiveSync();
   }
 
   @override
@@ -77,6 +80,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     BlockedWordCatalog.stopLiveSync();
     AppOptionCatalog.stopLiveSync();
     StickerLibraryRepository.stopLiveSync();
+    ColorFunLibraryRepository.stopLiveSync();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -88,6 +92,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
       BlockedWordCatalog.resumeLiveSync();
       AppOptionCatalog.resumeLiveSync();
       StickerLibraryRepository.resumeLiveSync();
+      ColorFunLibraryRepository.resumeLiveSync();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
@@ -95,6 +100,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
       BlockedWordCatalog.pauseLiveSync();
       AppOptionCatalog.pauseLiveSync();
       StickerLibraryRepository.pauseLiveSync();
+      ColorFunLibraryRepository.pauseLiveSync();
     }
   }
 

@@ -1,3 +1,4 @@
+import '../utils/date_formatters.dart';
 import 'app_locale.dart';
 import 'translation_catalog.dart';
 
@@ -161,7 +162,7 @@ class AppStrings {
   String get pasteVideoUrl =>
       _t('pasteVideoUrl', 'Paste video URL', 'I-paste ang video URL');
   String get iecMaterialsTitle =>
-      _t('iecMaterialsTitle', 'IEC Materials (Animated)', 'IEC Materials (Animated)');
+      _t('iecMaterialsTitle', 'IEC Materials', 'IEC Materials');
   String get iecMaterialsSubtitle => _t('iecMaterialsSubtitle', 
         'Browse animated IEC GIFs, images, and advocacy clips.',
         'Tingnan ang animated IEC GIF, larawan, at advocacy clips.',
@@ -176,6 +177,20 @@ class AppStrings {
   String get allMediaTypes => _t('allMediaTypes', 'All media', 'Lahat ng media');
   String get aboutIecMaterial =>
       _t('aboutIecMaterial', 'About this material', 'Tungkol sa material na ito');
+  String get downloadIecMaterial =>
+      _t('downloadIecMaterial', 'Download', 'I-download');
+  String get iecMaterialDownloading =>
+      _t('iecMaterialDownloading', 'Downloading…', 'Dina-download…');
+  String get iecMaterialDownloaded => _t(
+        'iecMaterialDownloaded',
+        'Ready to save. Use the share sheet to keep a copy.',
+        'Handa na. Gamitin ang share sheet para mag-save ng kopya.',
+      );
+  String get iecMaterialDownloadFailed => _t(
+        'iecMaterialDownloadFailed',
+        'Could not download this material. Try again.',
+        'Hindi ma-download ang material. Subukan ulit.',
+      );
   String get tapToViewIec => _t('tapToViewIec', 'Tap to view', 'I-tap para tingnan');
   String get creatorNameLabel =>
       _t('creatorNameLabel', 'Creator name', 'Pangalan ng creator');
@@ -230,8 +245,8 @@ class AppStrings {
   String get submissionsClosed =>
       _t('submissionsClosed', 'Submissions are closed', 'Sarado na ang pag-submit');
   String submissionsClosedWindow({String? start, String? end}) {
-    final startLabel = (start ?? '').trim();
-    final endLabel = (end ?? '').trim();
+    final startLabel = formatApiDate(start);
+    final endLabel = formatApiDate(end);
     if (startLabel.isNotEmpty && endLabel.isNotEmpty) {
       return _t(
         'submissionsClosedWindow',
@@ -518,6 +533,16 @@ class AppStrings {
   String get careColorFilterNature => _t('careColorFilterNature', 'Nature', 'Kalikasan');
   String get careColorFilterPeople => _t('careColorFilterPeople', 'People', 'Tao');
   String get careColorFilterMessages => _t('careColorFilterMessages', 'Messages', 'Mensahe');
+  String get careColorFunLoading => _t(
+        'careColorFunLoading',
+        'Loading worksheets…',
+        'Naglo-load ng worksheets…',
+      );
+  String get careColorFunEmpty => _t(
+        'careColorFunEmpty',
+        'No coloring worksheets yet. Check back soon!',
+        'Wala pang coloring worksheets. Balikan mamaya!',
+      );
   String get careWorksheetDownloaded => _t('careWorksheetDownloaded', 
         'Worksheet ready. Open it to print or color.',
         'Handa na ang worksheet. Buksan para i-print o kulayan.',

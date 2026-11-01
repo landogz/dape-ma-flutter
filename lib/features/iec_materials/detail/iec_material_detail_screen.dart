@@ -1,4 +1,10 @@
+import 'dart:ui';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -8,13 +14,20 @@ import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/iec_material.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/endpoints.dart';
-import '../../hope/hope_colors.dart';
+import '../../../core/share/app_share.dart';
 import '../../../core/theme/app_theme_colors.dart';
+import '../../../core/utils/api_url.dart';
+import '../../hope/hope_colors.dart';
 
 class IecMaterialDetailScreen extends StatefulWidget {
   final int materialId;
+  final String? materialKey;
 
-  const IecMaterialDetailScreen({super.key, required this.materialId});
+  const IecMaterialDetailScreen({
+    super.key,
+    required this.materialId,
+    this.materialKey,
+  });
 
   @override
   State<IecMaterialDetailScreen> createState() =>
@@ -24,6 +37,7 @@ class IecMaterialDetailScreen extends StatefulWidget {
 class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
   IecMaterial? _material;
   bool _loading = true;
+  bool _downloading = false;
   YoutubePlayerController? _yt;
 
   @override
@@ -42,7 +56,7 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
     setState(() => _loading = true);
     try {
       final res = await ApiClient().get<Map<String, dynamic>>(
-        Endpoints.iecMaterialDetail(widget.materialId),
+        Endpoints.iecMaterialDetail(widget.materialKey ?? widget.materialId),
       );
       final data = res.data?['data'];
       IecMaterial? material;
@@ -81,12 +95,114 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
     }
   }
 
+  Future<void> _share() async {
+    final material = _material;
+    if (material == null) return;
+
+    await AppShare.item(
+      url: ApiUrl.shareIecMaterial(material.id, uuid: material.uuid),
+    );
+    await AnalyticsClient.instance.trackIecShare(material.id);
+  }
+
   Future<void> _openExternal() async {
-    final url = _material?.mediaUrl;
+    final url = ApiUrl.resolve(_material?.mediaUrl) ?? _material?.mediaUrl;
     if (url == null || url.isEmpty) return;
     final uri = Uri.tryParse(url);
     if (uri == null) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _download() async {
+    final material = _material;
+    final l10n = context.l10n;
+    if (material == null || !material.canDownload || _downloading) return;
+
+    setState(() => _downloading = true);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.iecMaterialDownloading)),
+    );
+
+    try {
+      final url = ApiUrl.resolve(material.mediaUrl) ?? material.mediaUrl.trim();
+      final dir = await getTemporaryDirectory();
+      final fileName = _downloadFileName(material, url);
+      final path = p.join(dir.path, fileName);
+
+      await Dio().download(url, path);
+
+      if (!mounted) return;
+
+      final box = context.findRenderObject() as RenderBox?;
+      final origin = box != null
+          ? box.localToGlobal(Offset.zero) & box.size
+          : const Rect.fromLTWH(0, 0, 1, 1);
+
+      await Share.shareXFiles(
+        [
+          XFile(
+            path,
+            mimeType: _mimeType(material, url),
+            name: fileName,
+          ),
+        ],
+        text: material.title,
+        sharePositionOrigin: origin,
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.iecMaterialDownloaded)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.iecMaterialDownloadFailed)),
+      );
+    } finally {
+      if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  String _downloadFileName(IecMaterial material, String url) {
+    final fromUrl = p.extension(Uri.tryParse(url)?.path ?? '').replaceFirst('.', '');
+    final ext = fromUrl.isNotEmpty
+        ? fromUrl
+        : (material.isGif
+            ? 'gif'
+            : material.isLottie
+                ? 'json'
+                : 'jpg');
+    final slug = material.title
+        .toLowerCase()
+        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+        .replaceAll(RegExp(r'^-+|-+$'), '');
+    final base = slug.isEmpty ? 'iec-material' : slug;
+    return 'iec-${material.id}-$base.$ext';
+  }
+
+  String _mimeType(IecMaterial material, String url) {
+    final ext = p.extension(Uri.tryParse(url)?.path ?? '').toLowerCase();
+    switch (ext) {
+      case '.gif':
+        return 'image/gif';
+      case '.png':
+        return 'image/png';
+      case '.webp':
+        return 'image/webp';
+      case '.jpg':
+      case '.jpeg':
+        return 'image/jpeg';
+      case '.json':
+        return 'application/json';
+      default:
+        if (material.isGif) return 'image/gif';
+        if (material.isLottie) return 'application/json';
+        return 'image/jpeg';
+    }
   }
 
   @override
@@ -108,6 +224,26 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
             fontWeight: FontWeight.w800,
           ),
         ),
+        actions: [
+          if (material != null)
+            IconButton(
+              tooltip: l10n.sharePost,
+              onPressed: _share,
+              icon: const Icon(Icons.ios_share_rounded),
+            ),
+          if (material != null && material.canDownload)
+            IconButton(
+              tooltip: l10n.downloadIecMaterial,
+              onPressed: _downloading ? null : _download,
+              icon: _downloading
+                  ? const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.download_rounded),
+            ),
+        ],
       ),
       body: _loading
           ? const Center(
@@ -147,7 +283,9 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                     Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: HopeColors.cardBorderOf(context)),
+                        border: Border.all(
+                          color: HopeColors.cardBorderOf(context),
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: HopeColors.purple.withValues(alpha: 0.06),
@@ -164,7 +302,8 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                             )
                           : material.isImage
                               ? Image.network(
-                                  material.mediaUrl,
+                                  ApiUrl.resolve(material.mediaUrl) ??
+                                      material.mediaUrl,
                                   fit: BoxFit.cover,
                                   errorBuilder: (_, _, _) => Container(
                                     height: 220,
@@ -208,6 +347,59 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
                           color: HopeColors.mutedOf(context),
                           height: 1.5,
                           fontSize: 14,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      height: 48,
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _share,
+                        icon: const Icon(Icons.ios_share_rounded),
+                        label: Text(l10n.sharePost),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: HopeColors.purple,
+                          side: BorderSide(color: HopeColors.purple),
+                          minimumSize: const Size.fromHeight(48),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (material.canDownload) ...[
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 48,
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _downloading ? null : _download,
+                          icon: _downloading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.download_rounded),
+                          label: Text(
+                            _downloading
+                                ? l10n.iecMaterialDownloading
+                                : l10n.downloadIecMaterial,
+                          ),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: HopeColors.purple,
+                            foregroundColor: Colors.white,
+                            disabledBackgroundColor:
+                                HopeColors.purple.withValues(alpha: 0.55),
+                            disabledForegroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
                         ),
                       ),
                     ],

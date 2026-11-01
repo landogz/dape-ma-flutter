@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../features/contests/detail/contest_detail_screen.dart';
 import '../../features/hope/events/hope_event_detail_screen.dart';
+import '../../features/iec_materials/detail/iec_material_detail_screen.dart';
 import '../../features/post_detail/post_detail_screen.dart';
 import '../../features/post_engagement/post_engagement_service.dart';
 
@@ -87,6 +88,19 @@ class DeepLinkService {
               ContestDetailScreen(contestId: id ?? 0, contestKey: key),
         ),
       );
+      return;
+    }
+
+    if (type == 'iec-materials') {
+      final id = int.tryParse(key);
+      await nav.push(
+        MaterialPageRoute<void>(
+          builder: (_) => IecMaterialDetailScreen(
+            materialId: id ?? 0,
+            materialKey: key,
+          ),
+        ),
+      );
     }
   }
 
@@ -99,7 +113,10 @@ class DeepLinkService {
           ? segments.first
           : uri.path.replaceAll('/', '');
       if (key.isEmpty) return null;
-      if (type == 'posts' || type == 'events' || type == 'contests') {
+      if (type == 'posts' ||
+          type == 'events' ||
+          type == 'contests' ||
+          type == 'iec-materials') {
         return (type, key);
       }
       return null;
@@ -109,7 +126,10 @@ class DeepLinkService {
     final type = segments[0].toLowerCase();
     final key = segments[1];
     if (key.isEmpty) return null;
-    if (type == 'posts' || type == 'events' || type == 'contests') {
+    if (type == 'posts' ||
+        type == 'events' ||
+        type == 'contests' ||
+        type == 'iec-materials') {
       return (type, key);
     }
     return null;

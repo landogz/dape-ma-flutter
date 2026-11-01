@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/iec_material.dart';
+import '../../../core/share/app_share.dart';
+import '../../../core/utils/api_url.dart';
 import '../../hope/hope_colors.dart';
 import '../detail/iec_material_detail_screen.dart';
 import '../../../core/theme/app_theme_colors.dart';
@@ -34,8 +37,10 @@ class IecMaterialCard extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) =>
-                  IecMaterialDetailScreen(materialId: material.id),
+              builder: (_) => IecMaterialDetailScreen(
+                materialId: material.id,
+                materialKey: material.uuid,
+              ),
             ),
           );
         },
@@ -139,12 +144,40 @@ class IecMaterialCard extends StatelessWidget {
                       ),
                     ],
                     const SizedBox(height: 8),
-                    Text(
-                      l10n.tapToViewIec,
-                      style: TextStyle(
-                        color: HopeColors.mutedOf(context),
-                        fontSize: 12,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            l10n.tapToViewIec,
+                            style: TextStyle(
+                              color: HopeColors.mutedOf(context),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          tooltip: l10n.sharePost,
+                          visualDensity: VisualDensity.compact,
+                          constraints: const BoxConstraints(
+                            minWidth: 44,
+                            minHeight: 44,
+                          ),
+                          onPressed: () async {
+                            await AppShare.item(
+                              url: ApiUrl.shareIecMaterial(
+                                material.id,
+                                uuid: material.uuid,
+                              ),
+                            );
+                            await AnalyticsClient.instance
+                                .trackIecShare(material.id);
+                          },
+                          icon: Icon(
+                            Icons.ios_share_rounded,
+                            color: HopeColors.headingOf(context),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

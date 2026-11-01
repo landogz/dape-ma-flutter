@@ -26,7 +26,6 @@ import '../post_engagement/post_engagement_service.dart';
 import '../post_engagement/post_reaction.dart';
 import '../post_engagement/reaction_picker.dart';
 import '../post_engagement/reactors_sheet.dart';
-import '../post_engagement/stickers/kid_listo_stickers.dart';
 import '../post_engagement/widgets/comment_bubble.dart';
 import '../post_engagement/widgets/comment_emoji_sheet.dart';
 import '../post_engagement/widgets/edit_comment_sheet.dart';
@@ -345,17 +344,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final pick = await showCommentEmojiSheet(context);
     if (!mounted || pick == null) return;
 
-    final stickerAsset = pick.stickerAsset;
-    if (stickerAsset != null && stickerAsset.isNotEmpty) {
-      try {
-        final file = await KidListoStickers.fileFromAsset(stickerAsset);
-        if (!mounted) return;
-        setState(() => _commentImage = file);
-        await _submitComment('');
-      } catch (_) {
-        if (!mounted) return;
-        _showFloatingSnack(context.l10n.actionFailed('send sticker'));
-      }
+    final stickerFile = pick.stickerFile;
+    if (stickerFile != null) {
+      setState(() => _commentImage = stickerFile);
+      await _submitComment('');
       return;
     }
 

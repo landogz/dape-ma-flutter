@@ -26,6 +26,7 @@ class AppOptionCatalog extends ChangeNotifier {
   static const careToolkitGroup = 'care_toolkit';
   static const careSupportGroup = 'care_support';
   static const rehabCenterGroup = 'rehab_center';
+  static const postCategoryGroup = 'post_category';
 
   Map<String, List<AppOptionItem>> _byGroup = {};
   Future<void>? _inFlight;
@@ -212,6 +213,71 @@ class AppOptionCatalog extends ChangeNotifier {
           ),
         )
         .toList();
+  }
+
+  /// Active post categories from Lookups (`post_category`).
+  static List<AppOptionItem> postCategories() {
+    final remote = instance._byGroup[postCategoryGroup];
+    if (remote != null && remote.isNotEmpty) {
+      return List<AppOptionItem>.from(remote);
+    }
+    return const [
+      AppOptionItem(
+        key: 'drug-effects',
+        labelEn: 'Drug Effects',
+        labelTl: 'Epekto ng Droga',
+        icon: Icons.science_outlined,
+        sortOrder: 1,
+      ),
+      AppOptionItem(
+        key: 'rehabilitation',
+        labelEn: 'Rehabilitation',
+        labelTl: 'Rehabilitasyon',
+        icon: Icons.local_hospital_outlined,
+        sortOrder: 2,
+      ),
+      AppOptionItem(
+        key: 'prevention',
+        labelEn: 'Prevention',
+        labelTl: 'Pag-iwas',
+        icon: Icons.shield_outlined,
+        sortOrder: 3,
+      ),
+      AppOptionItem(
+        key: 'iec',
+        labelEn: 'Information, Education, and Communication (IEC)',
+        labelTl: 'Impormasyon, Edukasyon, at Komunikasyon (IEC)',
+        icon: Icons.campaign_outlined,
+        sortOrder: 4,
+      ),
+      AppOptionItem(
+        key: 'news',
+        labelEn: 'News',
+        labelTl: 'Balita',
+        icon: Icons.newspaper_outlined,
+        sortOrder: 5,
+      ),
+      AppOptionItem(
+        key: 'legal',
+        labelEn: 'Legal',
+        labelTl: 'Batas at Patakaran',
+        icon: Icons.gavel_outlined,
+        sortOrder: 6,
+      ),
+    ];
+  }
+
+  static String? postCategoryLabel(String? slug, {required bool isTagalog}) {
+    final key = slug?.trim() ?? '';
+    if (key.isEmpty || key == 'all') {
+      return null;
+    }
+    for (final option in postCategories()) {
+      if (option.key == key) {
+        return option.label(isTagalog: isTagalog);
+      }
+    }
+    return null;
   }
 
   /// Active Care Get Support categories from Lookups (`care_support`).
@@ -430,6 +496,7 @@ class AppOptionCatalog extends ChangeNotifier {
       careToolkitGroup => Icons.favorite_outline,
       careSupportGroup => Icons.support_agent_outlined,
       rehabCenterGroup => Icons.local_hospital_outlined,
+      postCategoryGroup => Icons.folder_open_outlined,
       _ => Icons.label_outline,
     };
   }

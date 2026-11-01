@@ -6,6 +6,7 @@ import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
 import '../../core/network/api_client.dart';
 import '../../core/network/endpoints.dart';
+import '../../core/options/app_option_catalog.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/brand_app_bar/brand_app_bar.dart';
 import '../auth/login_screen.dart';
@@ -45,6 +46,8 @@ class _PostsScreenState extends State<PostsScreen> {
   @override
   void initState() {
     super.initState();
+    AppOptionCatalog.instance.addListener(_onCatalogChanged);
+    AppOptionCatalog.prefetch(force: true);
     _posts = List<Post>.from(widget.initialPosts);
     final q = widget.initialQuery?.trim();
     if (q != null && q.isNotEmpty) {
@@ -59,12 +62,27 @@ class _PostsScreenState extends State<PostsScreen> {
 
   @override
   void dispose() {
+    AppOptionCatalog.instance.removeListener(_onCatalogChanged);
     _searchController.dispose();
     super.dispose();
   }
 
+  void _onCatalogChanged() {
+    if (!mounted) return;
+    final keys = AppOptionCatalog.postCategories().map((item) => item.key).toSet();
+    if (_currentCategory != 'all' && !keys.contains(_currentCategory)) {
+      _loadPosts(category: 'all');
+      return;
+    }
+    setState(() {});
+  }
+
   Future<void> _bootstrap() async {
-    await Future.wait([_loadPosts(), _refreshAuth()]);
+    await Future.wait([
+      AppOptionCatalog.prefetch(force: true),
+      _loadPosts(),
+      _refreshAuth(),
+    ]);
   }
 
   Future<void> _refreshAuth() async {

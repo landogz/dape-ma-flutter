@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/l10n/locale_scope.dart';
+import '../../../core/models/sticker_pack.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../stickers/kid_listo_stickers.dart';
+import '../stickers/sticker_library_repository.dart';
 
-/// Emoji + Kid Listo sticker picker for the post comment composer.
+/// Emoji + sticker picker for the post comment composer.
 Future<CommentComposerPick?> showCommentEmojiSheet(BuildContext context) {
   return showModalBottomSheet<CommentComposerPick>(
     context: context,
@@ -61,8 +65,8 @@ class _CommentComposerSheet extends StatelessWidget {
                     _EmojiGrid(onPick: (emoji) {
                       Navigator.of(context).pop(CommentComposerPick.emoji(emoji));
                     }),
-                    _StickerGrid(onPick: (asset) {
-                      Navigator.of(context).pop(CommentComposerPick.sticker(asset));
+                    _StickerGrid(onPick: (file) {
+                      Navigator.of(context).pop(CommentComposerPick.stickerFile(file));
                     }),
                   ],
                 ),
@@ -125,36 +129,146 @@ class _EmojiGrid extends StatelessWidget {
   }
 }
 
-class _StickerGrid extends StatelessWidget {
+class _StickerGrid extends StatefulWidget {
   const _StickerGrid({required this.onPick});
 
-  final ValueChanged<String> onPick;
+  final ValueChanged<File> onPick;
+
+  @override
+  State<_StickerGrid> createState() => _StickerGridState();
+}
+
+class _StickerGridState extends State<_StickerGrid> {
+  final _repo = StickerLibraryRepository.instance;
+  List<StickerItem> _remote = const [];
+  var _loading = true;
+  var _picking = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final stickers = await _repo.fetchStickers();
+    if (!mounted) return;
+    setState(() {
+      _remote = stickers;
+      _loading = false;
+    });
+  }
+
+  Future<void> _pickRemote(StickerItem sticker) async {
+    if (_picking) return;
+    setState(() => _picking = true);
+    try {
+      final file = await _repo.fileFromRemote(sticker);
+      if (!mounted) return;
+      widget.onPick(file);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _picking = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.actionFailed('load sticker'))),
+      );
+    }
+  }
+
+  Future<void> _pickAsset(String asset) async {
+    if (_picking) return;
+    setState(() => _picking = true);
+    try {
+      final file = await _repo.fileFromAsset(asset);
+      if (!mounted) return;
+      widget.onPick(file);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _picking = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.actionFailed('load sticker'))),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
-      itemCount: KidListoStickers.assets.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4,
-        mainAxisSpacing: 10,
-        crossAxisSpacing: 10,
-      ),
-      itemBuilder: (context, index) {
-        final asset = KidListoStickers.assets[index];
-        return Material(
-          color: context.softBrandSurface,
-          borderRadius: BorderRadius.circular(16),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(16),
-            onTap: () => onPick(asset),
-            child: Padding(
-              padding: const EdgeInsets.all(6),
-              child: Image.asset(asset, fit: BoxFit.contain),
+    if (_loading) {
+      return const Center(
+        child: SizedBox(
+          width: 28,
+          height: 28,
+          child: CircularProgressIndicator(strokeWidth: 2.5),
+        ),
+      );
+    }
+
+    final useRemote = _remote.isNotEmpty;
+    final count = useRemote ? _remote.length : KidListoStickers.assets.length;
+
+    return Stack(
+      children: [
+        GridView.builder(
+          padding: const EdgeInsets.fromLTRB(4, 12, 4, 8),
+          itemCount: count,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 4,
+            mainAxisSpacing: 10,
+            crossAxisSpacing: 10,
+          ),
+          itemBuilder: (context, index) {
+            if (useRemote) {
+              final sticker = _remote[index];
+              return Material(
+                color: context.softBrandSurface,
+                borderRadius: BorderRadius.circular(16),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () => _pickRemote(sticker),
+                  child: Padding(
+                    padding: const EdgeInsets.all(6),
+                    child: Image.network(
+                      sticker.imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Icon(
+                        Icons.broken_image_outlined,
+                        color: context.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            final asset = KidListoStickers.assets[index];
+            return Material(
+              color: context.softBrandSurface,
+              borderRadius: BorderRadius.circular(16),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () => _pickAsset(asset),
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Image.asset(asset, fit: BoxFit.contain),
+                ),
+              ),
+            );
+          },
+        ),
+        if (_picking)
+          Positioned.fill(
+            child: ColoredBox(
+              color: Colors.black.withValues(alpha: 0.18),
+              child: const Center(
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                ),
+              ),
             ),
           ),
-        );
-      },
+      ],
     );
   }
 }

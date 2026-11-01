@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
-import '../stickers/kid_listo_stickers.dart';
 import 'comment_emoji_sheet.dart';
 
 class EditCommentSheet extends StatefulWidget {
@@ -50,19 +49,12 @@ class _EditCommentSheetState extends State<EditCommentSheet> {
     final pick = await showCommentEmojiSheet(context);
     if (!mounted || pick == null) return;
 
-    final stickerAsset = pick.stickerAsset;
-    if (stickerAsset != null && stickerAsset.isNotEmpty) {
-      try {
-        final file = await KidListoStickers.fileFromAsset(stickerAsset);
-        if (!mounted) return;
-        setState(() {
-          _stickerFile = file;
-          _error = null;
-        });
-      } catch (_) {
-        if (!mounted) return;
-        setState(() => _error = context.l10n.commentUpdateFailed);
-      }
+    final stickerFile = pick.stickerFile;
+    if (stickerFile != null) {
+      setState(() {
+        _stickerFile = stickerFile;
+        _error = null;
+      });
       return;
     }
 

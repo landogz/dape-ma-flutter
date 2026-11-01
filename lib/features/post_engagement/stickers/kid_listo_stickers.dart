@@ -32,10 +32,10 @@ class KidListoStickers {
 }
 
 class CommentComposerPick {
-  const CommentComposerPick.emoji(this.emoji) : stickerAsset = null;
+  const CommentComposerPick.emoji(this.emoji) : stickerFile = null;
 
-  const CommentComposerPick.sticker(this.stickerAsset) : emoji = null;
+  const CommentComposerPick.stickerFile(this.stickerFile) : emoji = null;
 
   final String? emoji;
-  final String? stickerAsset;
+  final File? stickerFile;
 }

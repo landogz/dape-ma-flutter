@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
+import '../../../core/options/app_option_catalog.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../../../core/utils/api_url.dart';
@@ -80,8 +81,12 @@ class PostHeroHeader extends StatelessWidget {
       l10n.minReadLabel(minutes),
       if (dateLabel.isNotEmpty) dateLabel,
     ].join(' · ');
-    final badge = post.categoryName.trim().isNotEmpty
-        ? post.categoryName
+    final lookupCategory = AppOptionCatalog.postCategoryLabel(
+      post.categorySlug,
+      isTagalog: l10n.isTagalog,
+    );
+    final badge = (lookupCategory ?? post.categoryName).trim().isNotEmpty
+        ? (lookupCategory ?? post.categoryName)
         : l10n.featuredBadge;
     final initial = post.authorName.isNotEmpty
         ? post.authorName.trim().substring(0, 1).toUpperCase()

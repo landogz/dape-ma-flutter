@@ -53,6 +53,7 @@ class Endpoints {
   /// Deprecated: use [contests]. Kept for unused legacy screens.
   static const videoContest = '/video-contest';
   static const iecMaterials = '/iec-materials';
+  static const stickerPacks = '/sticker-packs';
   static const search = '/search';
   static const analyticsEvents = '/analytics/events';
   static const login = '/auth/login';

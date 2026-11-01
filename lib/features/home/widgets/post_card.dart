@@ -4,6 +4,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../../core/accessibility/accessibility_controller.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/post.dart';
+import '../../../core/options/app_option_catalog.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme_colors.dart';
 import '../../../core/share/app_share.dart';
@@ -200,24 +201,35 @@ class _PostCardState extends State<PostCard> {
               ),
             ),
             // ── Category (chip) ──
-            if (post.categoryName.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: context.softBrandSurface,
-                    borderRadius: BorderRadius.circular(999),
+            Builder(
+              builder: (context) {
+                final category = AppOptionCatalog.postCategoryLabel(
+                      post.categorySlug,
+                      isTagalog: context.l10n.isTagalog,
+                    ) ??
+                    post.categoryName;
+                if (category.trim().isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: context.softBrandSurface,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Text(
+                      category,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: context.iconOnSurface,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
                   ),
-                  child: Text(
-                    post.categoryName,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: context.iconOnSurface,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-              ),
+                );
+              },
+            ),
             // ── Media (image or YouTube placeholder) ──
             if (hasImage) ...[
               const SizedBox(height: 8),

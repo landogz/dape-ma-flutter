@@ -13,6 +13,7 @@ import 'core/l10n/translation_catalog.dart';
 import 'core/moderation/blocked_word_catalog.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/deep_link_service.dart';
+import 'features/post_engagement/stickers/sticker_library_repository.dart';
 import 'features/push/push_notification_service.dart';
 import 'features/splash/splash_screen.dart';
 
@@ -48,6 +49,7 @@ Future<void> _safeStartup() async {
   await withTimeout(AppOptionCatalog.prefetch(), 'app options');
   await withTimeout(TranslationCatalog.prefetch(), 'translations');
   await withTimeout(BlockedWordCatalog.prefetch(), 'blocked words');
+  await withTimeout(StickerLibraryRepository.prefetch(), 'sticker library');
   await withTimeout(AnalyticsClient.instance.bootstrap(), 'analytics');
 }
 
@@ -66,6 +68,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     TranslationCatalog.startLiveSync();
     BlockedWordCatalog.startLiveSync();
     AppOptionCatalog.startLiveSync();
+    StickerLibraryRepository.startLiveSync();
   }
 
   @override
@@ -73,6 +76,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     TranslationCatalog.stopLiveSync();
     BlockedWordCatalog.stopLiveSync();
     AppOptionCatalog.stopLiveSync();
+    StickerLibraryRepository.stopLiveSync();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -83,12 +87,14 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
       TranslationCatalog.resumeLiveSync();
       BlockedWordCatalog.resumeLiveSync();
       AppOptionCatalog.resumeLiveSync();
+      StickerLibraryRepository.resumeLiveSync();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
       TranslationCatalog.pauseLiveSync();
       BlockedWordCatalog.pauseLiveSync();
       AppOptionCatalog.pauseLiveSync();
+      StickerLibraryRepository.pauseLiveSync();
     }
   }
 

@@ -147,11 +147,26 @@ class _StickerGridState extends State<_StickerGrid> {
   @override
   void initState() {
     super.initState();
-    _load();
+    _repo.addListener(_onCatalogChanged);
+    _load(forceRefresh: true);
   }
 
-  Future<void> _load() async {
-    final stickers = await _repo.fetchStickers();
+  @override
+  void dispose() {
+    _repo.removeListener(_onCatalogChanged);
+    super.dispose();
+  }
+
+  void _onCatalogChanged() {
+    if (!mounted) return;
+    setState(() {
+      _remote = _repo.stickers;
+      _loading = false;
+    });
+  }
+
+  Future<void> _load({bool forceRefresh = false}) async {
+    final stickers = await _repo.fetchStickers(forceRefresh: forceRefresh);
     if (!mounted) return;
     setState(() {
       _remote = stickers;
@@ -229,6 +244,7 @@ class _StickerGridState extends State<_StickerGrid> {
                     padding: const EdgeInsets.all(6),
                     child: Image.network(
                       sticker.imageUrl,
+                      key: ValueKey(sticker.imageUrl),
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => Icon(
                         Icons.broken_image_outlined,

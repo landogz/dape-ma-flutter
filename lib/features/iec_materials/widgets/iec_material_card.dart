@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/iec_material.dart';
 import '../../../core/share/app_share.dart';
@@ -168,9 +167,9 @@ class IecMaterialCard extends StatelessWidget {
                                 material.id,
                                 uuid: material.uuid,
                               ),
+                              resourceType: 'iec_material',
+                              resourceId: material.id,
                             );
-                            await AnalyticsClient.instance
-                                .trackIecShare(material.id);
                           },
                           icon: Icon(
                             Icons.ios_share_rounded,

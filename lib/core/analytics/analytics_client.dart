@@ -104,6 +104,47 @@ class AnalyticsClient with WidgetsBindingObserver {
     );
   }
 
+  Future<void> trackIecDownload(int iecId) async {
+    await _enqueue(
+      'iec_download',
+      resourceType: 'iec_material',
+      resourceId: iecId,
+    );
+  }
+
+  Future<void> trackEventView(int eventId) async {
+    await _enqueue(
+      'event_view',
+      resourceType: 'hope_event',
+      resourceId: eventId,
+    );
+  }
+
+  Future<void> trackContestView(int contestId) async {
+    await _enqueue(
+      'contest_view',
+      resourceType: 'contest',
+      resourceId: contestId,
+    );
+  }
+
+  Future<void> trackCatalogShare({
+    required String resourceType,
+    required int resourceId,
+  }) async {
+    final eventType = switch (resourceType) {
+      'iec_material' => 'iec_share',
+      'hope_event' => 'event_share',
+      'contest' => 'contest_share',
+      _ => 'share',
+    };
+    await _enqueue(
+      eventType,
+      resourceType: resourceType,
+      resourceId: resourceId,
+    );
+  }
+
   Future<void> trackSearch({String? query}) async {
     await _enqueue(
       'search',

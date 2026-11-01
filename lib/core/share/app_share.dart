@@ -10,6 +10,8 @@ class AppShare {
   static Future<void> item({
     required String url,
     int? postId,
+    String? resourceType,
+    int? resourceId,
     Rect? sharePositionOrigin,
   }) async {
     await Share.share(
@@ -19,6 +21,13 @@ class AppShare {
     );
     if (postId != null) {
       await AnalyticsClient.instance.trackShare(postId);
+      return;
+    }
+    if (resourceType != null && resourceId != null) {
+      await AnalyticsClient.instance.trackCatalogShare(
+        resourceType: resourceType,
+        resourceId: resourceId,
+      );
     }
   }
 }

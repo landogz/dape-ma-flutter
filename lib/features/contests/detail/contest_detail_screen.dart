@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/contest.dart';
@@ -89,6 +90,9 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
           _myEntry = myEntry;
           _isLoggedIn = loggedIn;
         });
+        if (contest != null) {
+          AnalyticsClient.instance.trackContestView(contest.id);
+        }
       }
     } catch (_) {
       if (mounted) {
@@ -176,6 +180,8 @@ class _ContestDetailScreenState extends State<ContestDetailScreen> {
                 : () {
                     AppShare.item(
                       url: ApiUrl.shareContest(_contest!.id, uuid: _contest!.uuid),
+                      resourceType: 'contest',
+                      resourceId: _contest!.id,
                     );
                   },
             icon: const Icon(Icons.ios_share_rounded),

@@ -101,8 +101,9 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
 
     await AppShare.item(
       url: ApiUrl.shareIecMaterial(material.id, uuid: material.uuid),
+      resourceType: 'iec_material',
+      resourceId: material.id,
     );
-    await AnalyticsClient.instance.trackIecShare(material.id);
   }
 
   Future<void> _openExternal() async {
@@ -150,6 +151,8 @@ class _IecMaterialDetailScreenState extends State<IecMaterialDetailScreen> {
         text: material.title,
         sharePositionOrigin: origin,
       );
+
+      await AnalyticsClient.instance.trackIecDownload(material.id);
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).hideCurrentSnackBar();

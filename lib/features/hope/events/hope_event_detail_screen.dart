@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/share/app_share.dart';
 import '../../../core/utils/api_url.dart';
@@ -45,6 +46,7 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
         _event = event;
         _loading = false;
       });
+      await AnalyticsClient.instance.trackEventView(event.id);
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
@@ -119,6 +121,8 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
                             onTap: () {
                               AppShare.item(
                                 url: ApiUrl.shareEvent(event.id, uuid: event.uuid),
+                                resourceType: 'hope_event',
+                                resourceId: event.id,
                               );
                             },
                             child: const SizedBox(

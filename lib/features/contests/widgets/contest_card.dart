@@ -216,6 +216,8 @@ class ContestCard extends StatelessWidget {
                                 contest.id,
                                 uuid: contest.uuid,
                               ),
+                              resourceType: 'contest',
+                              resourceId: contest.id,
                             );
                           },
                           icon: Icon(

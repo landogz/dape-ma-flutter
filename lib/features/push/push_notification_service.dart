@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Platform;
 
@@ -7,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/network/endpoints.dart';
 import 'firebase_push_config.dart';
@@ -208,6 +210,9 @@ class PushNotificationService {
   }
 
   void _handleMessageOpen(RemoteMessage message) {
+    unawaited(AnalyticsClient.instance.trackNotificationOpen(
+      notificationId: message.messageId,
+    ));
     _openFromData(message.data);
   }
 

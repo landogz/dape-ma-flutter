@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/care_toolkit_question.dart';
@@ -124,6 +125,7 @@ class _CheckFlowScreenState extends State<CheckFlowScreen> {
         checkType: widget.checkType,
         answers: answers,
       );
+      await AnalyticsClient.instance.trackCareCheckSubmit(widget.checkType);
       if (!mounted) return;
       Navigator.of(context).pop(result);
     } catch (_) {

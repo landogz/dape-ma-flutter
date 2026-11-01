@@ -82,6 +82,7 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
           title: l10n.careWellDone,
           body: l10n.careAudioDoneBody,
           hint: l10n.careNoticeBody,
+          tool: 'audio',
         ),
       ),
     );

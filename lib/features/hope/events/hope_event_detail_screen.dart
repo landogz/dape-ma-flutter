@@ -58,6 +58,10 @@ class _HopeEventDetailScreenState extends State<HopeEventDetailScreen> {
     if (url == null || url.isEmpty) return;
     final uri = Uri.tryParse(url);
     if (uri == null) return;
+    final eventId = _event?.id;
+    if (eventId != null) {
+      await AnalyticsClient.instance.trackEventRegister(eventId);
+    }
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 

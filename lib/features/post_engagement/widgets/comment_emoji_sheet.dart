@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/sticker_pack.dart';
 import '../../../core/theme/app_colors.dart';
@@ -180,6 +181,7 @@ class _StickerGridState extends State<_StickerGrid> {
     try {
       final file = await _repo.fileFromRemote(sticker);
       if (!mounted) return;
+      AnalyticsClient.instance.trackFeatureUse('sticker');
       widget.onPick(file);
     } catch (_) {
       if (!mounted) return;
@@ -196,6 +198,7 @@ class _StickerGridState extends State<_StickerGrid> {
     try {
       final file = await _repo.fileFromAsset(asset);
       if (!mounted) return;
+      AnalyticsClient.instance.trackFeatureUse('sticker');
       widget.onPick(file);
     } catch (_) {
       if (!mounted) return;

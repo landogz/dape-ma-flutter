@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/post.dart';
@@ -242,6 +243,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _openNotification(AppNotification item) async {
+    await AnalyticsClient.instance.trackNotificationOpen(
+      notificationId: item.id.toString(),
+    );
     if (item.isUnread) {
       try {
         await NotificationsService.markAsRead(item.id);

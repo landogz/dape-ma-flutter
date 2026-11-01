@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/l10n/translation_catalog.dart';
@@ -130,9 +131,12 @@ class _CareHubScreenState extends State<CareHubScreen> {
           translationKey: 'careSpeedToolkit',
           logoAsset: CareHubAssets.selfCare,
           fallbackIcon: Icons.volunteer_activism_rounded,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SelfCareToolkitScreen()),
-          ),
+          onTap: () {
+            AnalyticsClient.instance.trackFeatureUse('care_toolkit');
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SelfCareToolkitScreen()),
+            );
+          },
         ),
       if (showSupport)
         _SpeedCard(
@@ -141,9 +145,12 @@ class _CareHubScreenState extends State<CareHubScreen> {
           translationKey: 'careSpeedSupport',
           logoAsset: CareHubAssets.support,
           fallbackIcon: Icons.handshake_rounded,
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const GetSupportScreen()),
-          ),
+          onTap: () {
+            AnalyticsClient.instance.trackFeatureUse('care_support');
+            Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const GetSupportScreen()),
+            );
+          },
         ),
     ];
 
@@ -358,14 +365,17 @@ class _CareHubScreenState extends State<CareHubScreen> {
                       height: 72,
                       fit: BoxFit.contain,
                     ),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const KidListoWelcomeScreen(
-                          initialPosts: [],
-                          replaceOnContinue: false,
+                    onTap: () {
+                      AnalyticsClient.instance.trackFeatureUse('kid_listo');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const KidListoWelcomeScreen(
+                            initialPosts: [],
+                            replaceOnContinue: false,
+                          ),
                         ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ],
               ]),

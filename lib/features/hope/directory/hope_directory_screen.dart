@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../hope_colors.dart';
 import 'hope_directory_org.dart';
@@ -63,6 +64,12 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
     final uri = Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'[^\d+]'), ''));
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
+    }
+  }
+
+  void _openOrg(HopeDirectoryOrg org) {
+    if (org.id > 0) {
+      AnalyticsClient.instance.trackHopeOrgView(org.id);
     }
   }
 
@@ -171,7 +178,11 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
                             final org = _items[index];
                             return _DirectoryCard(
                               org: org,
-                              onCall: () => _call(org.phone),
+                              onOpen: () => _openOrg(org),
+                              onCall: () {
+                                _openOrg(org);
+                                _call(org.phone);
+                              },
                             );
                           },
                         ),
@@ -184,16 +195,26 @@ class _HopeDirectoryScreenState extends State<HopeDirectoryScreen> {
 }
 
 class _DirectoryCard extends StatelessWidget {
-  const _DirectoryCard({required this.org, required this.onCall});
+  const _DirectoryCard({
+    required this.org,
+    required this.onOpen,
+    required this.onCall,
+  });
 
   final HopeDirectoryOrg org;
+  final VoidCallback onOpen;
   final VoidCallback onCall;
 
   @override
   Widget build(BuildContext context) {
     final initial = org.name.isNotEmpty ? org.name[0].toUpperCase() : '?';
 
-    return Container(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onOpen,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.cardBackground,
@@ -271,6 +292,8 @@ class _DirectoryCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    ),
       ),
     );
   }

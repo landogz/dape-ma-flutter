@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../core/analytics/analytics_client.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
 import '../../core/models/mood_checkin.dart';
@@ -165,6 +166,7 @@ class _MoodTrackerScreenState extends State<MoodTrackerScreen> {
     setState(() => _saving = true);
     try {
       await MoodCheckinService.create(mood: mood, source: 'mood_tracker');
+      await AnalyticsClient.instance.trackMoodCheckin();
       if (!mounted) return;
       await showJournalWizard(
         context,

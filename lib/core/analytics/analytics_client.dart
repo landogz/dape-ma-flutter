@@ -145,6 +145,60 @@ class AnalyticsClient with WidgetsBindingObserver {
     );
   }
 
+  Future<void> trackRehabView(int centerId) => _enqueue(
+        'rehab_view',
+        resourceType: 'rehab_center',
+        resourceId: centerId,
+      );
+
+  Future<void> trackRehabCall(int centerId) => _enqueue(
+        'rehab_call',
+        resourceType: 'rehab_center',
+        resourceId: centerId,
+      );
+
+  Future<void> trackRehabDirections(int centerId) => _enqueue(
+        'rehab_directions',
+        resourceType: 'rehab_center',
+        resourceId: centerId,
+      );
+
+  Future<void> trackHopeOrgView(int orgId) => _enqueue(
+        'hope_org_view',
+        resourceType: 'hope_directory_org',
+        resourceId: orgId,
+      );
+
+  Future<void> trackJournalCreate() => _enqueue('journal_create');
+
+  Future<void> trackCareCheckSubmit(String checkType) => _enqueue(
+        'care_check_submit',
+        metadata: <String, dynamic>{'check_type': checkType},
+      );
+
+  Future<void> trackMoodCheckin() => _enqueue('mood_checkin');
+
+  Future<void> trackCalmComplete(String tool) => _enqueue(
+        'calm_complete',
+        metadata: <String, dynamic>{'tool': tool},
+      );
+
+  Future<void> trackColorFunOpen() => _enqueue('color_fun_open');
+
+  Future<void> trackColorFunComplete() => _enqueue('color_fun_complete');
+
+  Future<void> trackContestSubmit(int contestId) => _enqueue(
+        'contest_submit',
+        resourceType: 'contest',
+        resourceId: contestId,
+      );
+
+  Future<void> trackEventRegister(int eventId) => _enqueue(
+        'event_register',
+        resourceType: 'hope_event',
+        resourceId: eventId,
+      );
+
   Future<void> trackSearch({String? query}) async {
     await _enqueue(
       'search',

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/auth/auth_service.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/contest.dart';
@@ -113,6 +114,7 @@ class _ContestSubmitScreenState extends State<ContestSubmitScreen> {
         Endpoints.contestSubmit(widget.contest.id),
         data: data,
       );
+      await AnalyticsClient.instance.trackContestSubmit(widget.contest.id);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.entrySubmittedForReview)),

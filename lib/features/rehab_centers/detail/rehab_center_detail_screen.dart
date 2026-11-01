@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/analytics/analytics_client.dart';
 import '../../../core/l10n/locale_scope.dart';
 import '../../../core/models/rehab_center.dart';
 import '../../hope/hope_colors.dart';
@@ -59,6 +60,7 @@ class RehabCenterDetailScreen extends StatelessWidget {
   Future<void> _openDirections() async {
     final uri = _googleMapsDirectionsUri;
     if (await canLaunchUrl(uri)) {
+      await AnalyticsClient.instance.trackRehabDirections(center.id);
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
@@ -75,6 +77,7 @@ class RehabCenterDetailScreen extends StatelessWidget {
     if (digits.isEmpty) return;
     final uri = Uri.parse('tel:$digits');
     if (await canLaunchUrl(uri)) {
+      await AnalyticsClient.instance.trackRehabCall(center.id);
       await launchUrl(uri);
     }
   }

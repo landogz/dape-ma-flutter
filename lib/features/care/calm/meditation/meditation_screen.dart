@@ -203,6 +203,9 @@ class _GuidedSessionPlayerState extends State<GuidedSessionPlayer> {
               ? l10n.careBreathingDoneBody
               : l10n.careAudioDoneBody,
           hint: l10n.careNoticeBody,
+          tool: widget.mode == GuidedSessionMode.meditation
+              ? 'meditation'
+              : 'visualization',
         ),
       ),
     );

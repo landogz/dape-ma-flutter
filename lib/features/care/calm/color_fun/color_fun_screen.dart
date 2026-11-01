@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/analytics/analytics_client.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/models/color_fun_worksheet.dart';
 import '../../../../core/options/app_option_catalog.dart';
@@ -31,6 +32,7 @@ class _ColorFunScreenState extends State<ColorFunScreen> {
     AppOptionCatalog.instance.addListener(_onLibraryChanged);
     ColorFunLibraryRepository.prefetch();
     AppOptionCatalog.prefetch();
+    AnalyticsClient.instance.trackColorFunOpen();
   }
 
   @override

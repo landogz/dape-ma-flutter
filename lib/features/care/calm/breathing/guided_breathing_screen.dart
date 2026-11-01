@@ -129,6 +129,7 @@ class _GuidedBreathingScreenState extends State<GuidedBreathingScreen>
           title: l10n.careGreatJob,
           body: l10n.careBreathingDoneBody,
           hint: l10n.careNoticeBody,
+          tool: 'breathing',
         ),
       ),
     );

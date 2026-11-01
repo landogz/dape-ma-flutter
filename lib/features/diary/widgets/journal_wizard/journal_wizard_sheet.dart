@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/analytics/analytics_client.dart';
 import '../../../../core/auth/auth_service.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/models/diary_entry.dart';
@@ -230,6 +231,7 @@ class _JournalWizardSheetState extends State<JournalWizardSheet> {
           bodyHtml: bodyHtml.isEmpty ? null : bodyHtml,
           imageFile: _imageFile,
         );
+        await AnalyticsClient.instance.trackJournalCreate();
       }
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(

@@ -373,6 +373,7 @@ class _StretchSessionScreenState extends State<_StretchSessionScreen> {
           title: l10n.careWellDone,
           body: l10n.careSessionComplete,
           hint: l10n.careNoticeBody,
+          tool: 'stretch',
         ),
       ),
     );

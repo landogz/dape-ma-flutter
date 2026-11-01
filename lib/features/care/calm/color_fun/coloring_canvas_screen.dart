@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../core/analytics/analytics_client.dart';
 import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../care_colors.dart';
@@ -175,7 +176,10 @@ class _ColoringCanvasScreenState extends State<ColoringCanvasScreen> {
                     ),
                   ),
                   FilledButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
+                    onPressed: () {
+                      AnalyticsClient.instance.trackColorFunComplete();
+                      Navigator.of(context).maybePop();
+                    },
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.mediumElectricBlue,
                       minimumSize: const Size(44, 44),

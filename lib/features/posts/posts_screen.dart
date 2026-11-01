@@ -171,7 +171,7 @@ class _PostsScreenState extends State<PostsScreen> {
             .map((e) => Post.fromJson(e as Map<String, dynamic>))
             .toList();
       });
-      await AnalyticsClient.instance.trackSearch();
+      await AnalyticsClient.instance.trackSearch(query: query);
     } finally {
       if (mounted) setState(() => _loading = false);
     }

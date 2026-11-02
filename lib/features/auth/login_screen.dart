@@ -54,11 +54,16 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await AuthService.login(
+      final needsCode = await AuthService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
       if (!mounted) return;
+
+      if (!needsCode) {
+        await _enterAppOrPop();
+        return;
+      }
 
       final verified = await Navigator.of(context).push<bool>(
         MaterialPageRoute(

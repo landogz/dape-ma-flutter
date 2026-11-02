@@ -107,7 +107,8 @@ class AuthService {
     await SettingsPreferences.setUserScope(cached);
   }
 
-  static Future<void> login({
+  /// Returns true when the API still requires the email verification code.
+  static Future<bool> login({
     required String email,
     required String password,
   }) async {
@@ -131,7 +132,11 @@ class AuthService {
     }
 
     await _setToken(token);
-    await bindCurrentUser();
+    final requiresVerification = payload['requires_verification'] == true;
+    if (!requiresVerification) {
+      await bindCurrentUser();
+    }
+    return requiresVerification;
   }
 
   static Future<void> sendLoginCode() async {
@@ -150,6 +155,14 @@ class AuthService {
           (root['message'] as String?) ?? 'Verification failed.',
         );
       }
+      final payload = root['data'] is Map<String, dynamic>
+          ? root['data'] as Map<String, dynamic>
+          : <String, dynamic>{};
+      final token = payload['token'] as String?;
+      if (token != null && token.isNotEmpty) {
+        await _setToken(token);
+      }
+      await bindCurrentUser();
     } on DioException catch (error) {
       final data = error.response?.data;
       final message = data is Map ? data['message'] as String? : null;

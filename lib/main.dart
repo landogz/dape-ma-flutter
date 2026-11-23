@@ -13,6 +13,7 @@ import 'core/l10n/translation_catalog.dart';
 import 'core/moderation/blocked_word_catalog.dart';
 import 'core/theme/app_theme.dart';
 import 'core/navigation/deep_link_service.dart';
+import 'features/care/calm/audio/relaxing_music_repository.dart';
 import 'features/care/calm/color_fun/color_fun_library_repository.dart';
 import 'features/post_engagement/stickers/sticker_library_repository.dart';
 import 'features/push/push_notification_service.dart';
@@ -52,6 +53,7 @@ Future<void> _safeStartup() async {
   await withTimeout(BlockedWordCatalog.prefetch(), 'blocked words');
   await withTimeout(StickerLibraryRepository.prefetch(), 'sticker library');
   await withTimeout(ColorFunLibraryRepository.prefetch(), 'color fun library');
+  await withTimeout(RelaxingMusicRepository.prefetch(), 'relaxing music');
   await withTimeout(AnalyticsClient.instance.bootstrap(), 'analytics');
 }
 
@@ -72,6 +74,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     AppOptionCatalog.startLiveSync();
     StickerLibraryRepository.startLiveSync();
     ColorFunLibraryRepository.startLiveSync();
+    RelaxingMusicRepository.startLiveSync();
   }
 
   @override
@@ -81,6 +84,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
     AppOptionCatalog.stopLiveSync();
     StickerLibraryRepository.stopLiveSync();
     ColorFunLibraryRepository.stopLiveSync();
+    RelaxingMusicRepository.stopLiveSync();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -93,6 +97,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
       AppOptionCatalog.resumeLiveSync();
       StickerLibraryRepository.resumeLiveSync();
       ColorFunLibraryRepository.resumeLiveSync();
+      RelaxingMusicRepository.resumeLiveSync();
     } else if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.hidden) {
@@ -101,6 +106,7 @@ class _DapeMaAppState extends State<DapeMaApp> with WidgetsBindingObserver {
       AppOptionCatalog.pauseLiveSync();
       StickerLibraryRepository.pauseLiveSync();
       ColorFunLibraryRepository.pauseLiveSync();
+      RelaxingMusicRepository.pauseLiveSync();
     }
   }
 

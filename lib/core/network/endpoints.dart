@@ -3,8 +3,9 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 
 class Endpoints {
-  /// Set to `true` only when using local Laravel on port 8000 (simulator/emulator).
-  static const bool useLocalApi = false;
+  /// Set to `true` only when using local Laravel (simulator/emulator).
+  /// Local testing: true + `_localPort` 8001. Release/public APK build: false.
+  static const bool useLocalApi = true;
 
   static const String _productionBaseUrl =
       'https://dapemade.ddb.gov.ph/api/v1';
@@ -12,7 +13,7 @@ class Endpoints {
   /// Your Mac LAN IP for a physical phone on the same Wi‑Fi.
   /// iOS Simulator / desktop can use 127.0.0.1; Android emulator uses 10.0.2.2.
   static const String _localLanHost = '192.168.100.84';
-  static const int _localPort = 8000;
+  static const int _localPort = 8001;
 
   static String get baseUrl {
     if (!useLocalApi) {
@@ -55,6 +56,7 @@ class Endpoints {
   static const iecMaterials = '/iec-materials';
   static const stickerPacks = '/sticker-packs';
   static const colorFunWorksheets = '/color-fun-worksheets';
+  static const relaxingMusicTracks = '/relaxing-music-tracks';
   static const search = '/search';
   static const analyticsEvents = '/analytics/events';
   static const login = '/auth/login';

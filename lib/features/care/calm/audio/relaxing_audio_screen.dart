@@ -11,7 +11,7 @@ import '../widgets/calm_app_bar.dart';
 import '../widgets/calm_circle_visual.dart';
 import '../widgets/calm_complete_page.dart';
 import '../widgets/calm_info_sheet.dart';
-import 'relaxing_tracks.dart';
+import 'relaxing_music_repository.dart';
 
 class RelaxingAudioScreen extends StatefulWidget {
   const RelaxingAudioScreen({super.key});
@@ -26,7 +26,9 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
   StreamSubscription<Duration>? _durationSub;
   StreamSubscription<void>? _completeSub;
 
-  RelaxingTrack? _selected;
+  List<PlayableRelaxingTrack> _tracks = const [];
+  PlayableRelaxingTrack? _selected;
+  bool _loading = true;
   bool _playing = false;
   Duration _position = Duration.zero;
   Duration _duration = Duration.zero;
@@ -46,6 +48,17 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
     });
     _completeSub = _player.onPlayerComplete.listen((_) {
       _finish();
+    });
+    _loadTracks();
+  }
+
+  Future<void> _loadTracks() async {
+    setState(() => _loading = true);
+    final tracks = await RelaxingMusicRepository.instance.fetchPlayable();
+    if (!mounted) return;
+    setState(() {
+      _tracks = tracks;
+      _loading = false;
     });
   }
 
@@ -90,7 +103,7 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
     );
   }
 
-  Future<void> _selectTrack(RelaxingTrack track) async {
+  Future<void> _selectTrack(PlayableRelaxingTrack track) async {
     HapticFeedback.selectionClick();
     if (_selected?.id == track.id) return;
     await _player.stop();
@@ -115,8 +128,12 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
         _duration > Duration.zero &&
         _position < _duration) {
       await _player.resume();
+    } else if (track.isRemote) {
+      await _player.play(UrlSource(track.audioUrl!));
+    } else if (track.asset != null) {
+      await _player.play(AssetSource(track.asset!));
     } else {
-      await _player.play(AssetSource(track.asset));
+      return;
     }
     setState(() => _playing = true);
   }
@@ -170,6 +187,10 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
     final heading = CareColors.headingOf(context);
     final muted = CareColors.mutedOf(context);
 
+    if (_loading && _tracks.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
       children: [
@@ -192,13 +213,23 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
           ),
         ),
         const SizedBox(height: 16),
-        for (var i = 0; i < kRelaxingTracks.length; i++) ...[
-          _TrackTile(
-            index: i + 1,
-            title: kRelaxingTracks[i].titleOf(l10n),
-            onTap: () => _selectTrack(kRelaxingTracks[i]),
-          ),
-        ],
+        if (_tracks.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 24),
+            child: Text(
+              l10n.careChooseTrackBody,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: muted, fontWeight: FontWeight.w500),
+            ),
+          )
+        else
+          for (var i = 0; i < _tracks.length; i++) ...[
+            _TrackTile(
+              index: i + 1,
+              title: _tracks[i].titleOf(l10n),
+              onTap: () => _selectTrack(_tracks[i]),
+            ),
+          ],
       ],
     );
   }

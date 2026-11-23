@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -38,6 +39,7 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
     super.initState();
     _player.setReleaseMode(ReleaseMode.stop);
     _player.setVolume(0.7);
+    unawaited(_configureAudioSession());
     _positionSub = _player.onPositionChanged.listen((pos) {
       if (!mounted) return;
       setState(() => _position = pos);
@@ -50,6 +52,27 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
       _finish();
     });
     _loadTracks();
+  }
+
+  Future<void> _configureAudioSession() async {
+    try {
+      await AudioPlayer.global.setAudioContext(
+        AudioContext(
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+          ),
+          android: const AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.gain,
+          ),
+        ),
+      );
+    } catch (_) {
+      // Ignore if the platform rejects the session config.
+    }
   }
 
   Future<void> _loadTracks() async {
@@ -128,14 +151,71 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
         _duration > Duration.zero &&
         _position < _duration) {
       await _player.resume();
-    } else if (track.isRemote) {
-      await _player.play(UrlSource(track.audioUrl!));
-    } else if (track.asset != null) {
-      await _player.play(AssetSource(track.asset!));
-    } else {
+      setState(() => _playing = true);
       return;
     }
-    setState(() => _playing = true);
+
+    final started = await _startPlayback(track);
+    if (!mounted) return;
+    if (started) {
+      setState(() => _playing = true);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not play this track.')),
+    );
+  }
+
+  /// Seeded / known tracks play from bundled assets (reliable on iOS).
+  /// New CMS uploads download into memory and play via [BytesSource].
+  Future<bool> _startPlayback(PlayableRelaxingTrack track) async {
+    await _player.stop();
+
+    if (track.asset != null && track.asset!.isNotEmpty) {
+      try {
+        await _player.play(AssetSource(track.asset!));
+        return true;
+      } catch (error) {
+        debugPrint('[RelaxingAudio] asset play failed: $error');
+      }
+    }
+
+    if (track.isRemote) {
+      try {
+        final bytes = await _downloadBytes(track.audioUrl!);
+        await _player.play(BytesSource(bytes, mimeType: _mimeForUrl(track.audioUrl!)));
+        return true;
+      } catch (error) {
+        debugPrint('[RelaxingAudio] remote play failed: $error');
+      }
+    }
+
+    return false;
+  }
+
+  Future<Uint8List> _downloadBytes(String url) async {
+    final response = await Dio().get<List<int>>(
+      url,
+      options: Options(
+        responseType: ResponseType.bytes,
+        followRedirects: true,
+        validateStatus: (code) => code != null && code >= 200 && code < 400,
+      ),
+    );
+    final data = response.data;
+    if (data == null || data.isEmpty) {
+      throw StateError('Empty audio download');
+    }
+    return Uint8List.fromList(data);
+  }
+
+  String _mimeForUrl(String url) {
+    final path = Uri.tryParse(url)?.path.toLowerCase() ?? '';
+    if (path.endsWith('.mp3')) return 'audio/mpeg';
+    if (path.endsWith('.wav')) return 'audio/wav';
+    if (path.endsWith('.aac')) return 'audio/aac';
+    if (path.endsWith('.ogg')) return 'audio/ogg';
+    return 'audio/mp4';
   }
 
   Future<void> _seek(double value) async {

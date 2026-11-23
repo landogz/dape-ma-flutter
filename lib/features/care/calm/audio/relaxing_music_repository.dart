@@ -82,15 +82,17 @@ class RelaxingMusicRepository extends ChangeNotifier {
     if (_tracks.isNotEmpty) {
       return _tracks
           .where((t) => t.audioUrl.isNotEmpty)
-          .map(
-            (t) => PlayableRelaxingTrack(
+          .map((t) {
+            final bundled = _matchBundled(t);
+            return PlayableRelaxingTrack(
               id: 'remote-${t.id}',
               titleEn: t.title,
               titleTl: t.titleTl.isNotEmpty ? t.titleTl : t.title,
               audioUrl: t.audioUrl,
-              asset: null,
-            ),
-          )
+              asset: bundled?.asset,
+              bundled: bundled,
+            );
+          })
           .toList(growable: false);
     }
 
@@ -106,6 +108,36 @@ class RelaxingMusicRepository extends ChangeNotifier {
           ),
         )
         .toList(growable: false);
+  }
+
+  /// Match CMS rows to bundled assets by filename or English title (seeder tracks).
+  static RelaxingTrack? _matchBundled(RelaxingMusicTrackDto track) {
+    final path = Uri.tryParse(track.audioUrl)?.path.toLowerCase() ?? '';
+    final title = track.title.trim().toLowerCase();
+    for (final item in kRelaxingTracks) {
+      final file = item.asset.split('/').last.toLowerCase();
+      if (path.endsWith('/$file') || path.endsWith(file)) {
+        return item;
+      }
+      final idTitle = item.id.replaceAll('_', ' ');
+      if (title == idTitle || title == item.id) {
+        return item;
+      }
+    }
+    // Title match against known English labels used by the seeder.
+    const titles = {
+      'tree of life': 'tree_of_life',
+      'reverse polarity': 'reverse_polarity',
+      'glass castle': 'glass_castle',
+      'serenity': 'serenity',
+      'aurora borealis': 'aurora_borealis',
+    };
+    final id = titles[title];
+    if (id == null) return null;
+    for (final item in kRelaxingTracks) {
+      if (item.id == id) return item;
+    }
+    return null;
   }
 
   Future<void> _fetch() async {

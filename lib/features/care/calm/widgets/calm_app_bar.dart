@@ -8,10 +8,13 @@ class CalmAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     this.onInfo,
+    this.onBack,
   });
 
   final String title;
   final VoidCallback? onInfo;
+  /// When set, replaces the default [Navigator.maybePop] back action.
+  final VoidCallback? onBack;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -25,7 +28,14 @@ class CalmAppBar extends StatelessWidget implements PreferredSizeWidget {
       foregroundColor: CareColors.headingOf(context),
       centerTitle: true,
       leading: IconButton(
-        onPressed: () => Navigator.of(context).maybePop(),
+        onPressed: () {
+          HapticFeedback.selectionClick();
+          if (onBack != null) {
+            onBack!();
+            return;
+          }
+          Navigator.of(context).maybePop();
+        },
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
         tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       ),

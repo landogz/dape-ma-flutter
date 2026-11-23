@@ -457,9 +457,31 @@ class AppStrings {
       );
   String get careRelaxingAudio => _t('careRelaxingAudio', 'Relaxing Audio', 'Relaxing Audio');
   String get careRelaxingAudioBody => _t('careRelaxingAudioBody', 
-        'Listen to soothing sounds to help you relax.',
-        'Makinig sa soothing sounds para makapag-relax.',
+        'Choose a calming track and listen to help you relax.',
+        'Pumili ng calming track at makinig para makapag-relax.',
       );
+  String get careChooseTrack =>
+      _t('careChooseTrack', 'Choose a track', 'Pumili ng kanta');
+  String get careChooseTrackBody => _t(
+        'careChooseTrackBody',
+        'Pick one of these relaxing songs, then press play.',
+        'Pumili ng isa sa mga relaxing songs, tapos pindutin ang play.',
+      );
+  String get careRelaxingTrackSubtitle => _t(
+        'careRelaxingTrackSubtitle',
+        'Relaxing music',
+        'Relaxing music',
+      );
+  String get careTrackTreeOfLife =>
+      _t('careTrackTreeOfLife', 'Tree of Life', 'Tree of Life');
+  String get careTrackReversePolarity =>
+      _t('careTrackReversePolarity', 'Reverse Polarity', 'Reverse Polarity');
+  String get careTrackGlassCastle =>
+      _t('careTrackGlassCastle', 'Glass Castle', 'Glass Castle');
+  String get careTrackSerenity =>
+      _t('careTrackSerenity', 'Serenity', 'Serenity');
+  String get careTrackAuroraBorealis =>
+      _t('careTrackAuroraBorealis', 'Aurora Borealis', 'Aurora Borealis');
   String get careGuidedMeditation =>
       _t('careGuidedMeditation', 'Guided Meditation', 'Guided Meditation');
   String get careGuidedMeditationBody => _t('careGuidedMeditationBody', 

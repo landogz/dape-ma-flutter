@@ -138,6 +138,34 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
     });
   }
 
+  int get _selectedIndex {
+    final selected = _selected;
+    if (selected == null) return -1;
+    return _tracks.indexWhere((track) => track.id == selected.id);
+  }
+
+  /// Spotify-style wrap: last → first and first → last.
+  Future<void> _skip(int delta) async {
+    if (_tracks.length < 2) return;
+    final index = _selectedIndex;
+    if (index < 0) return;
+    HapticFeedback.selectionClick();
+    final nextIndex = (index + delta + _tracks.length) % _tracks.length;
+    final track = _tracks[nextIndex];
+    await _player.stop();
+    setState(() {
+      _selected = track;
+      _playing = false;
+      _position = Duration.zero;
+      _duration = Duration.zero;
+    });
+    final started = await _startPlayback(track);
+    if (!mounted) return;
+    if (started) {
+      setState(() => _playing = true);
+    }
+  }
+
   Future<void> _toggle() async {
     final track = _selected;
     if (track == null) return;
@@ -407,26 +435,84 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
             ],
           ),
           const SizedBox(height: 20),
-          Material(
-            color: AppColors.mediumElectricBlue,
-            shape: const CircleBorder(),
-            elevation: 4,
-            shadowColor: AppColors.mediumElectricBlue.withValues(alpha: 0.25),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: _toggle,
-              child: SizedBox(
-                width: 72,
-                height: 72,
-                child: Icon(
-                  _playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                  color: Colors.white,
-                  size: 36,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _SkipButton(
+                icon: Icons.skip_previous_rounded,
+                label: l10n.carePreviousTrack,
+                enabled: _tracks.length > 1,
+                onTap: () => _skip(-1),
+              ),
+              const SizedBox(width: 20),
+              Material(
+                color: AppColors.mediumElectricBlue,
+                shape: const CircleBorder(),
+                elevation: 4,
+                shadowColor: AppColors.mediumElectricBlue.withValues(alpha: 0.25),
+                child: InkWell(
+                  customBorder: const CircleBorder(),
+                  onTap: _toggle,
+                  child: SizedBox(
+                    width: 72,
+                    height: 72,
+                    child: Icon(
+                      _playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 36,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 20),
+              _SkipButton(
+                icon: Icons.skip_next_rounded,
+                label: l10n.careNextTrack,
+                enabled: _tracks.length > 1,
+                onTap: () => _skip(1),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SkipButton extends StatelessWidget {
+  const _SkipButton({
+    required this.icon,
+    required this.label,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = enabled
+        ? CareColors.headingOf(context)
+        : CareColors.mutedOf(context).withValues(alpha: 0.35);
+
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: enabled ? onTap : null,
+          child: SizedBox(
+            width: 52,
+            height: 52,
+            child: Icon(icon, size: 40, color: color),
+          ),
+        ),
       ),
     );
   }

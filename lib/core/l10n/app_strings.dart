@@ -513,6 +513,9 @@ class AppStrings {
         'Manatiling kalmado at i-enjoy ang musika.',
       );
   String get careListen => _t('careListen', 'Listen.', 'Makinig.');
+  String get carePreviousTrack =>
+      _t('carePreviousTrack', 'Previous', 'Nakaraan');
+  String get careNextTrack => _t('careNextTrack', 'Next', 'Susunod');
   String get careEndSession => _t('careEndSession', 'End', 'Tapusin');
   String get carePause => _t('carePause', 'Pause', 'I-pause');
   String get careResume => _t('careResume', 'Resume', 'Ipagpatuloy');

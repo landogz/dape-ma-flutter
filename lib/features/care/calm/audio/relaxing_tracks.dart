@@ -16,27 +16,27 @@ class RelaxingTrack {
 const List<RelaxingTrack> kRelaxingTracks = [
   RelaxingTrack(
     id: 'tree_of_life',
-    asset: 'care/calm/music/tree_of_life.mp3',
+    asset: 'care/calm/music/tree_of_life.m4a',
     titleOf: _treeOfLife,
   ),
   RelaxingTrack(
     id: 'reverse_polarity',
-    asset: 'care/calm/music/reverse_polarity.mp3',
+    asset: 'care/calm/music/reverse_polarity.m4a',
     titleOf: _reversePolarity,
   ),
   RelaxingTrack(
     id: 'glass_castle',
-    asset: 'care/calm/music/glass_castle.mp3',
+    asset: 'care/calm/music/glass_castle.m4a',
     titleOf: _glassCastle,
   ),
   RelaxingTrack(
     id: 'serenity',
-    asset: 'care/calm/music/serenity.mp3',
+    asset: 'care/calm/music/serenity.m4a',
     titleOf: _serenity,
   ),
   RelaxingTrack(
     id: 'aurora_borealis',
-    asset: 'care/calm/music/aurora_borealis.mp3',
+    asset: 'care/calm/music/aurora_borealis.m4a',
     titleOf: _auroraBorealis,
   ),
 ];

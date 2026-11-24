@@ -56,6 +56,40 @@ class ProfileLocation {
       longitude: double.tryParse('${json['longitude'] ?? json['lng'] ?? ''}'),
     );
   }
+
+  ProfileLocation withParsedLabelFallback() {
+    if (!isEmpty) {
+      return this;
+    }
+    final raw = label?.trim();
+    if (raw == null || raw.isEmpty) {
+      return this;
+    }
+
+    final parts = raw
+        .split(',')
+        .map((part) => part.trim())
+        .where((part) => part.isNotEmpty)
+        .where((part) => part.toLowerCase() != 'philippines')
+        .where((part) => !RegExp(r'^\d{3,5}$').hasMatch(part))
+        .toList();
+    if (parts.isEmpty) {
+      return this;
+    }
+
+    final region = parts.isNotEmpty ? parts[parts.length - 1] : null;
+    final province = parts.length >= 2 ? parts[parts.length - 2] : region;
+    final city = parts.length >= 3 ? parts[parts.length - 3] : province;
+
+    return ProfileLocation(
+      region: region,
+      province: province,
+      city: city,
+      label: label,
+      latitude: latitude,
+      longitude: longitude,
+    );
+  }
 }
 
 enum ProfileLocationFailure {
@@ -104,15 +138,31 @@ class ProfileLocationService {
     try {
       return await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 20),
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 0,
+          timeLimit: Duration(seconds: 25),
         ),
       );
-    } on Exception catch (error) {
-      throw ProfileLocationException(
-        ProfileLocationFailure.unavailable,
-        error.toString(),
-      );
+    } on Exception {
+      final last = await Geolocator.getLastKnownPosition();
+      if (last != null) {
+        return last;
+      }
+
+      // Softer retry for simulators / cold GPS starts.
+      try {
+        return await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.low,
+            timeLimit: Duration(seconds: 15),
+          ),
+        );
+      } on Exception catch (error) {
+        throw ProfileLocationException(
+          ProfileLocationFailure.unavailable,
+          error.toString(),
+        );
+      }
     }
   }
 
@@ -130,7 +180,7 @@ class ProfileLocationService {
       if (data is! Map<String, dynamic>) {
         throw ProfileLocationException(ProfileLocationFailure.reverseFailed);
       }
-      final place = ProfileLocation.fromJson(data);
+      final place = ProfileLocation.fromJson(data).withParsedLabelFallback();
       if (place.isEmpty) {
         throw ProfileLocationException(ProfileLocationFailure.reverseFailed);
       }
@@ -140,7 +190,9 @@ class ProfileLocationService {
     } on DioException catch (error) {
       throw ProfileLocationException(
         ProfileLocationFailure.reverseFailed,
-        error.message,
+        error.response?.data is Map
+            ? (error.response!.data['message']?.toString() ?? error.message)
+            : error.message,
       );
     } on Exception catch (error) {
       throw ProfileLocationException(

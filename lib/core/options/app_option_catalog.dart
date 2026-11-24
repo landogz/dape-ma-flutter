@@ -28,6 +28,7 @@ class AppOptionCatalog extends ChangeNotifier {
   static const rehabCenterGroup = 'rehab_center';
   static const postCategoryGroup = 'post_category';
   static const colorFunGroup = 'color_fun';
+  static const calmCornerGroup = 'calm_corner';
 
   Map<String, List<AppOptionItem>> _byGroup = {};
   Future<void>? _inFlight;
@@ -451,6 +452,79 @@ class AppOptionCatalog extends ChangeNotifier {
     ];
   }
 
+  /// Active Calm Corner tools from Lookups (`calm_corner`).
+  /// Empty remote group means staff hid every tool — do not fall back.
+  static List<AppOptionItem> calmCornerTools() {
+    final remote = instance._byGroup[calmCornerGroup];
+    if (remote != null) {
+      return List<AppOptionItem>.from(remote);
+    }
+    return const [
+      AppOptionItem(
+        key: 'breathing',
+        labelEn: 'Breathing Exercise',
+        labelTl: 'Breathing Exercise',
+        subtitleEn: 'Simple guided breathing exercise to calm your mind.',
+        subtitleTl:
+            'Simpleng guided breathing exercise para pakalmahin ang isip.',
+        iconName: 'air',
+        icon: Icons.air_rounded,
+        sortOrder: 1,
+      ),
+      AppOptionItem(
+        key: 'relaxing_audio',
+        labelEn: 'Relaxing Audio',
+        labelTl: 'Relaxing Audio',
+        subtitleEn: 'Listen to soothing sounds to help you relax.',
+        subtitleTl: 'Makinig sa soothing sounds para makapagpahinga.',
+        iconName: 'music_note_outlined',
+        icon: Icons.music_note_rounded,
+        sortOrder: 2,
+      ),
+      AppOptionItem(
+        key: 'guided_meditation',
+        labelEn: 'Guided Meditation',
+        labelTl: 'Guided Meditation',
+        subtitleEn: 'Follow meditations for focus, calm, and balance.',
+        subtitleTl: 'Sundan ang meditations para sa focus, kalma, at balanse.',
+        iconName: 'self_improvement_outlined',
+        icon: Icons.self_improvement_rounded,
+        sortOrder: 3,
+      ),
+      AppOptionItem(
+        key: 'visualization',
+        labelEn: 'Visualization Exercises',
+        labelTl: 'Visualization Exercises',
+        subtitleEn: 'Use your imagination to reduce stress.',
+        subtitleTl: 'Gamitin ang imahinasyon para mabawasan ang stress.',
+        iconName: 'auto_awesome_outlined',
+        icon: Icons.auto_awesome_rounded,
+        sortOrder: 4,
+      ),
+      AppOptionItem(
+        key: 'color_fun',
+        labelEn: 'Color Fun',
+        labelTl: 'Color Fun',
+        subtitleEn: 'Print and color cute worksheets!',
+        subtitleTl: 'I-print at kulayan ang cute worksheets!',
+        iconName: 'palette_outlined',
+        icon: Icons.palette_rounded,
+        sortOrder: 5,
+      ),
+      AppOptionItem(
+        key: 'stretch_breaks',
+        labelEn: 'Stretch Breaks',
+        labelTl: 'Stretch Breaks',
+        subtitleEn: 'Do short posture resets to ease tension.',
+        subtitleTl:
+            'Gumawa ng maikling posture resets para mabawasan ang tensyon.',
+        iconName: 'accessibility_new_outlined',
+        icon: Icons.accessibility_new_rounded,
+        sortOrder: 6,
+      ),
+    ];
+  }
+
   /// Active Care Self-care Toolkit checks from Lookups (`care_toolkit`).
   /// Empty remote group means staff hid every toolkit — do not fall back.
   static List<AppOptionItem> careToolkits() {
@@ -537,6 +611,7 @@ class AppOptionCatalog extends ChangeNotifier {
       rehabCenterGroup => Icons.local_hospital_outlined,
       postCategoryGroup => Icons.folder_open_outlined,
       colorFunGroup => Icons.palette_outlined,
+      calmCornerGroup => Icons.self_improvement_outlined,
       _ => Icons.label_outline,
     };
   }

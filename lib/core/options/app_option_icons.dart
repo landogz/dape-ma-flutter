@@ -42,6 +42,8 @@ IconData appOptionIcon(String? name, {required IconData fallback}) {
     'thunderstorm_outlined' => Icons.thunderstorm_outlined,
     'water_drop_outlined' => Icons.water_drop_outlined,
     'air' => Icons.air,
+    'music_note_outlined' => Icons.music_note_outlined,
+    'accessibility_new_outlined' => Icons.accessibility_new_outlined,
     'groups_outlined' => Icons.groups_outlined,
     'waves_outlined' => Icons.waves_outlined,
     'bedtime_outlined' => Icons.bedtime_outlined,

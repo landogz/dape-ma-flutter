@@ -623,6 +623,11 @@ class AppStrings {
         'No care checks are available right now.',
         'Walang available na care check sa ngayon.',
       );
+  String get careCalmCornerEmpty => _t(
+        'careCalmCornerEmpty',
+        'No Calm Corner tools are available right now.',
+        'Walang available na Calm Corner tool sa ngayon.',
+      );
   String get careToolkitHero => _t('careToolkitHero', 
         'Tools to help you understand how you feel, build healthy habits, and know when to reach out.',
         'Mga tool para unawain ang damdamin, bumuo ng healthy habits, at malaman kung kailan humingi ng tulong.',

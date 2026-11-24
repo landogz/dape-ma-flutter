@@ -1299,6 +1299,15 @@ class AppStrings {
       );
   String get provinceLabel => _t('provinceLabel', 'Province', 'Lalawigan');
   String get cityLabel => _t('cityLabel', 'City / Municipality', 'Lungsod / Munisipyo');
+  String get selectRegion =>
+      _t('selectRegion', 'Select region', 'Piliin ang rehiyon');
+  String get selectProvince =>
+      _t('selectProvince', 'Select province', 'Piliin ang lalawigan');
+  String get selectCity => _t(
+        'selectCity',
+        'Select city / municipality',
+        'Piliin ang lungsod / munisipyo',
+      );
   String get interestsHint =>
       _t('interestsHint', 'Select your interests', 'Piliin ang iyong mga interes');
   String get interestsPickerHint => _t('interestsPickerHint', 

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../core/auth/auth_service.dart';
 import '../../core/l10n/locale_scope.dart';
+import '../../core/location/philippine_places.dart';
 import '../../core/location/profile_location_service.dart';
 import '../../core/network/endpoints.dart';
 import '../../core/theme/app_colors.dart';
@@ -779,39 +780,57 @@ class _LocationSheet extends StatefulWidget {
 }
 
 class _LocationSheetState extends State<_LocationSheet> {
-  late final TextEditingController _regionController;
-  late final TextEditingController _provinceController;
-  late final TextEditingController _cityController;
   bool _detecting = false;
+  bool _catalogReady = false;
+  String? _region;
+  String? _province;
+  String? _city;
 
   @override
   void initState() {
     super.initState();
-    _regionController = TextEditingController(text: widget.initial.region ?? '');
-    _provinceController =
-        TextEditingController(text: widget.initial.province ?? '');
-    _cityController = TextEditingController(text: widget.initial.city ?? '');
+    _bootstrap();
   }
 
-  @override
-  void dispose() {
-    _regionController.dispose();
-    _provinceController.dispose();
-    _cityController.dispose();
-    super.dispose();
+  Future<void> _bootstrap() async {
+    await PhilippinePlaces.ensureLoaded();
+    if (!mounted) return;
+    final matched = PhilippinePlaces.match(
+      region: widget.initial.region,
+      province: widget.initial.province,
+      city: widget.initial.city,
+    );
+    setState(() {
+      _catalogReady = true;
+      _region = matched.region;
+      _province = matched.province;
+      _city = matched.city;
+    });
+  }
+
+  void _applyPlace(ProfileLocation place) {
+    final matched = PhilippinePlaces.match(
+      region: place.region,
+      province: place.province,
+      city: place.city,
+    );
+    setState(() {
+      _region = matched.region;
+      _province = matched.province;
+      _city = matched.city;
+    });
   }
 
   Future<void> _detect() async {
     if (_detecting) return;
     setState(() => _detecting = true);
     try {
+      if (!PhilippinePlaces.isReady) {
+        await PhilippinePlaces.ensureLoaded();
+      }
       final place = await ProfileLocationService.detectFromGps();
       if (!mounted) return;
-      setState(() {
-        _regionController.text = place.region ?? '';
-        _provinceController.text = place.province ?? '';
-        _cityController.text = place.city ?? '';
-      });
+      _applyPlace(place);
     } on ProfileLocationException catch (error) {
       if (!mounted) return;
       final l10n = context.l10n;
@@ -835,12 +854,29 @@ class _LocationSheetState extends State<_LocationSheet> {
     }
   }
 
+  InputDecoration _dropdownDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      filled: true,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final hasValue = _regionController.text.trim().isNotEmpty ||
-        _provinceController.text.trim().isNotEmpty ||
-        _cityController.text.trim().isNotEmpty;
+    final regions = PhilippinePlaces.regions();
+    final provinces = PhilippinePlaces.provincesFor(_region);
+    final cities = PhilippinePlaces.citiesFor(_region, _province);
+    final hasValue = (_region?.isNotEmpty ?? false) ||
+        (_province?.isNotEmpty ?? false) ||
+        (_city?.isNotEmpty ?? false);
+    final canSave = (_region?.isNotEmpty ?? false) &&
+        (_province?.isNotEmpty ?? false) &&
+        (_city?.isNotEmpty ?? false);
 
     return Padding(
       padding: EdgeInsets.only(
@@ -890,57 +926,98 @@ class _LocationSheetState extends State<_LocationSheet> {
               ),
             ),
             const SizedBox(height: 14),
-            TextField(
-              controller: _regionController,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: l10n.regionLabel,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+            if (!_catalogReady)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primaryBlue),
                 ),
+              )
+            else ...[
+              DropdownButtonFormField<String>(
+                key: ValueKey('region-$_region'),
+                initialValue: _region,
+                isExpanded: true,
+                menuMaxHeight: 320,
+                decoration: _dropdownDecoration(l10n.regionLabel),
+                hint: Text(l10n.selectRegion),
+                items: regions
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _detecting
+                    ? null
+                    : (value) {
+                        setState(() {
+                          _region = value;
+                          _province = null;
+                          _city = null;
+                        });
+                      },
               ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _provinceController,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: l10n.provinceLabel,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                key: ValueKey('province-$_region-$_province'),
+                initialValue: _province,
+                isExpanded: true,
+                menuMaxHeight: 320,
+                decoration: _dropdownDecoration(l10n.provinceLabel),
+                hint: Text(l10n.selectProvince),
+                items: provinces
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _detecting || _region == null
+                    ? null
+                    : (value) {
+                        setState(() {
+                          _province = value;
+                          _city = null;
+                        });
+                      },
               ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _cityController,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: l10n.cityLabel,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                key: ValueKey('city-$_region-$_province-$_city'),
+                initialValue: _city,
+                isExpanded: true,
+                menuMaxHeight: 320,
+                decoration: _dropdownDecoration(l10n.cityLabel),
+                hint: Text(l10n.selectCity),
+                items: cities
+                    .map(
+                      (value) => DropdownMenuItem(
+                        value: value,
+                        child: Text(value, overflow: TextOverflow.ellipsis),
+                      ),
+                    )
+                    .toList(),
+                onChanged: _detecting || _province == null
+                    ? null
+                    : (value) => setState(() => _city = value),
               ),
-              onChanged: (_) => setState(() {}),
-            ),
+            ],
             const SizedBox(height: 16),
             SizedBox(
               height: 48,
               child: ElevatedButton(
-                onPressed: _detecting
+                onPressed: _detecting || !_catalogReady || !canSave
                     ? null
                     : () {
                         Navigator.of(context).pop(
                           _LocationSheetResult(
                             location: ProfileLocation(
-                              region: _regionController.text.trim(),
-                              province: _provinceController.text.trim(),
-                              city: _cityController.text.trim(),
+                              region: _region,
+                              province: _province,
+                              city: _city,
                             ),
                           ),
                         );

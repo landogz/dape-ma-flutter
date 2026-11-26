@@ -10,8 +10,9 @@ class ApiClient {
   factory ApiClient({String? token, Map<String, String>? extraHeaders}) {
     final options = BaseOptions(
       baseUrl: Endpoints.baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 20),
+      connectTimeout: const Duration(seconds: 15),
+      // Register may wait briefly on Have I Been Pwned; keep above HIBP timeout.
+      receiveTimeout: const Duration(seconds: 45),
       headers: {
         'Accept': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',

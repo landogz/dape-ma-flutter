@@ -84,6 +84,10 @@ class _RegistrationFlowScreenState extends State<RegistrationFlowScreen> {
         e.type == DioExceptionType.connectionTimeout) {
       return 'Cannot reach the server. Make sure the API is running.';
     }
+    if (e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout) {
+      return 'The server took too long to respond. Please try again.';
+    }
     return null;
   }
 

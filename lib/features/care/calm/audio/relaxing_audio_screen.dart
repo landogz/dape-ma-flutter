@@ -136,6 +136,15 @@ class _RelaxingAudioScreenState extends State<RelaxingAudioScreen> {
       _position = Duration.zero;
       _duration = Duration.zero;
     });
+    final started = await _startPlayback(track);
+    if (!mounted) return;
+    if (started) {
+      setState(() => _playing = true);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Could not play this track.')),
+    );
   }
 
   int get _selectedIndex {

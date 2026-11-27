@@ -45,7 +45,7 @@ class PasswordPolicyChecklist extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                       color: rule.met
                           ? const Color(0xFF15803D)
-                          : AppColors.nileBlue.withValues(alpha: 0.55),
+                          : AppColors.accentRed,
                     ),
                   ),
                   Expanded(
@@ -57,7 +57,7 @@ class PasswordPolicyChecklist extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                         color: rule.met
                             ? const Color(0xFF15803D)
-                            : AppColors.nileBlue.withValues(alpha: 0.72),
+                            : AppColors.accentRed,
                       ),
                     ),
                   ),

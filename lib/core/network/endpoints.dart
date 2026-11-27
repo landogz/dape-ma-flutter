@@ -99,6 +99,9 @@ class Endpoints {
   static const blockedWords = '/blocked-words';
   static const geocodeSearch = '/geocode/search';
   static const geocodeReverse = '/geocode/reverse';
+  static const locationsRegions = '/locations/regions';
+  static const locationsProvinces = '/locations/provinces';
+  static const locationsCities = '/locations/cities';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';

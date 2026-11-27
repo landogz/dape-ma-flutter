@@ -782,9 +782,14 @@ class _LocationSheet extends StatefulWidget {
 class _LocationSheetState extends State<_LocationSheet> {
   bool _detecting = false;
   bool _catalogReady = false;
+  bool _loadingProvinces = false;
+  bool _loadingCities = false;
   String? _region;
   String? _province;
   String? _city;
+  List<String> _regions = const [];
+  List<String> _provinces = const [];
+  List<String> _cities = const [];
 
   @override
   void initState() {
@@ -795,29 +800,74 @@ class _LocationSheetState extends State<_LocationSheet> {
   Future<void> _bootstrap() async {
     await PhilippinePlaces.ensureLoaded();
     if (!mounted) return;
-    final matched = PhilippinePlaces.match(
+    final matched = await PhilippinePlaces.matchAsync(
       region: widget.initial.region,
       province: widget.initial.province,
       city: widget.initial.city,
     );
+    if (!mounted) return;
     setState(() {
       _catalogReady = true;
+      _regions = PhilippinePlaces.regions();
       _region = matched.region;
       _province = matched.province;
       _city = matched.city;
+      _provinces = PhilippinePlaces.provincesFor(_region);
+      _cities = PhilippinePlaces.citiesFor(_region, _province);
     });
   }
 
-  void _applyPlace(ProfileLocation place) {
-    final matched = PhilippinePlaces.match(
+  Future<void> _applyPlace(ProfileLocation place) async {
+    final matched = await PhilippinePlaces.matchAsync(
       region: place.region,
       province: place.province,
       city: place.city,
     );
+    if (!mounted) return;
     setState(() {
       _region = matched.region;
       _province = matched.province;
       _city = matched.city;
+      _provinces = PhilippinePlaces.provincesFor(_region);
+      _cities = PhilippinePlaces.citiesFor(_region, _province);
+    });
+  }
+
+  Future<void> _onRegionChanged(String? value) async {
+    setState(() {
+      _region = value;
+      _province = null;
+      _city = null;
+      _provinces = const [];
+      _cities = const [];
+      _loadingProvinces = value != null;
+      _loadingCities = false;
+    });
+    if (value == null) return;
+    final provinces = await PhilippinePlaces.ensureProvinces(value);
+    if (!mounted || _region != value) return;
+    setState(() {
+      _provinces = provinces;
+      _loadingProvinces = false;
+    });
+  }
+
+  Future<void> _onProvinceChanged(String? value) async {
+    setState(() {
+      _province = value;
+      _city = null;
+      _cities = const [];
+      _loadingCities = value != null;
+    });
+    if (value == null) return;
+    final cities = await PhilippinePlaces.ensureCities(_region, value);
+    if (!mounted || _province != value) return;
+    setState(() {
+      _cities = cities;
+      _loadingCities = false;
+      if (_city == null && cities.length == 1) {
+        _city = cities.first;
+      }
     });
   }
 
@@ -830,7 +880,7 @@ class _LocationSheetState extends State<_LocationSheet> {
       }
       final place = await ProfileLocationService.detectFromGps();
       if (!mounted) return;
-      _applyPlace(place);
+      await _applyPlace(place);
     } on ProfileLocationException catch (error) {
       if (!mounted) return;
       final l10n = context.l10n;
@@ -868,9 +918,7 @@ class _LocationSheetState extends State<_LocationSheet> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final regions = PhilippinePlaces.regions();
-    final provinces = PhilippinePlaces.provincesFor(_region);
-    final cities = PhilippinePlaces.citiesFor(_region, _province);
+    final busy = _detecting || _loadingProvinces || _loadingCities;
     final hasValue = (_region?.isNotEmpty ?? false) ||
         (_province?.isNotEmpty ?? false) ||
         (_city?.isNotEmpty ?? false);
@@ -902,7 +950,7 @@ class _LocationSheetState extends State<_LocationSheet> {
             SizedBox(
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: _detecting ? null : _detect,
+                onPressed: busy ? null : _detect,
                 icon: _detecting
                     ? const SizedBox(
                         width: 18,
@@ -941,7 +989,7 @@ class _LocationSheetState extends State<_LocationSheet> {
                 menuMaxHeight: 320,
                 decoration: _dropdownDecoration(l10n.regionLabel),
                 hint: Text(l10n.selectRegion),
-                items: regions
+                items: _regions
                     .map(
                       (value) => DropdownMenuItem(
                         value: value,
@@ -949,67 +997,82 @@ class _LocationSheetState extends State<_LocationSheet> {
                       ),
                     )
                     .toList(),
-                onChanged: _detecting
-                    ? null
-                    : (value) {
-                        setState(() {
-                          _region = value;
-                          _province = null;
-                          _city = null;
-                        });
-                      },
+                onChanged: busy ? null : _onRegionChanged,
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                key: ValueKey('province-$_region-$_province'),
-                initialValue: _province,
-                isExpanded: true,
-                menuMaxHeight: 320,
-                decoration: _dropdownDecoration(l10n.provinceLabel),
-                hint: Text(l10n.selectProvince),
-                items: provinces
-                    .map(
-                      (value) => DropdownMenuItem(
-                        value: value,
-                        child: Text(value, overflow: TextOverflow.ellipsis),
+              if (_loadingProvinces)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryBlue,
                       ),
-                    )
-                    .toList(),
-                onChanged: _detecting || _region == null
-                    ? null
-                    : (value) {
-                        setState(() {
-                          _province = value;
-                          _city = null;
-                        });
-                      },
-              ),
+                    ),
+                  ),
+                )
+              else
+                DropdownButtonFormField<String>(
+                  key: ValueKey('province-$_region-$_province'),
+                  initialValue: _province,
+                  isExpanded: true,
+                  menuMaxHeight: 320,
+                  decoration: _dropdownDecoration(l10n.provinceLabel),
+                  hint: Text(l10n.selectProvince),
+                  items: _provinces
+                      .map(
+                        (value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(value, overflow: TextOverflow.ellipsis),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: busy || _region == null ? null : _onProvinceChanged,
+                ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                key: ValueKey('city-$_region-$_province-$_city'),
-                initialValue: _city,
-                isExpanded: true,
-                menuMaxHeight: 320,
-                decoration: _dropdownDecoration(l10n.cityLabel),
-                hint: Text(l10n.selectCity),
-                items: cities
-                    .map(
-                      (value) => DropdownMenuItem(
-                        value: value,
-                        child: Text(value, overflow: TextOverflow.ellipsis),
+              if (_loadingCities)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.primaryBlue,
                       ),
-                    )
-                    .toList(),
-                onChanged: _detecting || _province == null
-                    ? null
-                    : (value) => setState(() => _city = value),
-              ),
+                    ),
+                  ),
+                )
+              else
+                DropdownButtonFormField<String>(
+                  key: ValueKey('city-$_region-$_province-$_city'),
+                  initialValue: _city,
+                  isExpanded: true,
+                  menuMaxHeight: 320,
+                  decoration: _dropdownDecoration(l10n.cityLabel),
+                  hint: Text(l10n.selectCity),
+                  items: _cities
+                      .map(
+                        (value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(value, overflow: TextOverflow.ellipsis),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: busy || _province == null
+                      ? null
+                      : (value) => setState(() => _city = value),
+                ),
             ],
             const SizedBox(height: 16),
             SizedBox(
               height: 48,
               child: ElevatedButton(
-                onPressed: _detecting || !_catalogReady || !canSave
+                onPressed: busy || !_catalogReady || !canSave
                     ? null
                     : () {
                         Navigator.of(context).pop(
@@ -1035,7 +1098,7 @@ class _LocationSheetState extends State<_LocationSheet> {
             if (hasValue) ...[
               const SizedBox(height: 8),
               TextButton(
-                onPressed: _detecting
+                onPressed: busy
                     ? null
                     : () => Navigator.of(context).pop(
                           const _LocationSheetResult(clear: true),

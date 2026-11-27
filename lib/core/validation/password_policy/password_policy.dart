@@ -1,3 +1,19 @@
+class PasswordPolicyChecks {
+  const PasswordPolicyChecks({
+    required this.length,
+    required this.mixed,
+    required this.number,
+    required this.symbol,
+  });
+
+  final bool length;
+  final bool mixed;
+  final bool number;
+  final bool symbol;
+
+  bool get allMet => length && mixed && number && symbol;
+}
+
 class PasswordPolicy {
   PasswordPolicy._();
 
@@ -11,20 +27,15 @@ class PasswordPolicy {
   static final RegExp _number = RegExp(r'\d');
   static final RegExp _symbol = RegExp(r'[\p{P}\p{S}]', unicode: true);
 
-  static bool isValid(String? value) {
+  static PasswordPolicyChecks checks(String? value) {
     final password = value ?? '';
-    if (password.length < minLength) {
-      return false;
-    }
-    if (!_lower.hasMatch(password) || !_upper.hasMatch(password)) {
-      return false;
-    }
-    if (!_number.hasMatch(password)) {
-      return false;
-    }
-    if (!_symbol.hasMatch(password)) {
-      return false;
-    }
-    return true;
+    return PasswordPolicyChecks(
+      length: password.length >= minLength,
+      mixed: _lower.hasMatch(password) && _upper.hasMatch(password),
+      number: _number.hasMatch(password),
+      symbol: _symbol.hasMatch(password),
+    );
   }
+
+  static bool isValid(String? value) => checks(value).allMet;
 }

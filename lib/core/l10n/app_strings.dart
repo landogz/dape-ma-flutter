@@ -1512,6 +1512,19 @@ class AppStrings {
         'Password must include at least 8 characters, upper and lower case, a number, a symbol.',
         'Ang password ay dapat may 8 character, malaki at maliit na letra, numero, at simbolo.',
       );
+  String get passwordRuleLength =>
+      _t('passwordRuleLength', 'At least 8 characters', 'Hindi bababa sa 8 character');
+  String get passwordRuleMixed =>
+      _t('passwordRuleMixed', 'Upper and lower case', 'Malaki at maliit na letra');
+  String get passwordRuleNumber =>
+      _t('passwordRuleNumber', 'A number', 'May numero');
+  String get passwordRuleSymbol =>
+      _t('passwordRuleSymbol', 'A symbol', 'May simbolo');
+  String get passwordPolicyIncomplete => _t(
+        'passwordPolicyIncomplete',
+        'Complete all password requirements below.',
+        'Kumpletuhin ang lahat ng pangangailangan sa password sa ibaba.',
+      );
   String get passwordMustChangeTitle =>
       _t('passwordMustChangeTitle', 'Set a new password', 'Magtakda ng bagong password');
   String get passwordMustChangeBody => _t(

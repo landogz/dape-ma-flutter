@@ -7,6 +7,7 @@ import '../../../../core/l10n/locale_scope.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/validation/email_address.dart';
 import '../../../../core/validation/password_policy/password_policy.dart';
+import '../../../../core/validation/password_policy/password_policy_checklist.dart';
 import '../../widgets/auth_decor.dart';
 import '../../widgets/auth_scaffold.dart';
 
@@ -191,22 +192,20 @@ class _GetStartedStepState extends State<GetStartedStep> {
                   ),
                 ),
               ),
+              onChanged: (_) => setState(() {}),
               validator: (v) {
                 if (v == null || v.isEmpty) return l10n.passwordRequired;
-                if (!PasswordPolicy.isValid(v)) return l10n.passwordPolicyHint;
+                if (!PasswordPolicy.isValid(v)) {
+                  return l10n.passwordPolicyIncomplete;
+                }
                 return null;
               },
             ),
           ),
           Padding(
-            padding: const EdgeInsets.only(top: 8, left: 4, right: 4),
-            child: Text(
-              l10n.passwordPolicyHint,
-              style: const TextStyle(
-                fontSize: 12,
-                height: 1.4,
-                color: AuthTokens.muted,
-              ),
+            padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
+            child: PasswordPolicyChecklist(
+              password: _passwordController.text,
             ),
           ),
           const SizedBox(height: 14),

@@ -102,6 +102,7 @@ class Endpoints {
   static const locationsRegions = '/locations/regions';
   static const locationsProvinces = '/locations/provinces';
   static const locationsCities = '/locations/cities';
+  static const locationsTree = '/locations/tree';
 
   static String notificationRead(int id) => '/notifications/$id/read';
   static String diaryEntry(int id) => '/diary-entries/$id';

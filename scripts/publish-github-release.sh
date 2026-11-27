@@ -18,7 +18,8 @@ PY
 )"
 VERSION="${PUBSPEC_VERSION%%|*}"
 BUILD="${PUBSPEC_VERSION##*|}"
-TAG="v${VERSION}+${BUILD}"
+# Avoid bare '+' in tags (GitHub URL-encodes it as %2B).
+TAG="v${VERSION}-b${BUILD}"
 REPO="${GITHUB_REPO:-landogz/dape-ma-flutter}"
 APK_SRC="${APK_SRC:-build/app/outputs/flutter-apk/app-release.apk}"
 APK_NAME="dape-ma.apk"
